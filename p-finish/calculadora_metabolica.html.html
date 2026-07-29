@@ -1515,6 +1515,36 @@
         `;
         html = lowMealsHtml + html;
       }
+
+      if (selectedNumComidas >= 6) {
+        const highMealsHtml = `
+          <div class="mb-4 border-l-4 border-red-500 p-4 rounded-r-lg bg-card-alt">
+            <div class="flex items-start">
+              <i class="fas fa-exclamation-circle text-red-400 mr-3 mt-1"></i>
+              <div>
+                <h4 class="font-semibold text-red-400 mb-1">⚠️ Alerta: Exceso de calorías al comer ${selectedNumComidas} veces al día</h4>
+                <p class="text-sm text-secondary">
+                  Comer ${selectedNumComidas} veces al día puede llevar fácilmente a un <strong>exceso de calorías ingeridas</strong> sin que te des cuenta. 
+                  Ten mucho cuidado con lo siguiente:
+                  <br><br>
+                  • <strong>Controla las porciones:</strong> aunque sean comidas pequeñas, suman. No te pases con las cantidades.
+                  <br>
+                  • <strong>Evita picar entre comidas:</strong> cada "comida" debe ser estructurada, no un antojo. 
+                  <br>
+                  • <strong>Prioriza proteína y fibra:</strong> te llenan más y evitan que comas de más.
+                  <br>
+                  • <strong>Mide tus macros:</strong> reparte bien tus ${Math.round(r.proteinas_g)}g de proteína, ${Math.round(r.carbohidratos_g)}g de harinas y ${Math.round(r.grasas_g)}g de grasas entre las ${selectedNumComidas} comidas para no exceder tu meta de ${Math.round(r.calorias)} kcal al día.
+                  <br>
+                  • <strong>Haz ejercicio:</strong> si comes tantas veces al día, asegúrate de quemar esas calorías extra con actividad física.
+                  <br><br>
+                  Lo recomendable es mantener <strong>3 a 5 comidas al día</strong> para un mejor control calórico.
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+        html = highMealsHtml + html;
+      }
       document.getElementById('mealDistribution').innerHTML = html;
     }
 
