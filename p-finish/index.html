@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Calculadoras Nutricionales</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-card-hover: #1e2749;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-blue: #1e40af;
+            --accent-emerald: #059669;
+            --accent-cyan: #22d3ee;
+        }
+
+        /* Tema claro verdoso */
+        :root[data-theme="light"]{
+            --bg-primary: #f6fff9;
+            --bg-secondary: #eafff1;
+            --bg-card: #dff8ea;
+            --bg-card-hover: #c9f0d8;
+            --text-primary: #0b2a19;
+            --text-secondary: #2a5c42;
+
+            /* Verde césped vibrante */
+            --accent-blue: #2CEB63;
+            --accent-emerald: #2CEB63;
+            --accent-cyan: #2CEB63;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Contorno blanco SOLO en los recuadros que llevan a otras páginas */
+        .card-dark {
+            border: 2px solid rgba(255,255,255,0.95);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        /* Contorno blanco SOLO para el texto del header del index */
+        header .text-left h1,
+        header .text-left p {
+            -webkit-text-stroke: 1px rgba(255,255,255,0.95);
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+
+        .card-dark {
+            background: var(--bg-card);
+            transition: all 0.3s ease;
+        }
+        .login-container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 12px;
+  width: 350px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  color: white;
+  border-radius: 5px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #3ecf8e; /* Verde Supabase */
+  border: none;
+  color: #121212;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #34b27b;
+}
+
+        .card-dark:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(255,255,255,0.95);
+            transform: translateY(-2px);
+        }
+
+        .gradient-button {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+            transition: all 0.3s ease;
+        }
+
+        .gradient-button:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+            transform: translateY(-1px);
+        }
+
+        .rayos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .rayo {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6), transparent);
+            animation: rayoAnim 4s infinite ease-in-out;
+        }
+
+        .rayo:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .rayo:nth-child(2) { left: 25%; animation-delay: 1s; }
+        .rayo:nth-child(3) { left: 40%; animation-delay: 2s; }
+        .rayo:nth-child(4) { left: 55%; animation-delay: 3s; }
+        .rayo:nth-child(5) { left: 70%; animation-delay: 0.5s; }
+        .rayo:nth-child(6) { left: 85%; animation-delay: 1.5s; }
+
+        @keyframes rayoAnim {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+
+        /* ===== Accesibilidad en tema claro =====
+           Muchas cabeceras usan clases Tailwind (ej. text-white) fijas.
+           Esto fuerza a que en light respeten tus variables. */
+        :root[data-theme="light"] h1,
+        :root[data-theme="light"] h2,
+        :root[data-theme="light"] h3,
+        :root[data-theme="light"] h4,
+        :root[data-theme="light"] h5,
+        :root[data-theme="light"] h6 {
+            color: var(--text-primary) !important;
+            /* Contorno blanco brillante para legibilidad */
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.95),
+                 1px -1px 0 rgba(255,255,255,0.95),
+                -1px  1px 0 rgba(255,255,255,0.95),
+                 1px  1px 0 rgba(255,255,255,0.95),
+                 0   0px 6px rgba(255,255,255,0.35);
+        }
+
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300 {
+            color: var(--text-primary) !important;
+        }
+
+        :root[data-theme="light"] .text-text-secondary,
+        :root[data-theme="light"] .text-gray-400,
+        :root[data-theme="light"] .text-slate-300,
+        :root[data-theme="light"] .text-slate-400,
+        :root[data-theme="light"] .text-cyan-100,
+        :root[data-theme="light"] .text-blue-200,
+        :root[data-theme="light"] .text-yellow-300,
+        :root[data-theme="light"] .text-green-300,
+        :root[data-theme="light"] .text-red-300,
+        :root[data-theme="light"] .text-purple-300 {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Letras claras que puedan perder contraste: se refuerzan */
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300,
+        :root[data-theme="light"] .text-slate-300 {
+            text-shadow:
+                0 1px 0 rgba(0,0,0,0.18),
+                0 0 2px rgba(0,0,0,0.10) !important;
+        }
+
+        /* ===== Animación de hojas (solo tema claro) ===== */
+        .leaves-layer{
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+            display: none;
+        }
+        .leaf{
+            position: absolute;
+            top: -10vh;
+            width: var(--leaf-size, 18px);
+            height: auto;
+            opacity: 0.85;
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+            animation-name: leaf-fall;
+            animation-timing-function: linear;
+            animation-iteration-count: 1;
+            animation-duration: var(--leaf-duration, 7s);
+            transform: translateX(var(--leaf-x, 0)) rotate(var(--leaf-rot, 0deg));
+            left: 0;
+        }
+        @keyframes leaf-fall {
+            0% {
+                transform: translateX(var(--leaf-x, 0)) translateY(-10vh) rotate(var(--leaf-rot, 0deg));
+            }
+            100% {
+                transform: translateX(calc(var(--leaf-x, 0) + var(--leaf-drift, 40px))) translateY(110vh) rotate(calc(var(--leaf-rot, 0deg) + 220deg));
+                opacity: 0.25;
+            }
+        }
+
+        :root[data-theme="light"] .leaves-layer{
+            display: block;
+        }
+
+        /* ===== Dropdown theme (index) ===== */
+        .theme-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .theme-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            min-width: 210px;
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+        :root[data-theme="light"] .theme-dropdown-menu {
+            background: rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+        .theme-dropdown.open .theme-dropdown-menu {
+            display: block;
+        }
+        .theme-choice {
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 700;
+            color: #fff;
+            transition: 0.15s;
+        }
+        :root[data-theme="light"] .theme-choice {
+            color: var(--text-primary);
+        }
+        .theme-choice:hover {
+            background: rgba(255,255,255,0.12);
+        }
+        :root[data-theme="light"] .theme-choice:hover {
+            background: rgba(0,0,0,0.06);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div class="rayos">
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+    </div>
+    <header class="gradient-header py-8 px-4">
+        <div class="container mx-auto text-center">
+                <div class="flex items-start justify-between gap-6 max-w-5xl mx-auto">
+                    <div class="text-left">
+                        <h1 class="text-4xl font-bold text-white mb-2">MyFitnessPal</h1>
+                        <p class="text-xl text-gray-300">Herramientas avanzadas para tu bienestar nutricional</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <button
+                            id="logout-btn"
+                            type="button"
+                            class="w-auto px-4 py-2 rounded-xl shadow-lg font-bold border border-white/20 bg-white/10 hover:bg-white/15 transition text-white"
+                        >
+                            <i class="fas fa-right-from-bracket mr-2"></i>
+                            Cerrar sesión
+                        </button>
+                    </div>
+
+                <!-- Dropdown theme -->
+                <div class="theme-dropdown" id="themeDropdown">
+                    <!-- Botón externo -->
+                    <button
+                        id="themeDropdownOuterBtn"
+                        type="button"
+                        class="w-auto px-4 py-2 rounded-xl shadow-lg font-bold border border-white/20 bg-white/10 hover:bg-white/15 transition text-white flex items-center gap-2"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                    >
+                        <i id="themeDropdownIcon" class="fas fa-sun"></i>
+                        <span id="themeDropdownText">Tema claro</span>
+
+                        <!-- “Botón dentro de otro botón” (wrapper estilo) -->
+                        <span
+                            class="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-lg border border-white/20 bg-white/5"
+                            aria-hidden="true"
+                        >
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </span>
+                    </button>
+
+                    <!-- Menú interno -->
+                    <div class="theme-dropdown-menu" role="menu" aria-label="Cambiar tema">
+                        <button type="button" class="theme-choice" role="menuitem" data-theme-choice="light">
+                            <i class="fas fa-sun mr-2"></i>Tema claro
+                        </button>
+                        <button type="button" class="theme-choice" role="menuitem" data-theme-choice="dark">
+                            <i class="fas fa-moon mr-2"></i>Tema oscuro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="card-dark rounded-lg p-6 text-center">
+                <i class="fas fa-utensils text-6xl text-accent-emerald mb-4"></i>
+                <h2 class="text-2xl font-semibold mb-4">Calculadora de Macros de Comidas</h2>
+                <p class="text-text-secondary mb-6">Analiza los macronutrientes de tus comidas con precisión. Obtén información detallada sobre calorías, proteínas, carbohidratos y grasas.</p>
+                <a href="Calculadora_de_Macros_De_Comidas.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-block">Acceder</a>
+            </div>
+
+            <div class="card-dark rounded-lg p-6 text-center">
+                <i class="fas fa-calculator text-6xl text-accent-cyan mb-4"></i>
+                <h2 class="text-2xl font-semibold mb-4">Calculadora Metabólica</h2>
+                <p class="text-text-secondary mb-6">Calcula tu tasa metabólica basal y necesidades calóricas diarias. Personaliza según tu estilo de vida y objetivos.</p>
+                <a href="calculadora_metabolica.html.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-block">Acceder</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="gradient-header py-4 px-4 mt-auto">
+        <div class="container mx-auto text-center text-gray-300">
+            <p>&copy; 2026 Centro de Calculadoras Nutricionales. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+   
+    <script>
+        (function () {
+            const THEME_KEY = 'nutry_theme';
+            const root = document.documentElement;
+
+            const dropdown = document.getElementById('themeDropdown');
+            const outerBtn = document.getElementById('themeDropdownOuterBtn');
+            const icon = document.getElementById('themeDropdownIcon');
+            const text = document.getElementById('themeDropdownText');
+            const menuChoices = document.querySelectorAll('[data-theme-choice]');
+
+            const leavesLayer = document.getElementById('leavesLayer');
+
+            function applyTheme(theme) {
+                if (theme === 'light') root.setAttribute('data-theme', 'light');
+                else root.removeAttribute('data-theme');
+
+                if (icon) icon.className = theme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+                if (text) text.textContent = theme === 'light' ? 'Tema claro' : 'Tema oscuro';
+
+                // Generar hojas si es light
+                if (theme === 'light') spawnLeaves();
+            }
+
+            function spawnLeaves() {
+                if (!leavesLayer) return;
+
+                // Evitar duplicados
+                if (leavesLayer.dataset.spawned === '1') return;
+                leavesLayer.dataset.spawned = '1';
+
+                const leafCount = 28;
+
+                for (let i = 0; i < leafCount; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.className = 'leaf';
+
+                    const x = Math.random() * 100; // % del ancho
+                    const drift = 20 + Math.random() * 60;
+
+                    leaf.style.setProperty('--leaf-x', x + 'vw');
+                    leaf.style.setProperty('--leaf-drift', drift + 'px');
+                    leaf.style.setProperty('--leaf-rot', (Math.random() * 40 - 20) + 'deg');
+                    leaf.style.setProperty('--leaf-duration', (5 + Math.random() * 6) + 's');
+
+                    // Algunos tamaños variados
+                    const size = 14 + Math.random() * 18;
+                    leaf.style.setProperty('--leaf-size', size + 'px');
+
+                    // Íconos tipo hoja (usamos SVG inline simple vía contenido)
+                    // Para no romper con assets externos, usamos caracteres unicode como “hoja”
+                    leaf.textContent = '🍂';
+
+                    // Ajustes visuales del color
+                    leaf.style.fontSize = size + 'px';
+                    leaf.style.lineHeight = '1';
+
+                    leavesLayer.appendChild(leaf);
+                }
+            }
+
+            const storedTheme = localStorage.getItem(THEME_KEY);
+            const initialTheme = storedTheme === 'light' ? 'light' : 'dark';
+            applyTheme(initialTheme);
+
+            function closeMenu() {
+                if (dropdown) dropdown.classList.remove('open');
+                if (outerBtn) outerBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            function toggleMenu() {
+                if (!dropdown) return;
+                const isOpen = dropdown.classList.contains('open');
+                if (isOpen) closeMenu();
+                else {
+                    dropdown.classList.add('open');
+                    if (outerBtn) outerBtn.setAttribute('aria-expanded', 'true');
+                }
+            }
+
+            if (outerBtn) outerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            document.addEventListener('click', () => closeMenu());
+
+            if (menuChoices && menuChoices.length) {
+                menuChoices.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const theme = btn.getAttribute('data-theme-choice');
+                        if (theme === 'light' || theme === 'dark') {
+                            localStorage.setItem(THEME_KEY, theme);
+                            applyTheme(theme);
+                            closeMenu();
+                        }
+                    });
+                });
+            }
+        })();
+    </script>
+    <script type="module" src="./logout.js"></script>
+</body>
+</html>

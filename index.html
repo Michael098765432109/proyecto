@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lobby - Iniciar Sesión</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-primary: #0f0f23;
+      --bg-secondary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1e2749;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --accent-blue: #1e40af;
+      --accent-emerald: #059669;
+      --accent-cyan: #22d3ee;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Tema claro verdoso */
+    :root[data-theme="light"]{
+      --bg-primary: #f6fff9;
+      --bg-secondary: #eafff1;
+      --bg-card: #dff8ea;
+      --bg-card-hover: #c9f0d8;
+      --text-primary: #0b2a19;
+      --text-secondary: #2a5c42;
+
+      /* Verde más vivo */
+      --accent-blue: #00d084;
+      --accent-emerald: #00d084;
+      --accent-cyan: #00b3ff;
+    }
+
+    .gradient-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    }
+
+    .card-dark {
+      background: var(--bg-card);
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .card-dark:hover {
+      background: var(--bg-card-hover);
+      border-color: #475569;
+      transform: translateY(-2px);
+    }
+
+    /* Botón verde principal (más vivo) */
+    .btn-primary {
+      background: #00d084;
+      color: #121212;
+      font-weight: 800;
+      transition: 0.25s;
+      border: none;
+    }
+    .btn-primary:hover {
+      background: #00bf77;
+      transform: translateY(-1px);
+    }
+
+    .input-dark {
+      width: 100%;
+      padding: 12px 14px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      color: white;
+      border-radius: 10px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .input-dark:focus {
+      border-color: rgba(34, 211, 238, 0.8);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+    }
+
+    .helper-text {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    /* Rayos (animación) - misma idea que usan otras páginas */
+    .rayos {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .rayo {
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6), transparent);
+      animation: rayoAnim 4s infinite ease-in-out;
+    }
+
+    .rayo:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .rayo:nth-child(2) { left: 25%; animation-delay: 1s; }
+    .rayo:nth-child(3) { left: 40%; animation-delay: 2s; }
+    .rayo:nth-child(4) { left: 55%; animation-delay: 3s; }
+    .rayo:nth-child(5) { left: 70%; animation-delay: 0.5s; }
+    .rayo:nth-child(6) { left: 85%; animation-delay: 1.5s; }
+
+    @keyframes rayoAnim {
+      0% { transform: translateY(-100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+
+    /* Animación de entrada del contenedor */
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .pop-in {
+      animation: popIn 0.6s ease-out both;
+    }
+
+    /* ===== Accesibilidad en tema claro =====
+       En lobby se usan títulos con text-white / text-gray-300.
+       En light pueden perder contraste, así que forzamos a usar tus variables. */
+    :root[data-theme="light"] h1,
+    :root[data-theme="light"] h2,
+    :root[data-theme="light"] h3,
+    :root[data-theme="light"] h4,
+    :root[data-theme="light"] h5,
+    :root[data-theme="light"] h6 {
+      color: var(--text-primary) !important;
+    }
+
+    :root[data-theme="light"] .text-white,
+    :root[data-theme="light"] .text-gray-300,
+    :root[data-theme="light"] .text-gray-400,
+    :root[data-theme="light"] .text-slate-300,
+    :root[data-theme="light"] .text-slate-400,
+    :root[data-theme="light"] .text-cyan-100,
+    :root[data-theme="light"] .text-blue-200,
+    :root[data-theme="light"] .text-yellow-300,
+    :root[data-theme="light"] .text-green-300,
+    :root[data-theme="light"] .text-red-300,
+    :root[data-theme="light"] .text-purple-300 {
+      color: var(--text-primary) !important;
+    }
+
+    :root[data-theme="light"] .helper-text,
+    :root[data-theme="light"] .text-gray-600,
+    :root[data-theme="light"] .text-secondary,
+    :root[data-theme="light"] .text-gray-500,
+    :root[data-theme="light"] .text-slate-300,
+    :root[data-theme="light"] .text-slate-500 {
+      color: var(--text-secondary) !important;
+    }
+
+    /* Si por alguna razón algún texto claro queda “pegado” al fondo,
+       lo reforzamos con contorno suave */
+    :root[data-theme="light"] .text-slate-300,
+    :root[data-theme="light"] .text-gray-300,
+    :root[data-theme="light"] .text-white {
+      text-shadow:
+        0 1px 0 rgba(0,0,0,0.18),
+        0 0 2px rgba(0,0,0,0.10) !important;
+    }
+
+    /* Contorno blanco brillante a títulos en tema claro para lectura */
+    :root[data-theme="light"] h1,
+    :root[data-theme="light"] h2,
+    :root[data-theme="light"] h3,
+    :root[data-theme="light"] h4,
+    :root[data-theme="light"] h5,
+    :root[data-theme="light"] h6 {
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95),
+         0   0px 6px rgba(255,255,255,0.35);
+    }
+
+    /* Contorno blanco más marcado específicamente para el título MyFitnessPal en tema claro */
+    :root[data-theme="light"] #myfitnesspal-title {
+      text-shadow:
+        -2px -2px 0 rgba(255,255,255,0.95),
+         2px -2px 0 rgba(255,255,255,0.95),
+        -2px  2px 0 rgba(255,255,255,0.95),
+         2px  2px 0 rgba(255,255,255,0.95),
+         0    0px 10px rgba(255,255,255,0.5) !important;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+  <div id="file-protocol-warning" class="hidden">
+    <header class="gradient-header py-8 px-4">
+      <div class="container mx-auto text-center">
+        <h1 class="text-4xl font-bold text-white mb-2">
+          <i class="fas fa-triangle-exclamation inline-block mr-3"></i>
+          No funciona desde file://
+        </h1>
+        <p class="text-xl text-gray-300">
+          Abre el proyecto con un servidor (HTTP) para que cargue Supabase.
+        </p>
+      </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-10">
+      <section class="card-dark rounded-2xl p-8 pop-in max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold mb-4">Qué hacer</h2>
+        <ol class="list-decimal pl-6 space-y-3 helper-text">
+          <li>En VSCode, instala <strong>Live Server</strong>.</li>
+          <li>Click derecho en <strong>lobby.html</strong> → <strong>Open with Live Server</strong>.</li>
+          <li>Luego vuelve a entrar y prueba el registro/login.</li>
+        </ol>
+        <p class="helper-text mt-4">
+          Motivo: tu <strong>login.js</strong> usa <strong>type="module"</strong> y el navegador bloquea los módulos al abrir con <strong>file://</strong>.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <div id="app" class="flex flex-col">
+    <div class="rayos" aria-hidden="true">
+      <div class="rayo"></div>
+      <div class="rayo"></div>
+      <div class="rayo"></div>
+      <div class="rayo"></div>
+      <div class="rayo"></div>
+      <div class="rayo"></div>
+    </div>
+
+    <!-- Hojas cayendo (solo tema claro) -->
+    <div class="leaves-layer" aria-hidden="true" id="leavesLayer"></div>
+
+    <header class="gradient-header py-8 px-4">
+      <div class="container mx-auto text-center">
+        <div class="flex items-start justify-between gap-4 max-w-5xl mx-auto">
+          <div>
+            <h1 id="myfitnesspal-title" class="text-4xl font-bold text-white mb-2">
+              <i class="fas fa-calculator inline-block mr-3"></i>
+              MyFitnessPal
+            </h1>
+            <p class="text-xl text-gray-300">
+              Inicia sesión para continuar
+            </p>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              id="theme-toggle-btn"
+              type="button"
+              class="w-auto px-4 py-2 rounded-xl shadow-lg font-bold border border-white/20 bg-white/10 hover:bg-white/15 transition text-white flex items-center gap-2"
+              aria-label="Cambiar tema"
+            >
+              <i id="theme-toggle-icon" class="fas fa-sun"></i>
+              <span id="theme-toggle-text">Tema claro</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-10">
+      <div class="grid lg:grid-cols-2 gap-8 max-w-5xl mx-auto items-center">
+        <!-- Texto / Info -->
+        <section class="card-dark rounded-2xl p-8 pop-in">
+          <div class="text-center md:text-left">
+            <div class="flex items-center justify-center md:justify-start mb-4">
+              <i class="fas fa-dumbbell text-4xl" style="color: var(--accent-emerald)"></i>
+              <h2 class="text-2xl font-bold ml-3">Acceso seguro</h2>
+            </div>
+
+            <p class="helper-text mb-6">
+              Usa tu correo para entrar. También puedes crear una cuenta si aún no la tienes.
+            </p>
+
+            <div class="space-y-3">
+              <div class="flex items-start">
+                <i class="fas fa-shield-alt mr-3 mt-1" style="color: var(--accent-cyan)"></i>
+                <p class="helper-text">Autenticación con Supabase</p>
+              </div>
+              <div class="flex items-start">
+                <i class="fas fa-bolt mr-3 mt-1" style="color: var(--accent-emerald)"></i>
+                <p class="helper-text">Interfaz con animaciones de rayos y entrada</p>
+              </div>
+              <div class="flex items-start">
+                <i class="fas fa-user-check mr-3 mt-1" style="color: #3ecf8e"></i>
+                <p class="helper-text">Redirección a <strong>/index.html</strong> al iniciar</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card Login -->
+        <section class="card-dark rounded-2xl p-8 pop-in">
+          <div class="text-center mb-6">
+            <h2 id="form-title" class="text-3xl font-bold">Iniciar Sesión</h2>
+            <p id="form-subtitle" class="helper-text mt-2">Ingresa tus datos para acceder</p>
+          </div>
+
+          <!-- Sección INICIAR SESIÓN -->
+          <div id="login-section">
+            <form id="auth-form" class="space-y-4">
+              <div>
+                <label for="login-email" class="block helper-text mb-2">Correo</label>
+                <input id="login-email" type="email" required class="input-dark" placeholder="tucorreo@ejemplo.com" />
+              </div>
+
+              <div>
+                <label for="login-password" class="block helper-text mb-2">Contraseña</label>
+                <input id="login-password" type="password" required class="input-dark" placeholder="••••••••" />
+              </div>
+
+              <div id="login-message" class="text-center font-bold text-sm min-h-[20px]"></div>
+
+              <button id="login-submit" type="submit" class="btn-primary w-full py-3 rounded-xl shadow-lg">
+                Entrar
+              </button>
+
+              <button
+                id="switch-to-register"
+                type="button"
+                class="w-full border border-gray-600 rounded-xl py-3 text-white font-bold bg-transparent hover:bg-white/5 transition"
+              >
+                Crear cuenta
+              </button>
+            </form>
+          </div>
+
+          <!-- Sección CREAR CUENTA -->
+          <div id="register-section" class="hidden">
+            <form id="register-form" class="space-y-4">
+              <div>
+                <label for="email" class="block helper-text mb-2">Correo</label>
+                <input id="email" type="email" required class="input-dark" placeholder="tucorreo@ejemplo.com" />
+              </div>
+
+              <div>
+                <label for="password" class="block helper-text mb-2">Contraseña</label>
+                <input id="password" type="password" required class="input-dark" placeholder="••••••••" />
+              </div>
+
+              <div class="border border-white/10 rounded-xl p-4 bg-white/5">
+                <h3 class="text-lg font-bold mb-2">¡Listo, vamos a crear tu cuenta!</h3>
+                <p class="helper-text mb-1">
+                  Llena <strong>Correo</strong> y <strong>Contraseña</strong> y presiona <strong>Registrarse</strong>.
+                </p>
+                <p class="helper-text mt-2">
+                  Si Supabase te pide confirmación por correo, te llegará un link.
+                </p>
+              </div>
+
+              <div id="message" class="text-center font-bold text-sm min-h-[20px]"></div>
+
+              <button id="submit-btn" type="submit" class="btn-primary w-full py-3 rounded-xl shadow-lg">
+                Registrarse
+              </button>
+
+              <button
+                id="switch-auth"
+                type="button"
+                class="w-full border border-gray-600 rounded-xl py-3 text-white font-bold bg-transparent hover:bg-white/5 transition"
+              >
+                Iniciar sesión
+              </button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="gradient-header py-4 px-4 mt-auto">
+      <div class="container mx-auto text-center text-gray-300">
+<p>&copy; 2024 MyFitnessPal. Todos los derechos reservados.</p>
+      </div>
+    </footer>
+
+    <script>
+      // Si abres con file://, los módulos (type="module") fallan con CORS.
+      // Mostramos un mensaje en vez de dejar la pantalla “rota”.
+      (function () {
+        if (window.location.protocol === 'file:') {
+          document.getElementById('app').classList.add('hidden');
+          document.getElementById('file-protocol-warning').classList.remove('hidden');
+        }
+      })();
+
+      (function () {
+        const THEME_KEY = 'nutry_theme';
+        const root = document.documentElement;
+
+        const btn = document.getElementById('theme-toggle-btn');
+        const icon = document.getElementById('theme-toggle-icon');
+        const text = document.getElementById('theme-toggle-text');
+
+        const applyTheme = (theme) => {
+          if (theme === 'light') root.setAttribute('data-theme', 'light');
+          else root.removeAttribute('data-theme');
+
+          const isLight = theme === 'light';
+          if (icon) icon.className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+          if (text) text.textContent = isLight ? 'Tema oscuro' : 'Tema claro';
+        };
+
+        const storedTheme = localStorage.getItem(THEME_KEY);
+        applyTheme(storedTheme === 'light' ? 'light' : 'dark');
+
+        if (!btn) return;
+
+        btn.addEventListener('click', () => {
+          const currentTheme = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+          const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+          localStorage.setItem(THEME_KEY, nextTheme);
+          applyTheme(nextTheme);
+        });
+      })();
+    </script>
+
+    <script type="module" src="./login.js"></script>
+  </div>
+</body>
+</html>

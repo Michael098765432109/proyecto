@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora de Calorías y Comidas — Fácil y Rápida</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    
+    :root {
+      --bg-primary: #111827;
+      --bg-secondary: #1f2937;
+      --bg-card: #374151;
+      --text-primary: #f9fafb;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --accent: #22d3ee;
+      --accent-hover: #06b6d4;
+      --accent-light: #164e63;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gradient: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+    }
+
+    :root[data-theme="light"]{
+      --bg-primary: #f6fff9;
+      --bg-secondary: #eafff1;
+      --bg-card: #dff8ea;
+
+      --text-primary: #0b2a19;
+      --text-secondary: #2a5c42;
+      --text-muted: #3b7a55;
+
+      --accent: #0ea37a;
+      --accent-hover: #06b6d4;
+      --accent-light: #164e63;
+
+      --gradient: linear-gradient(135deg, #0ea37a 0%, #06b6d4 100%);
+    }
+   
+    
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+    }
+    
+    .gradient-bg {
+      background: var(--gradient);
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-2px);
+      transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      transition: all 0.2s ease;
+      color: var(--bg-primary);
+      font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid #4b5563;
+    }
+    
+    .macro-bar {
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .chart-container {
+      height: 250px;
+    }
+    
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .tab-button {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+    
+    .tab-button:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+    
+    .tab-button.active {
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-weight: 600;
+    }
+    
+    .input-group label {
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      display: block;
+    }
+    
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #4b5563;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    
+    .input-group input:focus, .input-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+    }
+
+    .bg-card {
+      background: var(--bg-secondary);
+    }
+
+    .bg-card-alt {
+      background: var(--bg-card);
+    }
+
+    .text-primary {
+      color: var(--text-primary);
+    }
+
+    .text-secondary {
+      color: var(--text-secondary);
+    }
+
+    .text-muted {
+      color: var(--text-muted);
+    }
+
+    .border-custom {
+      border-color: #4b5563;
+    }
+
+    .bg-accent-light {
+      background: var(--accent-light);
+    }
+
+    .bg-gradient-custom {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Responsive optimizations for PDF */
+    @media (max-width: 768px) {
+      .grid {
+        gap: 1rem !important;
+      }
+    }
+
+    /* Animaciones de rayos */
+    .rayos {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .rayo {
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6), transparent);
+      animation: rayoAnim 4s infinite ease-in-out;
+    }
+
+    .rayo:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .rayo:nth-child(2) { left: 25%; animation-delay: 1s; }
+    .rayo:nth-child(3) { left: 40%; animation-delay: 2s; }
+    .rayo:nth-child(4) { left: 55%; animation-delay: 3s; }
+    .rayo:nth-child(5) { left: 70%; animation-delay: 0.5s; }
+    .rayo:nth-child(6) { left: 85%; animation-delay: 1.5s; }
+
+    @keyframes rayoAnim {
+      0% { transform: translateY(-100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+
+    /* ===== Accesibilidad en tema claro =====
+       Esta página usa muchos colores Tailwind "fijos" (text-white, text-slate-300, etc.).
+       Si el tema cambia a light, esos colores pueden perder contraste.
+       Forzamos a que títulos y textos típicos respeten las variables del tema. */
+    :root[data-theme="light"] h1,
+    :root[data-theme="light"] h2,
+    :root[data-theme="light"] h3,
+    :root[data-theme="light"] h4,
+    :root[data-theme="light"] h5,
+    :root[data-theme="light"] h6 {
+      color: var(--text-primary) !important;
+      /* Contorno blanco brillante para legibilidad */
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95),
+         0   0px 6px rgba(255,255,255,0.35);
+    }
+
+    /* Reforzar contorno también en textos “de color” (amarillos/verde/cian/etc.) */
+    :root[data-theme="light"] .text-yellow-400,
+    :root[data-theme="light"] .text-green-400,
+    :root[data-theme="light"] .text-red-400,
+    :root[data-theme="light"] .text-purple-400,
+    :root[data-theme="light"] .text-blue-400,
+    :root[data-theme="light"] .text-cyan-400,
+    :root[data-theme="light"] .text-indigo-400,
+    :root[data-theme="light"] .text-orange-400 {
+      text-shadow:
+        0 1px 0 rgba(0,0,0,0.16),
+        0 0 2px rgba(0,0,0,0.08),
+        0 0 6px rgba(255,255,255,0.25) !important;
+    }
+
+    /* Animación: hojas cayendo en tema claro */
+    .leaves-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .leaf {
+      position: absolute;
+      top: -10vh;
+      width: var(--leaf-size, 18px);
+      height: auto;
+      opacity: 0.85;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+      animation-name: leaf-fall;
+      animation-timing-function: linear;
+      animation-iteration-count: 1;
+      animation-duration: var(--leaf-duration, 7s);
+      transform: translateX(var(--leaf-x, 0)) rotate(var(--leaf-rot, 0deg));
+    }
+
+    @keyframes leaf-fall {
+      0% {
+        transform: translateX(var(--leaf-x, 0)) translateY(-10vh) rotate(var(--leaf-rot, 0deg));
+      }
+      100% {
+        transform: translateX(calc(var(--leaf-x, 0) + var(--leaf-drift, 40px))) translateY(110vh) rotate(calc(var(--leaf-rot, 0deg) + 220deg));
+        opacity: 0.25;
+      }
+    }
+
+    /* Solo mostrar hojas en tema claro */
+    :root[data-theme="light"] .leaves-layer {
+      display: block;
+    }
+    :root:not([data-theme="light"]) .leaves-layer {
+      display: none;
+    }
+
+    :root[data-theme="light"] .text-white,
+    :root[data-theme="light"] .text-gray-300,
+    :root[data-theme="light"] .text-slate-300,
+    :root[data-theme="light"] .text-cyan-100,
+    :root[data-theme="light"] .text-blue-200 {
+      color: var(--text-primary) !important;
+    }
+
+    :root[data-theme="light"] .text-secondary,
+    :root[data-theme="light"] .text-muted,
+    :root[data-theme="light"] .text-gray-400,
+    :root[data-theme="light"] .text-slate-400,
+    :root[data-theme="light"] .text-sm.text-muted {
+      color: var(--text-secondary) !important;
+    }
+
+    :root[data-theme="light"] .text-accent,
+    :root[data-theme="light"] .text-primary {
+      color: var(--text-primary) !important;
+    }
+
+    /* Letras claras en light -> más oscuras para contraste (y refuerzo visual) */
+    :root[data-theme="light"] .text-white,
+    :root[data-theme="light"] .text-gray-300,
+    :root[data-theme="light"] .text-gray-400,
+    :root[data-theme="light"] .text-slate-300,
+    :root[data-theme="light"] .text-slate-400,
+    :root[data-theme="light"] .text-slate-500,
+    :root[data-theme="light"] .text-cyan-100,
+    :root[data-theme="light"] .text-blue-200,
+    :root[data-theme="light"] .text-yellow-300,
+    :root[data-theme="light"] .text-green-300,
+    :root[data-theme="light"] .text-red-300,
+    :root[data-theme="light"] .text-purple-300 {
+      color: var(--text-primary) !important;
+      text-shadow:
+        0 1px 0 rgba(0,0,0,0.18),
+        0 0 2px rgba(0,0,0,0.10) !important;
+    }
+
+    :root[data-theme="light"] .text-secondary,
+    :root[data-theme="light"] .text-muted,
+    :root[data-theme="light"] .text-gray-500,
+    :root[data-theme="light"] .text-slate-200 {
+      color: var(--text-secondary) !important;
+      text-shadow:
+        0 1px 0 rgba(0,0,0,0.14),
+        0 0 2px rgba(0,0,0,0.08) !important;
+    }
+
+    :root[data-theme="light"] .btn-primary {
+      color: var(--bg-primary) !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="rayos">
+    <div class="rayo"></div>
+    <div class="rayo"></div>
+    <div class="rayo"></div>
+    <div class="rayo"></div>
+    <div class="rayo"></div>
+    <div class="rayo"></div>
+  </div>
+  <!-- Header -->
+  <div class="gradient-bg text-white py-6 mb-6">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center">
+        <div class="inline-flex items-center bg-black bg-opacity-20 rounded-full px-4 py-2 mb-3">
+          <i class="fas fa-calculator mr-2"></i>
+          <span class="font-semibold">Calculadora de Comidas</span>
+        </div>
+        <h1 class="text-3xl font-bold mb-2">¿Cuántas calorías y cuánta comida necesitas al día?</h1>
+        <p class="text-cyan-100 max-w-2xl mx-auto text-sm">
+          Te decimos cuánto comer según tu cuerpo, tu rutina y lo que quieres lograr. Te armamos las porciones, 
+          los horarios de tus comidas y consejos sencillos para que sepas qué hacer.
+        </p>
+        <div class="mt-8">
+          <a href="index.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-800 via-blue-500 to-blue-400 text-white rounded-lg font-semibold hover:from-blue-900 hover:via-blue-600 hover:to-blue-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <i class="fas fa-home mr-2"></i>
+            Lobby
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 pb-6">
+    <!-- Tabs Navigation -->
+    <div class="flex flex-wrap justify-center mb-6 bg-card rounded-xl shadow-lg p-2">
+      <button class="tab-button active px-4 py-3 rounded-lg font-medium text-sm m-1" data-tab="calculadora">
+        <i class="fas fa-calculator mr-2"></i>Calculadora
+      </button>
+      <button class="tab-button px-4 py-3 rounded-lg font-medium text-sm m-1" data-tab="resultados">
+        <i class="fas fa-chart-pie mr-2"></i>Resultados
+      </button>
+      <button class="tab-button px-4 py-3 rounded-lg font-medium text-sm m-1" data-tab="porciones">
+        <i class="fas fa-utensils mr-2"></i>Porciones
+      </button>
+      <button class="tab-button px-4 py-3 rounded-lg font-medium text-sm m-1" data-tab="comidas">
+        <i class="fas fa-clock mr-2"></i>Horarios
+      </button>
+      <button class="tab-button px-4 py-3 rounded-lg font-medium text-sm m-1" data-tab="consejos">
+        <i class="fas fa-lightbulb mr-2"></i>Consejos
+      </button>
+    </div>
+
+    <!-- Calculadora Tab -->
+    <div id="calculadora" class="tab-content active">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <!-- Formulario -->
+        <div class="bg-card rounded-xl shadow-lg p-5 card-hover">
+          <h3 class="text-xl font-bold text-primary mb-5 flex items-center">
+            <i class="fas fa-user mr-3" style="color: var(--accent)"></i>Cuéntanos sobre ti
+          </h3>
+          
+          <form id="form" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="input-group">
+                <label for="peso">Peso (kg)</label>
+                <input id="peso" type="number" min="1" step="0.1" value="67" required>
+              </div>
+              <div class="input-group">
+                <label for="altura">Altura (cm)</label>
+                <input id="altura" type="number" min="30" step="0.1" value="176" required>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="input-group">
+                <label for="edad">¿Qué edad tienes?</label>
+                <input id="edad" type="number" min="10" step="1" value="17" required>
+              </div>
+              <div class="input-group">
+                <label for="sexo">¿Eres hombre o mujer?</label>
+                <select id="sexo">
+                  <option value="hombre">Hombre</option>
+                  <option value="mujer">Mujer</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="actividad">¿Qué tan activo eres en el día a día?</label>
+              <select id="actividad">
+                <option value="1.2">Casi no me muevo (paso sentado todo el día)</option>
+                <option value="1.375">Me ejercito poquito (1 a 3 días por semana)</option>
+                <option value="1.55" selected>Me ejercito normal (3 a 5 días por semana)</option>
+                <option value="1.725">Me ejercito harto (6 a 7 días por semana)</option>
+                <option value="1.9">Súper activo (trabajo pesado + gimnasio)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="objetivo">¿Qué quieres lograr?</label>
+              <select id="objetivo">
+                <option value="ganar-conservador">Subir músculo despacito y seguro (+200 kcal)</option>
+                <option value="ganar">Subir músculo a buen ritmo (+300 kcal)</option>
+                <option value="ganar-agresivo">Subir músculo rápido (+500 kcal)</option>
+                <option value="mantener">Quedarme como estoy (sin cambios)</option>
+                <option value="perder-suave">Bajar de peso suavecito (-300 kcal)</option>
+                <option value="perder">Bajar de peso a buen ritmo (-500 kcal)</option>
+                <option value="perder-agresivo">Bajar de peso rápido (-700 kcal)</option>
+                <option value="recomposicion">Bajar grasa y subir músculo a la vez (-100 kcal)</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="input-group">
+                <label for="macroModo">¿Cómo quieres calcular tu comida?</label>
+                <select id="macroModo">
+                  <option value="somatotipo">Por mi tipo de cuerpo (más fácil)</option>
+                  <option value="proteKg" selected>Por proteína según mi peso (más exacto)</option>
+                </select>
+              </div>
+              <div id="tipoEntrenoGroup" class="input-group">
+                <label for="tipoEntreno">¿Qué tipo de ejercicio haces?</label>
+                <select id="tipoEntreno">
+                  <option value="fuerza" selected>Pesas / Gimnasio (para ganar músculo)</option>
+                  <option value="cardio">Cardio (correr, ciclismo, fútbol, etc.)</option>
+                  <option value="mixto">Un poco de las dos</option>
+                </select>
+                <small class="text-muted mt-1">Esto cambia cómo repartimos tu comida</small>
+              </div>
+            </div>
+
+            <!-- Opciones Somatotipo -->
+            <div id="somOptions" class="input-group" style="display:none">
+              <label for="somatotipo">¿Cómo es tu cuerpo?</label>
+              <select id="somatotipo">
+                <option value="ectomorfo">Flaco por naturaleza, me cuesta engordar</option>
+                <option value="mesomorfo">Atlético, gano músculo fácil</option>
+                <option value="endomorfo">Tiendo a engordar fácil</option>
+              </select>
+              <small class="text-muted mt-2">Nosotros nos encargamos de armar tu plan según tu cuerpo y ejercicio.</small>
+            </div>
+
+            <!-- Opciones Proteína por kg -->
+            <div id="proteKgOptions" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                  <label for="proteKg">¿Cuánta proteína quieres comer?</label>
+                  <select id="proteKg">
+                    <option value="1.6">Lo justo y necesario</option>
+                    <option value="1.8" selected>Lo recomendado (la mejor opción)</option>
+                    <option value="2.0">Un poquito más de lo normal</option>
+                    <option value="2.2">Bastante (para los más fitness)</option>
+                    <option value="2.4">Mucha proteína</option>
+                  </select>
+                </div>
+                <div class="input-group" style="display:none">
+                  <label for="fatPct">¿Cuánta grasa buena en tu comida? (%)</label>
+                  <input id="fatPct" type="number" min="15" max="40" step="1" value="25">
+                </div>
+              </div>
+              <small class="text-muted">Lo ajustamos según tu ejercicio. El resto se reparte en harinas (arroz, pan, papa, etc.).</small>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+              <button class="btn-primary px-6 py-3 rounded-lg font-medium flex-1 flex items-center justify-center" type="submit">
+                <i class="fas fa-calculator mr-2"></i>¡Calcular ya!
+              </button>
+              <button id="btnSave" type="button" class="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-lg font-medium">
+                <i class="fas fa-save"></i>
+              </button>
+              <button id="btnLoad" type="button" class="bg-card-alt hover:bg-gray-600 text-primary px-5 py-3 rounded-lg font-medium border border-custom">
+                <i class="fas fa-upload"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Vista Previa Rápida -->
+        <div class="bg-card rounded-xl shadow-lg p-5">
+          <div id="quickPreview" class="space-y-4">
+            <div class="text-center text-muted py-6">
+              <i class="fas fa-arrow-left text-3xl mb-3"></i>
+              <p>Llena tus datos y dale a <strong>¡Calcular ya!</strong></p>
+            </div>
+          </div>
+
+          <div id="quickAlts" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados Tab -->
+    <div id="resultados" class="tab-content">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Resumen Principal -->
+        <div class="lg:col-span-2 space-y-5">
+          <div class="bg-card rounded-xl shadow-lg p-5">
+            <h3 class="text-2xl font-bold text-primary mb-5 flex items-center">
+              <i class="fas fa-chart-line mr-3" style="color: var(--accent)"></i>
+              Tu plan de comida
+              <span id="totalCalBadge" class="ml-auto px-4 py-2 rounded-full font-bold text-sm" style="background: var(--accent); color: var(--bg-primary)">— kcal</span>
+            </h3>
+            
+            <div id="mainResults" class="space-y-5">
+              <div class="text-center text-muted py-6">
+                <i class="fas fa-chart-pie text-3xl mb-3"></i>
+                <p>Acá te aparecerá todo después de calcular</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfico de Macros -->
+          <div class="bg-card rounded-xl shadow-lg p-5">
+            <h4 class="text-lg font-semibold text-primary mb-4 flex items-center">
+              <i class="fas fa-chart-pie mr-3 text-purple-400"></i>Cómo se reparte tu comida
+            </h4>
+            <div class="chart-container">
+              <canvas id="macroChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="space-y-5">
+          <!-- TMB/TDEE -->
+          <div class="bg-card rounded-xl shadow-lg p-5">
+            <h4 class="text-lg font-semibold text-primary mb-4 flex items-center">
+              <i class="fas fa-fire mr-3 text-red-400"></i>Cuánto quemas al día
+            </h4>
+            <div id="metabolismInfo" class="space-y-3 text-secondary">
+              <div class="text-center py-4">
+                <i class="fas fa-calculator text-2xl mb-2"></i>
+                <p>Calcula primero para ver cuánta energía quemas</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progreso Semanal -->
+          <div class="bg-card rounded-xl shadow-lg p-5">
+            <h4 class="text-lg font-semibold text-primary mb-4 flex items-center">
+              <i class="fas fa-calendar-week mr-3 text-indigo-400"></i>¿Cuánto vas a avanzar por semana?
+            </h4>
+            <div id="progressInfo" class="space-y-3 text-secondary">
+              <div class="text-center py-4">
+                <i class="fas fa-chart-line text-2xl mb-2"></i>
+                <p>Lo verás después de calcular</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Validación -->
+          <div id="validationArea" class="bg-card rounded-xl shadow-lg p-5" style="display:none">
+            <h4 class="text-lg font-semibold text-primary mb-4 flex items-center">
+              <i class="fas fa-check-circle mr-3 text-green-400"></i>Avisos
+            </h4>
+            <div id="validationResults"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Porciones Tab -->
+    <div id="porciones" class="tab-content">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="bg-card rounded-xl shadow-lg p-5">
+          <h3 class="text-xl font-bold text-primary mb-5 flex items-center">
+            <i class="fas fa-utensils mr-3 text-orange-400"></i>¿Cuánto comer de cada cosa?
+          </h3>
+          
+          <div id="porcionesCalculator" class="space-y-5">
+            <div class="text-center text-muted py-6">
+              <i class="fas fa-arrow-up text-3xl mb-3"></i>
+              <p>Primero calcula tu plan en la pestaña de <strong>Calculadora</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-card rounded-xl shadow-lg p-5">
+          <h3 class="text-xl font-bold text-primary mb-5 flex items-center">
+            <i class="fas fa-list mr-3 text-purple-400"></i>Lista de mercado sugerida
+          </h3>
+          
+          <div id="shoppingList" class="space-y-4">
+            <div class="text-center text-muted py-6">
+              <i class="fas fa-shopping-cart text-3xl mb-3"></i>
+              <p>Te aparecerá la lista junto con las porciones</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribución de Comidas Tab -->
+    <div id="comidas" class="tab-content">
+      <div class="bg-card rounded-xl shadow-lg p-5">
+        <h3 class="text-xl font-bold text-primary mb-5 flex items-center">
+          <i class="fas fa-clock mr-3 text-green-400"></i>¿Cómo repartir tus comidas en el día?
+        </h3>
+        
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-primary mb-2">¿Cuántas veces comes al día?</label>
+          <select id="numComidas" class="w-full md:w-48 p-3 border-2 rounded-lg bg-card border-custom text-primary">
+            <option value="2">2 veces al día</option>
+            <option value="3">3 veces al día</option>
+            <option value="4">4 veces al día</option>
+            <option value="5" selected>5 veces al día</option>
+            <option value="6">6 veces al día</option>
+            <option value="7">7 veces al día</option>
+            <option value="8">8 veces al día</option>
+          </select>
+        </div>
+
+        <div id="mealDistribution" class="grid gap-5">
+          <div class="text-center text-muted py-6">
+            <i class="fas fa-clock text-3xl mb-3"></i>
+            <p>Primero calcula tu plan para ver cómo repartir tus comidas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consejos Tab -->
+    <div id="consejos" class="tab-content">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <!-- Consejos Nutricionales -->
+        <div class="bg-card rounded-xl shadow-lg p-5">
+          <h3 class="text-xl font-bold text-primary mb-5 flex items-center">
+            <i class="fas fa-apple-alt mr-3 text-green-400"></i>Tips para tu comida
+          </h3>
+          
+          <div class="space-y-5">
+            <div class="border-l-4 border-green-500 pl-4 bg-gradient-to-r from-green-900 to-transparent p-3 rounded-r">
+              <h4 class="font-semibold text-primary mb-2">Si quieres ganar músculo:</h4>
+              <ul class="text-secondary space-y-1 text-sm">
+                <li>• Si no subes entre 250 y 500 gramos por semana, come un poquito más (150 a 200 kcal extra)</li>
+                <li>• Después del gimnasio, come algo con proteína (huevos, pollo, atún, batido)</li>
+                <li>• Trata de comer cada 3 o 4 horas para que el músculo crezca parejo</li>
+                <li>• Toma harta agua: más o menos un vaso por cada 2 kilos que pesas, todo el día</li>
+              </ul>
+            </div>
+
+            <div class="border-l-4 border-red-500 pl-4 bg-gradient-to-r from-red-900 to-transparent p-3 rounded-r">
+              <h4 class="font-semibold text-primary mb-2">Si quieres bajar de peso:</h4>
+              <ul class="text-secondary space-y-1 text-sm">
+                <li>• No bajes más de 500g a 1 kilo por semana, eso es lo sano</li>
+                <li>• Sigue comiendo bastante proteína para no perder músculo</li>
+                <li>• Come cositas con fibra (frutas, verduras, avena) para no sentir hambre</li>
+                <li>• Si llevas mucho tiempo a dieta, date un día libre cada 1 o 2 semanas</li>
+              </ul>
+            </div>
+
+            <div class="border-l-4 pl-4 bg-gradient-to-r to-transparent p-3 rounded-r" style="border-color: var(--accent); background: linear-gradient(to right, rgba(34, 211, 238, 0.2), transparent);">
+              <h4 class="font-semibold text-primary mb-2">¿Cuándo comer cada cosa?</h4>
+              <ul class="text-secondary space-y-1 text-sm">
+                <li>• Antes del ejercicio: come arroz, pan o avena 1 o 2 horas antes</li>
+                <li>• Después del ejercicio: come proteína y harinas en las siguientes 2 horas</li>
+                <li>• Antes de dormir: algo de proteína que se digiera lento (queso, yogurt griego)</li>
+                <li>• Ayuno intermitente: úsalo si te gusta, pero no es magia</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consejos de Entrenamiento -->
+        <div class="bg-card rounded-xl shadow-lg p-5">
+          <h3 class="text-xl font-bold text-primary mb-5 flex items-center">
+            <i class="fas fa-dumbbell mr-3" style="color: var(--accent)"></i>Tips para entrenar
+          </h3>
+          
+          <div class="space-y-5">
+            <div class="border-l-4 border-purple-500 pl-4 bg-gradient-to-r from-purple-900 to-transparent p-3 rounded-r">
+              <h4 class="font-semibold text-primary mb-2">Los ejercicios que sí funcionan:</h4>
+              <ul class="text-secondary space-y-1 text-sm">
+                <li>• Sentadillas, peso muerto, press de pecho y dominadas (los reyes)</li>
+                <li>• Haz entre 6 y 12 repeticiones para que crezca el músculo</li>
+                <li>• De 3 a 4 series por ejercicio</li>
+                <li>• Cada semana trata de levantar un poquito más de peso o hacer una repe más</li>
+              </ul>
+            </div>
+
+            <div class="border-l-4 border-orange-500 pl-4 bg-gradient-to-r from-orange-900 to-transparent p-3 rounded-r">
+              <h4 class="font-semibold text-primary mb-2">El descanso también es clave:</h4>
+              <ul class="text-secondary space-y-1 text-sm">
+                <li>• Duerme entre 7 y 9 horas para que tu cuerpo se recupere bien</li>
+                <li>• Tómate un día libre del gimnasio cada 2 o 3 días</li>
+                <li>• Después de entrenar, estira de 10 a 15 minuticos</li>
+                <li>• Bájale al estrés: medita, camina, escucha música tranquila</li>
+              </ul>
+            </div>
+
+            <div class="border-l-4 border-indigo-500 pl-4 bg-gradient-to-r from-indigo-900 to-transparent p-3 rounded-r">
+              <h4 class="font-semibold text-primary mb-2">Suplementos que sí valen la pena:</h4>
+              <ul class="text-secondary space-y-1 text-sm">
+                <li>• Creatina: 3 a 5 gramos al día (te ayuda a tener más fuerza)</li>
+                <li>• Proteína en polvo: solo si no alcanzas a comer suficiente proteína con la comida normal</li>
+                <li>• Vitamina D: si casi no te da el sol (oficina todo el día)</li>
+                <li>• Omega-3 (aceite de pescado): si no comes pescado seguido</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertas y Precauciones -->
+      <div class="mt-6 border-l-4 border-yellow-400 p-5 rounded-r-lg" style="background: linear-gradient(to right, rgba(245, 158, 11, 0.2), transparent);">
+        <div class="flex items-start">
+          <i class="fas fa-exclamation-triangle text-yellow-400 mr-3 mt-1"></i>
+          <div>
+            <h4 class="font-semibold text-yellow-400 mb-2">¡Ojo, ten en cuenta esto!</h4>
+            <ul class="text-yellow-300 text-sm space-y-1">
+              <li>• Antes de cambiar mucho tu dieta o ejercicio, mejor pregúntale a un nutricionista o médico</li>
+              <li>• Si tienes alguna enfermedad, diabetes o problemas con la comida, primero ve al doctor</li>
+              <li>• Estos números son una guía, ve ajustando según cómo te sientas y los resultados que veas</li>
+              <li>• Si te has lesionado antes, ten cuidado con la técnica y no te excedas</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const THEME_KEY = 'nutry_theme';
+      const root = document.documentElement;
+      const storedTheme = localStorage.getItem(THEME_KEY);
+      if (storedTheme === 'light') root.setAttribute('data-theme', 'light');
+      else root.removeAttribute('data-theme');
+    })();
+
+    // ===== UTILIDADES =====
+    function round(n, dp = 0) {
+      const m = Math.pow(10, dp);
+      return Math.round(n * m) / m;
+    }
+
+    function mifflinTMB(peso, altura, edad, sexo) {
+      if (sexo === 'hombre') return 10 * peso + 6.25 * altura - 5 * edad + 5;
+      return 10 * peso + 6.25 * altura - 5 * edad - 161;
+    }
+
+    function porcentajesPorSomatipo(s, tipoEntreno = 'fuerza') {
+      let base = {};
+      if (s === 'ectomorfo') base = { prote: 0.22, carb: 0.55, fat: 0.23 };
+      else if (s === 'endomorfo') base = { prote: 0.3, carb: 0.4, fat: 0.3 };
+      else base = { prote: 0.28, carb: 0.47, fat: 0.25 };
+
+      // Ajuste significativo por tipo de entreno
+      if (tipoEntreno === 'cardio') {
+        base.carb += 0.08; // Más carbohidratos para resistencia
+        base.fat -= 0.05;
+        base.prote -= 0.03;
+      } else if (tipoEntreno === 'fuerza') {
+        base.prote += 0.05; // Más proteína para hipertrofia
+        base.carb -= 0.03;
+        base.fat -= 0.02;
+      }
+      // mixto mantiene balance base
+
+      return base;
+    }
+
+    function ajustarProteínaPorEntreno(baseProteKg, tipoEntreno) {
+      // Ajustar proteína base según tipo de entrenamiento
+      let multiplier = 1.0;
+      
+      if (tipoEntreno === 'fuerza') {
+        multiplier = 1.15; // +15% más proteína para fuerza/hipertrofia
+      } else if (tipoEntreno === 'cardio') {
+        multiplier = 0.95; // -5% menos proteína para cardio (más énfasis en carbs)
+      } else if (tipoEntreno === 'mixto') {
+        multiplier = 1.05; // +5% para balanceado
+      }
+      
+      return baseProteKg * multiplier;
+    }
+
+    function ajustarGrasasPorEntreno(baseFatPct, tipoEntreno) {
+      // Ajustar porcentaje de grasas según entrenamiento
+      let adjustment = 0;
+      
+      if (tipoEntreno === 'fuerza') {
+        adjustment = -2; // Menos grasas para fuerza
+      } else if (tipoEntreno === 'cardio') {
+        adjustment = -3; // Aún menos grasas para cardio (más carbs)
+      } else if (tipoEntreno === 'mixto') {
+        adjustment = -1; // Ligero ajuste
+      }
+      
+      return Math.max(15, Math.min(40, baseFatPct + adjustment));
+    }
+
+    function getObjetivoAjuste(objetivo) {
+      const ajustes = {
+        'ganar-conservador': 200,
+        'ganar': 300,
+        'ganar-agresivo': 500,
+        'mantener': 0,
+        'perder-suave': -300,
+        'perder': -500,
+        'perder-agresivo': -700,
+        'recomposicion': -100
+      };
+      return ajustes[objetivo] || 0;
+    }
+
+    // ===== VARIABLES GLOBALES =====
+    let currentResults = null;
+    let macroChart = null;
+
+    // ===== DOM ELEMENTS =====
+    const form = document.getElementById('form');
+    const macroModo = document.getElementById('macroModo');
+    const somOptions = document.getElementById('somOptions');
+    const proteKgOptions = document.getElementById('proteKgOptions');
+    const numComidas = document.getElementById('numComidas');
+    const tipoEntrenoGroup = document.getElementById('tipoEntrenoGroup');
+
+    // ===== TABS SYSTEM =====
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetTab = button.getAttribute('data-tab');
+          
+          // Remove active class from all buttons and contents
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Add active class to clicked button and corresponding content
+          button.classList.add('active');
+          document.getElementById(targetTab).classList.add('active');
+        });
+      });
+
+      // Load saved data on page load
+      loadDatos();
+      
+      // Calculate with default values
+      calcular();
+    });
+
+    // ===== EVENT LISTENERS =====
+    macroModo.addEventListener('change', () => {
+      if (macroModo.value === 'somatotipo') {
+        somOptions.style.display = 'block';
+        proteKgOptions.style.display = 'none';
+      } else {
+        somOptions.style.display = 'none';
+        proteKgOptions.style.display = 'block';
+      }
+    });
+
+    function updateTipoEntrenoVisibility() {
+      const actividadValue = parseFloat(document.getElementById('actividad').value);
+      const shouldHide = actividadValue === 1.2;
+
+      if (shouldHide) {
+        tipoEntrenoGroup.style.display = 'none';
+      } else {
+        tipoEntrenoGroup.style.display = 'block';
+      }
+    }
+
+    document.getElementById('actividad').addEventListener('change', () => {
+      updateTipoEntrenoVisibility();
+    });
+
+    // Aplicar estado inicial (por si cargan con 1.2 ya seleccionado)
+    updateTipoEntrenoVisibility();
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      calcular();
+    });
+
+    numComidas.addEventListener('change', () => {
+      if (currentResults) {
+        generateMealDistribution();
+      }
+    });
+
+    document.getElementById('btnSave').addEventListener('click', guardarDatos);
+    document.getElementById('btnLoad').addEventListener('click', loadDatos);
+
+    // ===== FUNCIONES PRINCIPALES =====
+    function calcular() {
+      const peso = parseFloat(document.getElementById('peso').value);
+      const altura = parseFloat(document.getElementById('altura').value);
+      const edad = parseInt(document.getElementById('edad').value);
+      const sexo = document.getElementById('sexo').value;
+      const actividad = parseFloat(document.getElementById('actividad').value);
+      const objetivo = document.getElementById('objetivo').value;
+      const tipoEntreno = document.getElementById('tipoEntreno').value;
+
+      if (!peso || !altura || !edad) {
+        alert('Oye, revisa los datos porfa, falta algo.');
+        return;
+      }
+
+      // TMB y calorías
+      const tmb = mifflinTMB(peso, altura, edad, sexo);
+      const tdee = tmb * actividad;
+      let calorias = tdee + getObjetivoAjuste(objetivo);
+      calorias = Math.max(1200, calorias); // Seguridad
+
+      // Macros con ajustes por tipo de entrenamiento
+      let proteinas_g, grasas_g, carbohidratos_g;
+      
+      if (macroModo.value === 'somatotipo') {
+        const s = document.getElementById('somatotipo').value;
+        const pct = porcentajesPorSomatipo(s, tipoEntreno);
+        proteinas_g = Math.round((calorias * pct.prote) / 4);
+        grasas_g = Math.round((calorias * pct.fat) / 9);
+        carbohidratos_g = Math.round((calorias * pct.carb) / 4);
+      } else {
+        const baseProteKg = parseFloat(document.getElementById('proteKg').value);
+        const baseFatPct = parseFloat(document.getElementById('fatPct').value);
+        
+        // Aplicar ajustes por tipo de entrenamiento
+        const proteKgAjustado = ajustarProteínaPorEntreno(baseProteKg, tipoEntreno);
+        const fatPctAjustado = ajustarGrasasPorEntreno(baseFatPct, tipoEntreno) / 100;
+        
+        proteinas_g = Math.round(proteKgAjustado * peso);
+        const protCal = proteinas_g * 4;
+        const fatCal = Math.round(calorias * fatPctAjustado);
+        grasas_g = Math.round(fatCal / 9);
+        const remaining = Math.max(0, calorias - protCal - fatCal);
+        carbohidratos_g = Math.round(remaining / 4);
+      }
+
+      // Guardar resultados
+      currentResults = {
+        peso, altura, edad, sexo, actividad, objetivo, tipoEntreno,
+        tmb, tdee, calorias,
+        proteinas_g, grasas_g, carbohidratos_g,
+        protCal: proteinas_g * 4,
+        fatCal: grasas_g * 9,
+        carbCal: carbohidratos_g * 4
+      };
+
+      // Actualizar todas las vistas
+      updateQuickPreview();
+      updateMainResults();
+      updateMetabolismInfo();
+      updateProgressInfo();
+      updateValidation();
+      updateMacroChart();
+      generatePortionsCalculator();
+      generateMealDistribution();
+    }
+
+    function updateQuickPreview() {
+      const loadingHtml = `
+        <div class="text-center py-8">
+          <div class="inline-block w-12 h-12 border-4 border-gray-600 rounded-full mb-4" style="border-top-color: var(--accent); animation: gs-spin 0.8s linear infinite;"></div>
+          <p class="text-muted">Calculando...</p>
+        </div>
+        <style>@keyframes gs-spin { to { transform: rotate(360deg); } }</style>
+      `;
+      const readyHtml = `
+        <div class="text-center py-4">
+          <i class="fas fa-check-circle text-4xl mb-3" style="color: var(--accent)"></i>
+          <p class="text-primary font-semibold text-lg">Ya puedes mirar la pestaña de resultados! 👍</p>
+          <div class="mt-4 flex justify-center">
+            <img 
+              src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDc5NWgxd3p5bjA0bTd2azg2bmo4dXB1dWNrN3BwMG4xajF1ZHY5dCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/RrVzUOXldFe8M/200.webp" 
+              alt="¡Listo!" 
+              style="border-radius: 12px; max-width: 200px; width: 100%;"
+            />
+          </div>
+        </div>
+      `;
+      const el = document.getElementById('quickPreview');
+      el.innerHTML = loadingHtml;
+      setTimeout(() => { el.innerHTML = readyHtml; }, 1800);
+    }
+
+    function updateMainResults() {
+      const r = currentResults;
+      document.getElementById('totalCalBadge').textContent = `${Math.round(r.calorias)} kcal`;
+
+      const html = `
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+          <div class="p-5 rounded-xl" style="background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(34, 211, 238, 0.05));">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium" style="color: var(--accent)">Calorías al día</span>
+              <i class="fas fa-fire" style="color: var(--accent)"></i>
+            </div>
+            <div class="text-3xl font-bold" style="color: var(--accent)">${Math.round(r.calorias)}</div>
+            <div class="text-sm text-muted">cada día</div>
+          </div>
+
+          <div class="p-5 rounded-xl" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-green-400 font-medium">Proteína</span>
+              <i class="fas fa-dumbbell text-green-400"></i>
+            </div>
+            <div class="text-3xl font-bold text-green-400">${r.proteinas_g}g</div>
+            <div class="text-sm text-muted">${r.protCal} kcal</div>
+          </div>
+
+          <div class="p-5 rounded-xl" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-yellow-400 font-medium">Harinas</span>
+              <i class="fas fa-seedling text-yellow-400"></i>
+            </div>
+            <div class="text-3xl font-bold text-yellow-400">${r.carbohidratos_g}g</div>
+            <div class="text-sm text-muted">${r.carbCal} kcal</div>
+          </div>
+
+          <div class="p-5 rounded-xl" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-purple-400 font-medium">Grasas buenas</span>
+              <i class="fas fa-tint text-purple-400"></i>
+            </div>
+            <div class="text-3xl font-bold text-purple-400">${r.grasas_g}g</div>
+            <div class="text-sm text-muted">${r.fatCal} kcal</div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-5">
+          <div class="text-center">
+            <div class="text-lg font-semibold text-secondary">Proteína por kilo</div>
+            <div class="text-2xl font-bold text-green-400">${round(r.proteinas_g / r.peso, 1)} g/kg</div>
+          </div>
+          <div class="text-center">
+            <div class="text-lg font-semibold text-secondary">% Proteína</div>
+            <div class="text-2xl font-bold text-green-400">${round((r.protCal / r.calorias) * 100, 0)}%</div>
+          </div>
+          <div class="text-center">
+            <div class="text-lg font-semibold text-secondary">% Grasas</div>
+            <div class="text-2xl font-bold text-purple-400">${round((r.fatCal / r.calorias) * 100, 0)}%</div>
+          </div>
+        </div>
+
+        <!-- Indicador de ajuste por entrenamiento -->
+        <div class="mt-4 p-3 rounded-lg border border-custom">
+          <div class="flex items-center text-sm">
+            <i class="fas fa-info-circle mr-2" style="color: var(--accent)"></i>
+            <span class="text-secondary">Tu plan está armado para ejercicio de <strong class="text-primary">${r.tipoEntreno}</strong></span>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('mainResults').innerHTML = html;
+    }
+
+    function updateMetabolismInfo() {
+      const r = currentResults;
+      const html = `
+        <div class="space-y-4">
+          <div class="flex justify-between items-center py-2 border-b border-custom">
+            <span class="text-secondary">Lo que quemas en reposo:</span>
+            <span class="font-semibold text-primary">${Math.round(r.tmb)} kcal</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-custom">
+            <span class="text-secondary">Lo que quemas todo el día:</span>
+            <span class="font-semibold text-primary">${Math.round(r.tdee)} kcal</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-custom">
+            <span class="text-secondary">Ajuste por tu meta:</span>
+            <span class="font-semibold text-primary">${getObjetivoAjuste(r.objetivo) > 0 ? '+' : ''}${getObjetivoAjuste(r.objetivo)} kcal</span>
+          </div>
+          <div class="flex justify-between items-center py-2">
+            <span class="text-secondary font-medium">Lo que debes comer:</span>
+            <span class="font-bold text-lg" style="color: var(--accent)">${Math.round(r.calorias)} kcal</span>
+          </div>
+        </div>
+      `;
+      document.getElementById('metabolismInfo').innerHTML = html;
+    }
+
+    function updateProgressInfo() {
+      const r = currentResults;
+      const ajuste = getObjetivoAjuste(r.objetivo);
+      let progresoTexto = '';
+      let iconColor = '';
+
+      if (ajuste > 0) {
+        const ganancia = (ajuste * 7) / 7700; // 1kg = ~7700kcal
+        progresoTexto = `Vas a subir más o menos ${round(ganancia, 2)} kg por semana`;
+        iconColor = 'text-green-400';
+      } else if (ajuste < 0) {
+        const perdida = Math.abs((ajuste * 7) / 7700);
+        progresoTexto = `Vas a bajar más o menos ${round(perdida, 2)} kg por semana`;
+        iconColor = 'text-red-400';
+      } else {
+        progresoTexto = 'Te vas a mantener en el peso que tienes';
+        iconColor = 'style="color: var(--accent)"';
+      }
+
+      const html = `
+        <div class="space-y-4">
+          <div class="text-center">
+            <i class="fas fa-chart-line text-3xl ${iconColor} mb-2"></i>
+            <p class="font-medium text-primary">${progresoTexto}</p>
+          </div>
+          
+          <div class="p-4 rounded-lg" style="background: var(--bg-card);">
+            <h5 class="font-semibold text-primary mb-2">Tips para ajustar:</h5>
+            <ul class="text-sm text-secondary space-y-1">
+              ${ajuste > 0 ? 
+                '<li>• Si no subes de peso: come 100 a 150 calorías más al día</li><li>• Si subes muy rápido: come 50 a 100 calorías menos</li>' :
+                ajuste < 0 ?
+                '<li>• Si no bajas de peso: come 100 a 150 calorías menos al día</li><li>• Si bajas muy rápido: come 100 calorías más</li>' :
+                '<li>• Pésate cada semana a la misma hora</li><li>• Sube o baja 100 calorías si ves cambios raros</li>'
+              }
+            </ul>
+          </div>
+        </div>
+      `;
+      document.getElementById('progressInfo').innerHTML = html;
+    }
+
+    function updateValidation() {
+      const r = currentResults;
+      const totalCalCheck = r.protCal + r.fatCal + r.carbCal;
+      const diff = Math.round(r.calorias) - totalCalCheck;
+      
+      if (Math.abs(diff) > 10) {
+        document.getElementById('validationArea').style.display = 'block';
+        const html = `
+          <div class="border border-yellow-500 p-4 rounded-lg" style="background: rgba(245, 158, 11, 0.1);">
+            <div class="flex items-center mb-2">
+              <i class="fas fa-exclamation-triangle text-yellow-400 mr-2"></i>
+              <span class="font-medium text-yellow-400">Pequeña diferencia</span>
+            </div>
+            <p class="text-yellow-300 text-sm">
+              Hay una diferencia de ${Math.abs(diff)} calorías por los redondeos. 
+              ${diff > 0 ? 'Te sobran' : 'Te faltan'} unas poquitas calorías en la cuenta. No es nada grave.
+            </p>
+          </div>
+        `;
+        document.getElementById('validationResults').innerHTML = html;
+      } else {
+        document.getElementById('validationArea').style.display = 'none';
+      }
+    }
+
+    function updateMacroChart() {
+      const ctx = document.getElementById('macroChart').getContext('2d');
+      const r = currentResults;
+      
+      if (macroChart) {
+        macroChart.destroy();
+      }
+
+      macroChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Proteína', 'Harinas', 'Grasas buenas'],
+          datasets: [{
+            data: [r.protCal, r.carbCal, r.fatCal],
+            backgroundColor: ['#10B981', '#F59E0B', '#8B5CF6'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                font: { size: 12 },
+                color: '#d1d5db'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function generateQuickAlternatives() {
+      const r = currentResults;
+      const altTargets = [1.6, 1.8, 2.0, 2.2, 2.4];
+      
+      let html = '<div class="overflow-x-auto"><table class="w-full text-sm">';
+      html += '<thead><tr class="border-b border-custom"><th class="text-left p-2 text-secondary">g/kg</th><th class="text-left p-2 text-secondary">Proteína</th><th class="text-left p-2 text-secondary">Grasas (25%)</th><th class="text-left p-2 text-secondary">Harinas</th></tr></thead>';
+      html += '<tbody>';
+      
+      altTargets.forEach(target => {
+        const adjustedTarget = ajustarProteínaPorEntreno(target, r.tipoEntreno);
+        const p_g = Math.round(adjustedTarget * r.peso);
+        const p_cal = p_g * 4;
+        const fat_cal = Math.round(r.calorias * 0.25);
+        const fat_g = Math.round(fat_cal / 9);
+        const remaining = Math.max(0, r.calorias - p_cal - fat_cal);
+        const c_g = Math.round(remaining / 4);
+        
+        const isSelected = Math.abs(p_g - r.proteinas_g) < 5 ? 'style="background: rgba(34, 211, 238, 0.1);"' : '';
+        html += `<tr ${isSelected}><td class="p-2 text-muted">${target}</td><td class="p-2 font-medium text-primary">${p_g}g</td><td class="p-2 text-secondary">${fat_g}g</td><td class="p-2 text-secondary">${c_g}g</td></tr>`;
+      });
+      
+      html += '</tbody></table></div>';
+      html += `<div class="mt-3 text-xs text-muted">* Estos valores ya están ajustados para tu ejercicio de ${r.tipoEntreno}</div>`;
+      document.getElementById('quickAlts').innerHTML = html;
+    }
+
+    function generatePortionsCalculator() {
+      const r = currentResults;
+      
+      const alimentos = [
+        // Proteínas
+        { nombre: 'Pechuga de pollo', categoria: 'Proteína', proteina: 23, carbs: 0, grasa: 3.6, precio: 8 },
+        { nombre: 'Salmón', categoria: 'Proteína', proteina: 20, carbs: 0, grasa: 13, precio: 15 },
+        { nombre: 'Huevos', categoria: 'Proteína', proteina: 13, carbs: 1, grasa: 11, precio: 3 },
+        { nombre: 'Atún en lata', categoria: 'Proteína', proteina: 25, carbs: 0, grasa: 1, precio: 4 },
+        { nombre: 'Proteína en polvo', categoria: 'Proteína', proteina: 80, carbs: 4, grasa: 2, precio: 25 },
+        
+        // Carbohidratos
+        { nombre: 'Arroz blanco', categoria: 'Carbohidrato', proteina: 7, carbs: 77, grasa: 0.9, precio: 2 },
+        { nombre: 'Avena', categoria: 'Carbohidrato', proteina: 17, carbs: 66, grasa: 7, precio: 3 },
+        { nombre: 'Camote (batata)', categoria: 'Carbohidrato', proteina: 2, carbs: 20, grasa: 0.1, precio: 2.5 },
+        { nombre: 'Pasta integral', categoria: 'Carbohidrato', proteina: 13, carbs: 71, grasa: 1.5, precio: 2.8 },
+        { nombre: 'Banano', categoria: 'Carbohidrato', proteina: 1, carbs: 23, grasa: 0.3, precio: 2 },
+        
+        // Grasas
+        { nombre: 'Aceite de oliva', categoria: 'Grasa', proteina: 0, carbs: 0, grasa: 100, precio: 8 },
+        { nombre: 'Almendras', categoria: 'Grasa', proteina: 21, carbs: 22, grasa: 49, precio: 12 },
+        { nombre: 'Aguacate', categoria: 'Grasa', proteina: 2, carbs: 9, grasa: 15, precio: 4 },
+        { nombre: 'Mantequilla de maní', categoria: 'Grasa', proteina: 25, carbs: 20, grasa: 50, precio: 5 }
+      ];
+
+      let html = `
+        <div class="space-y-5">
+          <div class="grid grid-cols-3 gap-4 text-center mb-5">
+            <div class="p-4 rounded-lg" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+              <div class="font-bold text-green-400">${r.proteinas_g}g</div>
+              <div class="text-sm text-green-400">Proteína al día</div>
+            </div>
+            <div class="p-4 rounded-lg" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);">
+              <div class="font-bold text-yellow-400">${r.carbohidratos_g}g</div>
+              <div class="text-sm text-yellow-400">Harinas al día</div>
+            </div>
+            <div class="p-4 rounded-lg" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3);">
+              <div class="font-bold text-purple-400">${r.grasas_g}g</div>
+              <div class="text-sm text-purple-400">Grasas buenas al día</div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+      `;
+
+      ['Proteína', 'Carbohidrato', 'Grasa'].forEach(categoria => {
+        const alimentosCategoria = alimentos.filter(a => a.categoria === categoria);
+        const objetivo = categoria === 'Proteína' ? r.proteinas_g : categoria === 'Carbohidrato' ? r.carbohidratos_g : r.grasas_g;
+        const iconClass = categoria === 'Proteína' ? 'dumbbell' : categoria === 'Carbohidrato' ? 'seedling' : 'tint';
+        const colorClass = categoria === 'Proteína' ? 'green-400' : categoria === 'Carbohidrato' ? 'yellow-400' : 'purple-400';
+        
+        html += `
+          <div class="border border-custom rounded-lg p-4">
+            <h4 class="font-semibold text-primary mb-3 flex items-center">
+              <i class="fas fa-${iconClass} mr-2 text-${colorClass}"></i>
+              ${categoria === "Proteína" ? "Proteína" : categoria === "Carbohidrato" ? "Harinas" : "Grasas buenas"} — meta: ${objetivo}g
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        `;
+        
+        alimentosCategoria.forEach(alimento => {
+          const macroValue = categoria === 'Proteína' ? alimento.proteina : categoria === 'Carbohidrato' ? alimento.carbs : alimento.grasa;
+          const cantidad = Math.round((objetivo / macroValue) * 100);
+          const costo = round((cantidad / 100) * alimento.precio, 1);
+          
+          html += `
+            <div class="p-3 rounded border border-custom" style="background: var(--bg-card);">
+              <div class="font-medium text-primary">${alimento.nombre}</div>
+              <div class="text-sm text-secondary">
+                Come ${cantidad}g → te da ${round(macroValue * cantidad / 100, 1)}g de ${categoria === "Proteína" ? "proteína" : categoria === "Carbohidrato" ? "harinas" : "grasas"}
+              </div>
+              <div class="text-xs" style="color: var(--accent)">~$${costo}</div>
+            </div>
+          `;
+        });
+        
+        html += '</div></div>';
+      });
+
+      html += '</div></div>';
+
+      // Generar lista de compras
+      const shoppingHtml = `
+        <div class="space-y-4">
+          <div class="p-4 rounded-lg" style="background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.3);">
+            <h4 class="font-semibold mb-2" style="color: var(--accent)">Lista de mercado sugerida</h4>
+            <p class="text-sm text-muted">Alimentos sugeridos para tu plan</p>
+          </div>
+          <div class="space-y-2">
+            ${alimentos.slice(0, 8).map(alimento => {
+              return `
+                <div class="flex items-center p-3 border border-custom rounded">
+                  <span class="font-medium text-primary">${alimento.nombre}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('porcionesCalculator').innerHTML = html;
+      document.getElementById('shoppingList').innerHTML = shoppingHtml;
+    }
+
+    function generateMealDistribution() {
+      const r = currentResults;
+      const selectedNumComidas = parseInt(numComidas.value);
+      const numComidasValue = Math.min(6, selectedNumComidas);
+      
+      // Distribución típica según número de comidas
+      let distribucion = [];
+      
+          switch(numComidasValue) {
+        case 2:
+          distribucion = [
+            {nombre: 'Desayuno', hora: '9:00', pct_cal: 0.3, pct_prot: 0.25, pct_carb: 0.3, pct_fat: 0.25},
+            {nombre: 'Cena', hora: '20:00', pct_cal: 0.7, pct_prot: 0.65, pct_carb: 0.7, pct_fat: 0.65}
+          ];
+          break;
+        case 3:
+          distribucion = [
+            {nombre: 'Desayuno', hora: '8:00', pct_cal: 0.3, pct_prot: 0.25, pct_carb: 0.35, pct_fat: 0.25},
+            {nombre: 'Almuerzo', hora: '14:00', pct_cal: 0.45, pct_prot: 0.45, pct_carb: 0.45, pct_fat: 0.45},
+            {nombre: 'Cena', hora: '20:00', pct_cal: 0.25, pct_prot: 0.3, pct_carb: 0.2, pct_fat: 0.3}
+          ];
+          break;
+        case 4:
+          distribucion = [
+            {nombre: 'Desayuno', hora: '8:00', pct_cal: 0.25, pct_prot: 0.2, pct_carb: 0.3, pct_fat: 0.2},
+            {nombre: 'Almuerzo', hora: '13:00', pct_cal: 0.35, pct_prot: 0.4, pct_carb: 0.35, pct_fat: 0.35},
+            {nombre: 'Onces / algo', hora: '17:00', pct_cal: 0.15, pct_prot: 0.15, pct_carb: 0.15, pct_fat: 0.15},
+            {nombre: 'Cena', hora: '21:00', pct_cal: 0.25, pct_prot: 0.25, pct_carb: 0.2, pct_fat: 0.3}
+          ];
+          break;
+        case 5:
+          distribucion = [
+            {nombre: 'Desayuno', hora: '7:30', pct_cal: 0.2, pct_prot: 0.15, pct_carb: 0.25, pct_fat: 0.15},
+            {nombre: 'A media mañana', hora: '10:30', pct_cal: 0.15, pct_prot: 0.2, pct_carb: 0.15, pct_fat: 0.1},
+            {nombre: 'Almuerzo', hora: '13:30', pct_cal: 0.3, pct_prot: 0.35, pct_carb: 0.3, pct_fat: 0.3},
+            {nombre: 'Onces / algo', hora: '17:00', pct_cal: 0.15, pct_prot: 0.15, pct_carb: 0.15, pct_fat: 0.2},
+            {nombre: 'Cena', hora: '20:30', pct_cal: 0.2, pct_prot: 0.15, pct_carb: 0.15, pct_fat: 0.25}
+          ];
+          break;
+        case 6:
+          distribucion = [
+            {nombre: 'Desayuno', hora: '7:00', pct_cal: 0.18, pct_prot: 0.15, pct_carb: 0.2, pct_fat: 0.15},
+            {nombre: 'A media mañana', hora: '10:00', pct_cal: 0.12, pct_prot: 0.15, pct_carb: 0.12, pct_fat: 0.1},
+            {nombre: 'Almuerzo', hora: '13:00', pct_cal: 0.25, pct_prot: 0.3, pct_carb: 0.25, pct_fat: 0.25},
+            {nombre: 'Después del gym', hora: '16:00', pct_cal: 0.15, pct_prot: 0.2, pct_carb: 0.18, pct_fat: 0.1},
+            {nombre: 'Onces / algo', hora: '18:30', pct_cal: 0.12, pct_prot: 0.1, pct_carb: 0.12, pct_fat: 0.15},
+            {nombre: 'Cena', hora: '21:00', pct_cal: 0.18, pct_prot: 0.1, pct_carb: 0.13, pct_fat: 0.25}
+          ];
+          break;
+      }
+
+      let html = `
+        <div class="grid gap-4">
+          <div class="p-4 rounded-lg" style="background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.3);">
+            <h4 class="font-semibold mb-2" style="color: var(--accent)">Tu plan de ${numComidasValue} comidas al día</h4>
+            <p class="text-sm text-muted">Horarios y porciones armadas para tu ejercicio de ${r.tipoEntreno}</p>
+          </div>
+      `;
+
+      distribucion.forEach((comida, index) => {
+        const calorias_comida = Math.round(r.calorias * comida.pct_cal);
+        const prot_comida = Math.round(r.proteinas_g * comida.pct_prot);
+        const carb_comida = Math.round(r.carbohidratos_g * comida.pct_carb);
+        const fat_comida = Math.round(r.grasas_g * comida.pct_fat);
+
+        html += `
+          <div class="border border-custom rounded-lg p-4" style="background: var(--bg-card);">
+            <div class="flex justify-between items-center mb-3">
+              <div class="flex items-center">
+                <div class="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3" style="background: var(--accent);">
+                  ${index + 1}
+                </div>
+                <div>
+                  <h5 class="font-semibold text-primary">${comida.nombre}</h5>
+                  <p class="text-sm text-muted">${comida.hora}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-lg text-primary">${calorias_comida} kcal</div>
+                <div class="text-sm text-muted">${Math.round(comida.pct_cal * 100)}% de tu día</div>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4">
+              <div class="text-center p-3 rounded" style="background: rgba(16, 185, 129, 0.1);">
+                <div class="font-semibold text-green-400">${prot_comida}g</div>
+                <div class="text-xs text-green-400">Proteína</div>
+              </div>
+              <div class="text-center p-3 rounded" style="background: rgba(245, 158, 11, 0.1);">
+                <div class="font-semibold text-yellow-400">${carb_comida}g</div>
+                <div class="text-xs text-yellow-400">Harinas</div>
+              </div>
+              <div class="text-center p-3 rounded" style="background: rgba(139, 92, 246, 0.1);">
+                <div class="font-semibold text-purple-400">${fat_comida}g</div>
+                <div class="text-xs text-purple-400">Grasas buenas</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+        </div>
+        
+        <div class="mt-5 p-4 rounded-lg" style="background: var(--bg-card);">
+          <h5 class="font-semibold text-primary mb-2">Tips de horarios para tu ejercicio de ${r.tipoEntreno}:</h5>
+          <ul class="text-sm text-secondary space-y-1">
+            ${r.tipoEntreno === 'fuerza' ? 
+              '<li>• <strong>Antes de entrenar:</strong> come algo con proteína y harinas 30 a 60 minutos antes</li><li>• <strong>Después de entrenar:</strong> come proteína y harinas dentro de los 30 minutos siguientes</li><li>• <strong>Antes de dormir:</strong> algo con proteína que se digiera lento (queso, yogurt griego)</li>' :
+            r.tipoEntreno === 'cardio' ?
+              '<li>• <strong>Antes de hacer cardio:</strong> come algo fácil de digerir como banano o pan 30 a 60 min antes</li><li>• <strong>Durante:</strong> si entrenas más de 1.5 horas, toma una bebida deportiva (Gatorade o similar)</li><li>• <strong>Después:</strong> come harinas y un poquito de proteína para recuperarte</li>' :
+              '<li>• <strong>Antes de entrenar:</strong> come balanceado (harinas y proteína) 1 a 2 horas antes</li><li>• <strong>Después:</strong> come harinas y proteína (más harinas que proteína)</li><li>• <strong>Entre comidas:</strong> no dejes pasar más de 3 a 4 horas sin comer</li>'
+            }
+            <li>• <strong>Toma harta agua:</strong> 2 vasos 2 horas antes de entrenar, y traguitos cada 15-20 min mientras entrenas</li>
+          </ul>
+        </div>
+      `;
+
+      if (selectedNumComidas === 2) {
+        const lowMealsHtml = `
+          <div class="mb-4 border-l-4 border-yellow-400 p-4 rounded-r-lg bg-card-alt">
+            <div class="flex items-start">
+              <i class="fas fa-exclamation-triangle text-yellow-400 mr-3 mt-1"></i>
+              <div>
+                <h4 class="font-semibold text-yellow-400 mb-1">Ojo: 2 comidas al día es muy poco</h4>
+                <p class="text-sm text-secondary">
+                  Para la mayoría de personas, 2 comidas al día suele ser muy poco para repartir bien calorías, proteína y fibra.
+                  Si ya eliges 2, hazlo así para comer mejor:
+                  <br><br>
+                  • <strong>Prioriza proteína en cada comida</strong> (pollo, huevos, atún, yogurt griego, legumbres).
+                  <br>
+                  • <strong>Incluye verduras/fracura</strong> (fibra) para mejorar digestión y saciedad.
+                  <br>
+                  • <strong>Reparte carbohidratos</strong> según tu actividad (sin dejarte sin energía).
+                  <br>
+                  • <strong>Agua + sal/grasas buenas</strong> en porciones: ayuda a que te sientas bien y no “ataques” después.
+                  <br><br>
+                  Lo ideal suele ser <strong>3 a 5 comidas</strong> para que sea más fácil cumplir tu dieta sin quedarte corto.
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+        html = lowMealsHtml + html;
+      }
+      document.getElementById('mealDistribution').innerHTML = html;
+    }
+
+    // ===== FUNCIONES DE ALMACENAMIENTO =====
+    function guardarDatos() {
+      const datos = {
+        peso: document.getElementById('peso').value,
+        altura: document.getElementById('altura').value,
+        edad: document.getElementById('edad').value,
+        sexo: document.getElementById('sexo').value,
+        actividad: document.getElementById('actividad').value,
+        objetivo: document.getElementById('objetivo').value,
+        macroModo: document.getElementById('macroModo').value,
+        somatotipo: document.getElementById('somatotipo').value,
+        proteKg: document.getElementById('proteKg').value,
+        fatPct: document.getElementById('fatPct').value,
+        tipoEntreno: document.getElementById('tipoEntreno').value
+      };
+      
+      localStorage.setItem('calculadoraMacros', JSON.stringify(datos));
+      
+      // Feedback visual
+      const btn = document.getElementById('btnSave');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i>';
+      btn.classList.add('bg-green-600');
+      setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('bg-green-600');
+      }, 1000);
+    }
+
+    function loadDatos() {
+      try {
+        const datos = localStorage.getItem('calculadoraMacros');
+        if (datos) {
+          const parsed = JSON.parse(datos);
+          
+          Object.keys(parsed).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+              element.value = parsed[key];
+            }
+          });
+
+          // Trigger macro mode change
+          if (macroModo.value === 'somatotipo') {
+            somOptions.style.display = 'block';
+            proteKgOptions.style.display = 'none';
+          } else {
+            somOptions.style.display = 'none';
+            proteKgOptions.style.display = 'block';
+          }
+          
+          // Feedback visual
+          const btn = document.getElementById('btnLoad');
+          const originalHtml = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check"></i>';
+          btn.classList.add('bg-green-600');
+          setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.classList.remove('bg-green-600');
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    }
+  </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>

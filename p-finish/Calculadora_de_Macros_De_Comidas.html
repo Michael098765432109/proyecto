@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Nutricional Avanzada - Análisis Preciso de Macronutrientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-card-hover: #1e2749;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-blue: #1e40af;
+            --accent-emerald: #059669;
+            --accent-slate: #475569;
+        }
+
+        :root[data-theme="light"]{
+            --bg-primary: #f6fff9;
+            --bg-secondary: #eafff1;
+            --bg-card: #dff8ea;
+            --bg-card-hover: #c9f0d8;
+            --text-primary: #0b2a19;
+            --text-secondary: #2a5c42;
+
+            --accent-blue: #0ea37a;
+            --accent-emerald: #0ea37a;
+            --accent-slate: #2a5c42;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+
+        .card-dark {
+            background: var(--bg-card);
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .card-dark:hover {
+            background: var(--bg-card-hover);
+            border-color: #475569;
+        }
+
+        .gradient-button {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+            transition: all 0.3s ease;
+        }
+
+        .gradient-button:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+            transform: translateY(-1px);
+        }
+
+        .gradient-calories {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .gradient-proteins {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        }
+
+        .gradient-carbs {
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+        }
+
+        .gradient-fats {
+            background: linear-gradient(135deg, #eab308 0%, #facc15 100%);
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .nutrient-bar {
+            transition: width 0.8s ease-out;
+            border-radius: 4px;
+        }
+
+        .badge-animate {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .input-dark {
+            background: var(--bg-secondary);
+            border: 1px solid #374151;
+            color: var(--text-primary);
+        }
+
+        .input-dark:focus {
+            background: var(--bg-card);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-dark::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .status-success {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border: 1px solid #059669;
+        }
+
+        .status-warning {
+            background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+            border: 1px solid #d97706;
+        }
+
+        .status-info {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            border: 1px solid #3b82f6;
+        }
+
+        .status-secondary {
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            border: 1px solid #6b7280;
+        }
+
+        .table-dark {
+            background: var(--bg-secondary);
+        }
+
+        .table-dark th {
+            background: var(--bg-card);
+            border-bottom: 2px solid #374151;
+        }
+
+        .table-dark tr:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .table-dark td {
+            border-bottom: 1px solid #374151;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .example-card {
+            background: rgba(30, 64, 175, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* ===== Accesibilidad en tema claro =====
+           Muchas cabeceras usan clases Tailwind fijas (text-white, text-slate-300, etc.).
+           Esto las fuerza a usar tus variables del tema claro. */
+        :root[data-theme="light"] h1,
+        :root[data-theme="light"] h2,
+        :root[data-theme="light"] h3,
+        :root[data-theme="light"] h4,
+        :root[data-theme="light"] h5,
+        :root[data-theme="light"] h6 {
+            color: var(--text-primary) !important;
+            /* Contorno blanco brillante para lectura */
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.95),
+                 1px -1px 0 rgba(255,255,255,0.95),
+                -1px  1px 0 rgba(255,255,255,0.95),
+                 1px  1px 0 rgba(255,255,255,0.95),
+                 0   0px 6px rgba(255,255,255,0.35);
+        }
+
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300,
+        :root[data-theme="light"] .text-slate-300 {
+            color: var(--text-primary) !important;
+        }
+
+        :root[data-theme="light"] .text-slate-400,
+        :root[data-theme="light"] .text-slate-300 {
+            color: var(--text-secondary) !important;
+        }
+
+        :root[data-theme="light"] .text-blue-400,
+        :root[data-theme="light"] .text-emerald-400,
+        :root[data-theme="light"] .text-cyan-400,
+        :root[data-theme="light"] .text-indigo-400,
+        :root[data-theme="light"] .text-purple-400,
+        :root[data-theme="light"] .text-yellow-400 {
+            color: var(--accent-emerald) !important;
+        }
+
+        /* Letras claras (en light) -> más oscuras para contraste */
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300,
+        :root[data-theme="light"] .text-slate-300,
+        :root[data-theme="light"] .text-red-300,
+        :root[data-theme="light"] .text-yellow-300,
+        :root[data-theme="light"] .text-green-300,
+        :root[data-theme="light"] .text-blue-200,
+        :root[data-theme="light"] .text-cyan-100 {
+            color: var(--text-primary) !important;
+            text-shadow:
+                0 1px 0 rgba(0,0,0,0.18),
+                0 0 2px rgba(0,0,0,0.10) !important;
+        }
+
+        :root[data-theme="light"] .text-slate-200,
+        :root[data-theme="light"] .text-slate-400,
+        :root[data-theme="light"] .text-slate-500,
+        :root[data-theme="light"] .text-secondary,
+        :root[data-theme="light"] .text-slate-300 {
+            color: var(--text-secondary) !important;
+            text-shadow:
+                0 1px 0 rgba(0,0,0,0.12),
+                0 0 2px rgba(0,0,0,0.06) !important;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="min-h-screen">
+        <!-- Hojas cayendo (solo tema claro) -->
+        <div class="leaves-layer" aria-hidden="true" id="leavesLayer"></div>
+
+        <!-- Header -->
+        <div class="gradient-header py-12">
+            <div class="container mx-auto px-4">
+                <div class="flex items-center justify-between">
+                    <a href="index.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center hover:shadow-lg transition-all duration-300">
+                        <i class="fas fa-home mr-2"></i>
+                        Lobby
+                    </a>
+                    <div class="text-center flex-1">
+                        <h1 class="text-5xl font-bold mb-4">
+                            <i class="fas fa-utensils mr-4 text-blue-400"></i>IA Nutricional Avanzada
+                        </h1>
+                        <p class="text-xl text-slate-300">Análisis preciso de macronutrientes con inteligencia artificial</p>
+                    </div>
+                    <div class="w-24"></div> <!-- Espacio para balancear -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 py-12 max-w-7xl">
+            <div class="grid lg:grid-cols-2 gap-8">
+                
+                <!-- Input Section -->
+                <div class="card-dark rounded-2xl p-8">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-edit text-blue-400 mr-4"></i>
+                        Cuéntame tu comida
+                    </h2>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-300 mb-3">
+                            Ingresa los alimentos con sus cantidades específicas:
+                        </label>
+                        <textarea 
+                            id="descripcion" 
+                            rows="7"
+                            class="w-full p-5 input-dark rounded-xl resize-none text-lg focus:outline-none"
+                            placeholder="Ejemplos:&#10;• 2 huevos revueltos y 1 taza de arroz&#10;• 200g de pollo a la plancha, 150g de brócoli&#10;• 1 aguacate mediano, 2 rebanadas de pan integral&#10;• 1 vaso de jugo de naranja, 1 yogur griego"></textarea>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-sm font-medium text-slate-300 mb-4">Ejemplos de formatos válidos:</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="example-card p-3 rounded-lg text-sm">
+                                <strong class="text-blue-400">Cantidades:</strong> <span class="text-slate-300">2 huevos, 100g pollo</span>
+                            </div>
+                            <div class="example-card p-3 rounded-lg text-sm">
+                                <strong class="text-emerald-400">Porciones:</strong> <span class="text-slate-300">1 taza arroz, 1/2 aguacate</span>
+                            </div>
+                            <div class="example-card p-3 rounded-lg text-sm">
+                                <strong class="text-blue-400">Medidas:</strong> <span class="text-slate-300">1 vaso leche, 2 cucharadas aceite</span>
+                            </div>
+                            <div class="example-card p-3 rounded-lg text-sm">
+                                <strong class="text-emerald-400">Tamaños:</strong> <span class="text-slate-300">1 manzana grande, 1 pan pequeño</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button 
+                        onclick="analizarComida()" 
+                        class="w-full gradient-button text-white py-5 px-8 rounded-xl font-bold text-lg shadow-2xl glow-effect">
+                        <i class="fas fa-microscope mr-3"></i>
+                        Que lo analice la IA
+                    </button>
+                </div>
+
+                <!-- Results Section -->
+                <div class="card-dark rounded-2xl p-8">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-chart-pie text-emerald-400 mr-4"></i>
+                        Tu análisis nutricional
+                    </h2>
+                    
+                    <div id="resultado" class="text-center text-slate-400 py-12">
+                        <i class="fas fa-arrow-left text-5xl mb-6 opacity-30"></i>
+                        <p class="text-xl">Cuéntanos tu comida y te mostramos el análisis</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Analysis Section (Initially Hidden) -->
+            <div id="analisisDetallado" class="mt-12 hidden">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    
+                    <!-- Macronutrient Chart -->
+                    <div class="lg:col-span-2 card-dark rounded-2xl p-8">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-chart-donut text-purple-400 mr-3"></i>
+                            Distribución de Macronutrientes
+                        </h3>
+                        <div class="chart-container p-4" style="height: 350px;">
+                            <canvas id="macroChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Nutritional Status -->
+                    <div class="card-dark rounded-2xl p-8">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-heart text-red-400 mr-3"></i>
+                            Estado Nutricional
+                        </h3>
+                        <div id="statusBadges" class="space-y-4">
+                            <!-- Badges will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Breakdown -->
+                <div class="mt-8 card-dark rounded-2xl p-8">
+                    <h3 class="text-2xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-table text-indigo-400 mr-3"></i>
+                        Desglose Detallado por Alimento
+                    </h3>
+                    <div id="detalleAlimentos" class="overflow-x-auto">
+                        <!-- Detailed breakdown will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="bdalimentos.js"></script>
+    <script type="module">
+        // Usar alimentos desde window
+        const alimentos = window.alimentos;
+
+        console.log("Total de alimentos cargados:", alimentos.length);
+
+        // Variable global para el gráfico
+        let macroChart;
+
+        // Convertir alimentos array a objeto para compatibilidad
+        const alimentosDB = {};
+        alimentos.forEach(alimento => {
+            const nombreLower = alimento.nombre.toLowerCase();
+            alimentosDB[nombreLower] = {
+                calorias: alimento.calorias,
+                proteinas: alimento.proteinas,
+                carbohidratos: alimento.carbohidratos,
+                grasas: alimento.grasas,
+                porcion: alimento.porcion,
+                gramos: alimento.gramos
+            };
+            // Añadir también la primera palabra como clave alternativa
+            const primeraPalabra = nombreLower.split(' ')[0];
+            if (!alimentosDB[primeraPalabra]) {
+                alimentosDB[primeraPalabra] = alimentosDB[nombreLower];
+            }
+        });
+
+        function parsearAlimentos(texto) {
+            const alimentosEncontrados = [];
+            const textoLower = texto.toLowerCase();
+            
+            for (const item of alimentos) {
+                const nombreLower = item.nombre.toLowerCase();
+                const primeraPalabra = nombreLower.split(' ')[0];
+                
+                // Buscar si el texto incluye la primera palabra como palabra completa
+                const regex = new RegExp('\\b' + primeraPalabra.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+                const incluyePrimera = regex.test(textoLower);
+                
+                // O si incluye el nombre completo
+                const incluyeNombre = textoLower.includes(nombreLower);
+                
+                if (incluyePrimera || incluyeNombre) {
+                    let cantidad = 1;
+                    
+                    // Extraer cantidad del texto - buscar números cerca de la palabra
+                    const palabras = textoLower.split(/\s+/);
+                    const indexPrimera = palabras.findIndex(p => p === primeraPalabra);
+                    
+                    if (indexPrimera > 0) {
+                        const posibleCantidad = palabras[indexPrimera - 1];
+                        if (/^\d+(?:\.\d+)?$|^\d+\/\d+$/.test(posibleCantidad)) {
+                            if (posibleCantidad.includes('/')) {
+                                const [numerador, denominador] = posibleCantidad.split('/').map(Number);
+                                cantidad = numerador / denominador;
+                            } else {
+                                cantidad = parseFloat(posibleCantidad);
+                            }
+                        }
+                    }
+                    
+                    // Si no encontró cantidad antes, buscar cualquier número en el texto
+                    if (cantidad === 1) {
+                        const numeroRegex = /(\d+(?:\.\d+)?|\d+\/\d+)/g;
+                        const matches = textoLower.match(numeroRegex);
+                        if (matches && matches.length > 0) {
+                            const cantidadStr = matches[0]; // Tomar el primer número
+                            if (cantidadStr.includes('/')) {
+                                const [numerador, denominador] = cantidadStr.split('/').map(Number);
+                                cantidad = numerador / denominador;
+                            } else {
+                                cantidad = parseFloat(cantidadStr);
+                            }
+                        }
+                    }
+                    
+                    alimentosEncontrados.push({
+                        nombre: item.nombre,
+                        cantidad: cantidad,
+                        datos: item
+                    });
+                }
+            }
+            
+            return alimentosEncontrados;
+        }
+
+        function calcularMacronutrientes(alimentosEncontrados) {
+            let totalCalorias = 0;
+            let totalProteinas = 0;
+            let totalCarbohidratos = 0;
+            let totalGrasas = 0;
+            
+            const detalleAlimentos = [];
+            
+            alimentosEncontrados.forEach(item => {
+                const calorias = item.datos.calorias * item.cantidad;
+                const proteinas = item.datos.proteinas * item.cantidad;
+                const carbohidratos = item.datos.carbohidratos * item.cantidad;
+                const grasas = item.datos.grasas * item.cantidad;
+                
+                totalCalorias += calorias;
+                totalProteinas += proteinas;
+                totalCarbohidratos += carbohidratos;
+                totalGrasas += grasas;
+                
+                detalleAlimentos.push({
+                    nombre: item.nombre,
+                    cantidad: item.cantidad,
+                    calorias: Math.round(calorias),
+                    proteinas: Math.round(proteinas * 10) / 10,
+                    carbohidratos: Math.round(carbohidratos * 10) / 10,
+                    grasas: Math.round(grasas * 10) / 10
+                });
+            });
+            
+            const caloriasProteinas = totalProteinas * 4;
+            const caloriasCarbohidratos = totalCarbohidratos * 4;
+            const caloriasGrasas = totalGrasas * 9;
+            const totalCaloriasCalculadas = caloriasProteinas + caloriasCarbohidratos + caloriasGrasas;
+            
+            const porcentajes = totalCaloriasCalculadas > 0 ? {
+                proteinas: Math.round((caloriasProteinas / totalCaloriasCalculadas) * 100),
+                carbohidratos: Math.round((caloriasCarbohidratos / totalCaloriasCalculadas) * 100),
+                grasas: Math.round((caloriasGrasas / totalCaloriasCalculadas) * 100)
+            } : {
+                proteinas: 0,
+                carbohidratos: 0,
+                grasas: 0
+            };
+            
+            return {
+                calorias: Math.round(totalCalorias),
+                proteinas: Math.round(totalProteinas * 10) / 10,
+                carbohidratos: Math.round(totalCarbohidratos * 10) / 10,
+                grasas: Math.round(totalGrasas * 10) / 10,
+                porcentajes: porcentajes,
+                detalleAlimentos: detalleAlimentos
+            };
+        }
+
+        function evaluarEstadoNutricional(macros) {
+            const badges = [];
+            
+            if (macros.porcentajes.proteinas >= 25) {
+                badges.push({ tipo: 'success', icono: 'fas fa-dumbbell', texto: 'Rica en proteínas', descripcion: 'Excelente para el desarrollo muscular' });
+            } else if (macros.porcentajes.proteinas < 15) {
+                badges.push({ tipo: 'warning', icono: 'fas fa-exclamation-triangle', texto: 'Baja en proteínas', descripcion: 'Considera agregar más proteínas' });
+            }
+            
+            if (macros.porcentajes.carbohidratos > 60) {
+                badges.push({ tipo: 'info', icono: 'fas fa-bolt', texto: 'Alta en energía', descripcion: 'Ideal para actividad física intensa' });
+            } else if (macros.porcentajes.carbohidratos < 30) {
+                badges.push({ tipo: 'secondary', icono: 'fas fa-leaf', texto: 'Baja en harinas', descripcion: 'Apropiada para dieta cetogénica' });
+            }
+            
+            if (macros.porcentajes.grasas > 35) {
+                badges.push({ tipo: 'warning', icono: 'fas fa-heart', texto: 'Alta en grasas', descripcion: 'Controla las grasas saturadas' });
+            } else if (macros.porcentajes.grasas >= 20 && macros.porcentajes.grasas <= 35) {
+                badges.push({ tipo: 'success', icono: 'fas fa-balance-scale', texto: 'Grasas equilibradas', descripcion: 'Distribución saludable de grasas' });
+            }
+            
+            if (macros.calorias < 300) {
+                badges.push({ tipo: 'info', icono: 'fas fa-feather-alt', texto: 'Comida ligera', descripcion: 'Ideal para snack o entrada' });
+            } else if (macros.calorias > 800) {
+                badges.push({ tipo: 'warning', icono: 'fas fa-fire', texto: 'Alta en calorías', descripcion: 'Comida muy energética' });
+            } else {
+                badges.push({ tipo: 'success', icono: 'fas fa-check-circle', texto: 'Comida balanceada', descripcion: 'Buena distribución calórica' });
+            }
+            
+            return badges;
+        }
+
+        function mostrarResultados(macros) {
+            const resultado = document.getElementById('resultado');
+            const analisisDetallado = document.getElementById('analisisDetallado');
+            
+            resultado.innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="gradient-calories text-white p-6 rounded-xl text-center shadow-lg">
+                        <i class="fas fa-fire text-3xl mb-3"></i>
+                        <div class="text-3xl font-bold">${macros.calorias}</div>
+                        <div class="text-sm opacity-90">Calorías</div>
+                    </div>
+                    <div class="gradient-proteins text-white p-6 rounded-xl text-center shadow-lg">
+                        <i class="fas fa-dumbbell text-3xl mb-3"></i>
+                        <div class="text-3xl font-bold">${macros.proteinas}g</div>
+                        <div class="text-sm opacity-90">Proteínas</div>
+                    </div>
+                    <div class="gradient-carbs text-white p-6 rounded-xl text-center shadow-lg">
+                        <i class="fas fa-bolt text-3xl mb-3"></i>
+                        <div class="text-3xl font-bold">${macros.carbohidratos}g</div>
+                        <div class="text-sm opacity-90">Carbohidratos</div>
+                    </div>
+                    <div class="gradient-fats text-white p-6 rounded-xl text-center shadow-lg">
+                        <i class="fas fa-oil-can text-3xl mb-3"></i>
+                        <div class="text-3xl font-bold">${macros.grasas}g</div>
+                        <div class="text-sm opacity-90">Grasas</div>
+                    </div>
+                </div>
+                
+                <div class="card-dark p-6 rounded-xl">
+                    <h4 class="font-bold text-xl mb-6 text-slate-200">Distribución de Macronutrientes:</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-medium text-blue-400">Proteínas</span>
+                            <span class="text-lg font-bold text-slate-200">${macros.porcentajes.proteinas}%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-3 rounded-full nutrient-bar" style="width: ${macros.porcentajes.proteinas}%"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-medium text-green-400">Harinas</span>
+                            <span class="text-lg font-bold text-slate-200">${macros.porcentajes.carbohidratos}%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-green-500 to-green-400 h-3 rounded-full nutrient-bar" style="width: ${macros.porcentajes.carbohidratos}%"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-medium text-yellow-400">Grasas</span>
+                            <span class="text-lg font-bold text-slate-200">${macros.porcentajes.grasas}%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-yellow-500 to-yellow-400 h-3 rounded-full nutrient-bar" style="width: ${macros.porcentajes.grasas}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            analisisDetallado.classList.remove('hidden');
+            crearGraficoMacros(macros);
+            mostrarBadgesEstado(macros);
+            mostrarDetalleAlimentos(macros.detalleAlimentos);
+        }
+
+        function crearGraficoMacros(macros) {
+            const ctx = document.getElementById('macroChart').getContext('2d');
+            
+            if (macroChart) {
+                macroChart.destroy();
+            }
+            
+            macroChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Proteínas', 'Harinas', 'Grasas'],
+                    datasets: [{
+                        data: [macros.porcentajes.proteinas, macros.porcentajes.carbohidratos, macros.porcentajes.grasas],
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#22C55E',
+                            '#FACC15'
+                        ],
+                        borderWidth: 3,
+                        borderColor: '#1a1a2e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 25,
+                                font: {
+                                    size: 14
+                                },
+                                color: '#e2e8f0'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    return `${label}: ${value}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function mostrarBadgesEstado(macros) {
+            const badges = evaluarEstadoNutricional(macros);
+            const statusBadges = document.getElementById('statusBadges');
+            
+            const colores = {
+                'success': 'status-success',
+                'warning': 'status-warning',
+                'info': 'status-info',
+                'secondary': 'status-secondary'
+            };
+            
+            statusBadges.innerHTML = badges.map(badge => `
+                <div class="badge-animate ${colores[badge.tipo]} rounded-xl p-4 text-white">
+                    <div class="flex items-center mb-2">
+                        <i class="${badge.icono} mr-3"></i>
+                        <span class="font-bold text-sm">${badge.texto}</span>
+                    </div>
+                    <p class="text-xs opacity-90">${badge.descripcion}</p>
+                </div>
+            `).join('');
+        }
+
+        function mostrarDetalleAlimentos(detalleAlimentos) {
+            const detalleDiv = document.getElementById('detalleAlimentos');
+            
+            detalleDiv.innerHTML = `
+                <table class="w-full text-sm table-dark rounded-xl overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th class="text-left py-4 px-4 font-bold text-slate-200">Alimento</th>
+                            <th class="text-center py-4 px-4 font-bold text-slate-200">Cantidad</th>
+                            <th class="text-center py-4 px-4 font-bold text-slate-200">Calorías</th>
+                            <th class="text-center py-4 px-4 font-bold text-slate-200">Proteínas</th>
+                            <th class="text-center py-4 px-4 font-bold text-slate-200">Harinas</th>
+                            <th class="text-center py-4 px-4 font-bold text-slate-200">Grasas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${detalleAlimentos.map(alimento => `
+                            <tr class="transition-colors duration-200">
+                                <td class="py-4 px-4 font-medium capitalize text-slate-200">${alimento.nombre}</td>
+                                <td class="py-4 px-4 text-center text-slate-300">${alimento.cantidad === 1 ? '1' : alimento.cantidad.toFixed(1)}</td>
+                                <td class="py-4 px-4 text-center font-bold text-red-400">${alimento.calorias}</td>
+                                <td class="py-4 px-4 text-center text-blue-400 font-semibold">${alimento.proteinas}g</td>
+                                <td class="py-4 px-4 text-center text-emerald-400 font-semibold">${alimento.carbohidratos}g</td>
+                                <td class="py-4 px-4 text-center text-yellow-400 font-semibold">${alimento.grasas}g</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function analizarComida() {
+            const input = document.getElementById('descripcion').value.trim();
+            const resultado = document.getElementById('resultado');
+            const analisisDetallado = document.getElementById('analisisDetallado');
+            
+            if (!input) {
+                resultado.innerHTML = `
+                    <div class="text-center text-red-400 py-12">
+                        <i class="fas fa-exclamation-triangle text-5xl mb-6"></i>
+                        <p class="text-2xl font-bold">Cuéntame qué comiste</p>
+                        <p class="text-lg opacity-75">Escribe los alimentos y te armamos el análisis</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultado.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="pulse-animation">
+                        <i class="fas fa-microscope text-6xl text-blue-400 mb-6"></i>
+                    </div>
+                    <p class="text-2xl font-bold text-slate-200">Estoy revisando tu comida...</p>
+                    <p class="text-lg text-slate-400">Calculando calorías y macros</p>
+                </div>
+            `;
+            
+            analisisDetallado.classList.add('hidden');
+            
+            setTimeout(() => {
+                try {
+                    const alimentosEncontrados = parsearAlimentos(input);
+                    
+                    if (alimentosEncontrados.length === 0) {
+                        resultado.innerHTML = `
+                            <div class="text-center text-yellow-400 py-12">
+                                <i class="fas fa-search text-5xl mb-6"></i>
+                                <p class="text-2xl font-bold">No pude identificar nada</p>
+                                <p class="text-lg opacity-75">Prueba con cosas tipo "2 huevos", "1 taza de arroz", etc.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    const macros = calcularMacronutrientes(alimentosEncontrados);
+                    mostrarResultados(macros);
+                    
+                } catch (error) {
+                    resultado.innerHTML = `
+                        <div class="text-center text-red-400 py-12">
+                            <i class="fas fa-exclamation-circle text-5xl mb-6"></i>
+                            <p class="text-2xl font-bold">Uy, pasó algo</p>
+                            <p class="text-lg opacity-75">Intenta de nuevo con una descripción un poquito más clara</p>
+                        </div>
+                    `;
+                    console.error('Error en análisis:', error);
+                }
+            }, 1800);
+        }
+
+        document.getElementById('descripcion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                analizarComida();
+            }
+        });
+
+        // Exponer función al scope global para el onclick
+        window.analizarComida = analizarComida;
+    </script>
+    <script>
+      (function () {
+        const THEME_KEY = 'nutry_theme';
+        const root = document.documentElement;
+        const storedTheme = localStorage.getItem(THEME_KEY);
+        if (storedTheme === 'light') root.setAttribute('data-theme', 'light');
+        else root.removeAttribute('data-theme');
+      })();
+    </script>
+</body>
+</html>
