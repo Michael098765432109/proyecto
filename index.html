@@ -172,14 +172,57 @@
       color: var(--text-secondary) !important;
     }
 
-    /* Si por alguna razón algún texto claro queda “pegado” al fondo,
-       lo reforzamos con contorno suave */
+    /* Contorno blanco para textos claros en tema claro */
     :root[data-theme="light"] .text-slate-300,
     :root[data-theme="light"] .text-gray-300,
     :root[data-theme="light"] .text-white {
       text-shadow:
-        0 1px 0 rgba(0,0,0,0.18),
-        0 0 2px rgba(0,0,0,0.10) !important;
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95),
+         0   0px 6px rgba(255,255,255,0.35) !important;
+    }
+
+    /* Botón de cambio de tema con contorno blanco en tema claro */
+    :root[data-theme="light"] #theme-toggle-btn {
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95),
+         0   0px 6px rgba(255,255,255,0.35) !important;
+    }
+
+    /* Helper-text con contorno blanco en tema claro */
+    :root[data-theme="light"] .helper-text {
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95),
+         0   0px 4px rgba(255,255,255,0.30) !important;
+    }
+
+    /* Footer y otros textos con clase text-gray-300 */
+    :root[data-theme="light"] footer .text-gray-300 {
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95),
+         0   0px 6px rgba(255,255,255,0.35) !important;
+    }
+
+    /* Botones de cambio de sección (Crear cuenta / Iniciar sesión) con contorno blanco */
+    :root[data-theme="light"] #switch-to-register,
+    :root[data-theme="light"] #switch-auth {
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.95),
+         1px -1px 0 rgba(255,255,255,0.95),
+        -1px  1px 0 rgba(255,255,255,0.95),
+         1px  1px 0 rgba(255,255,255,0.95),
+         0   0px 6px rgba(255,255,255,0.35) !important;
     }
 
     /* Contorno blanco brillante a títulos en tema claro para lectura */
