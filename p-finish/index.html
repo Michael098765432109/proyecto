@@ -309,38 +309,7 @@ button:hover {
                         </button>
                     </div>
 
-                <!-- Dropdown theme -->
-                <div class="theme-dropdown" id="themeDropdown">
-                    <!-- Botón externo -->
-                    <button
-                        id="themeDropdownOuterBtn"
-                        type="button"
-                        class="w-auto px-4 py-2 rounded-xl shadow-lg font-bold border border-white/20 bg-white/10 hover:bg-white/15 transition text-white flex items-center gap-2"
-                        aria-haspopup="menu"
-                        aria-expanded="false"
-                    >
-                        <i id="themeDropdownIcon" class="fas fa-sun"></i>
-                        <span id="themeDropdownText">Tema claro</span>
-
-                        <!-- “Botón dentro de otro botón” (wrapper estilo) -->
-                        <span
-                            class="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-lg border border-white/20 bg-white/5"
-                            aria-hidden="true"
-                        >
-                            <i class="fas fa-chevron-down text-sm"></i>
-                        </span>
-                    </button>
-
-                    <!-- Menú interno -->
-                    <div class="theme-dropdown-menu" role="menu" aria-label="Cambiar tema">
-                        <button type="button" class="theme-choice" role="menuitem" data-theme-choice="light">
-                            <i class="fas fa-sun mr-2"></i>Tema claro
-                        </button>
-                        <button type="button" class="theme-choice" role="menuitem" data-theme-choice="dark">
-                            <i class="fas fa-moon mr-2"></i>Tema oscuro
-                        </button>
-                    </div>
-                </div>
+                <!-- theme selector removed per user request -->
             </div>
         </div>
     </header>
@@ -382,20 +351,11 @@ button:hover {
             const THEME_KEY = 'nutry_theme';
             const root = document.documentElement;
 
-            const dropdown = document.getElementById('themeDropdown');
-            const outerBtn = document.getElementById('themeDropdownOuterBtn');
-            const icon = document.getElementById('themeDropdownIcon');
-            const text = document.getElementById('themeDropdownText');
-            const menuChoices = document.querySelectorAll('[data-theme-choice]');
-
             const leavesLayer = document.getElementById('leavesLayer');
 
             function applyTheme(theme) {
                 if (theme === 'light') root.setAttribute('data-theme', 'light');
                 else root.removeAttribute('data-theme');
-
-                if (icon) icon.className = theme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
-                if (text) text.textContent = theme === 'light' ? 'Tema claro' : 'Tema oscuro';
 
                 // Generar hojas si es light
                 if (theme === 'light') spawnLeaves();
@@ -426,11 +386,7 @@ button:hover {
                     const size = 14 + Math.random() * 18;
                     leaf.style.setProperty('--leaf-size', size + 'px');
 
-                    // Íconos tipo hoja (usamos SVG inline simple vía contenido)
-                    // Para no romper con assets externos, usamos caracteres unicode como “hoja”
                     leaf.textContent = '🍂';
-
-                    // Ajustes visuales del color
                     leaf.style.fontSize = size + 'px';
                     leaf.style.lineHeight = '1';
 
@@ -441,42 +397,6 @@ button:hover {
             const storedTheme = localStorage.getItem(THEME_KEY);
             const initialTheme = storedTheme === 'light' ? 'light' : 'dark';
             applyTheme(initialTheme);
-
-            function closeMenu() {
-                if (dropdown) dropdown.classList.remove('open');
-                if (outerBtn) outerBtn.setAttribute('aria-expanded', 'false');
-            }
-
-            function toggleMenu() {
-                if (!dropdown) return;
-                const isOpen = dropdown.classList.contains('open');
-                if (isOpen) closeMenu();
-                else {
-                    dropdown.classList.add('open');
-                    if (outerBtn) outerBtn.setAttribute('aria-expanded', 'true');
-                }
-            }
-
-            if (outerBtn) outerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleMenu();
-            });
-
-            document.addEventListener('click', () => closeMenu());
-
-            if (menuChoices && menuChoices.length) {
-                menuChoices.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const theme = btn.getAttribute('data-theme-choice');
-                        if (theme === 'light' || theme === 'dark') {
-                            localStorage.setItem(THEME_KEY, theme);
-                            applyTheme(theme);
-                            closeMenu();
-                        }
-                    });
-                });
-            }
         })();
     </script>
     <script type="module" src="./logout.js"></script>
