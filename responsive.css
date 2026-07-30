@@ -80,6 +80,27 @@ table th, table td { white-space: nowrap; }
   html, body { overflow-x: hidden; }
 }
 
+/* Strong safeguards against horizontal overflow (mobile-specific) */
+@media (max-width: 1024px) {
+  html, body { width: 100vw; overscroll-behavior-x: none; }
+
+  /* Limit wide containers that use Tailwind max-width classes */
+  .max-w-7xl, .max-w-6xl, .max-w-5xl { max-width: calc(100vw - 2rem) !important; }
+
+  /* Prevent rows/grids from causing horizontal scroll by ensuring columns wrap */
+  .grid { grid-auto-flow: row; }
+  .flex { flex-wrap: wrap; }
+
+  /* Ensure any element that might be wider than viewport is clamped */
+  [class*="max-w-"], .card-dark, .card, .result-card, .example-card {
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Images/canvases already set, add a final clamp for any direct child */
+  body > * { max-width: 100vw !important; }
+}
+
 /* Fix: header / selector area wrapping and buttons on small screens */
 .gradient-header .container .flex {
   display: flex;
