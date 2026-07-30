@@ -141,6 +141,30 @@ body, main, header, footer { overflow-x: hidden !important; }
 .input-dark, textarea.input-dark { font-size: 1rem; line-height: 1.3; }
 textarea { min-height: 120px; max-height: 60vh; }
 
+/* Password toggle (ojito) — siempre centrado dentro del input */
+.password-toggle {
+  position: absolute !important;
+  right: 0.75rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 1.8rem !important;
+  width: 1.8rem !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  z-index: 50 !important;
+  opacity: 0.95 !important;
+}
+.password-toggle i { line-height: 1 !important; font-size: 1rem !important; }
+
+@media (max-width: 480px) {
+  .password-toggle { right: 0.6rem !important; height: 1.6rem !important; width: 1.6rem !important; }
+  .password-toggle i { font-size: 0.95rem !important; }
+}
+
 /* Reduce padding on cards for narrow screens to avoid overflow */
 @media (max-width: 480px) {
   .card-dark, .card, .container, .result-card { padding: 0.75rem !important; }

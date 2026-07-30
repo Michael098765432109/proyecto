@@ -418,9 +418,8 @@
                 alimentosDB[primeraPalabra] = alimentosDB[nombreLower];
             }
         });
-
-        <script src="fix-overflow.js"></script>
-        function parsearAlimentos(texto) {
+        
+    function parsearAlimentos(texto) {
             const alimentosEncontrados = [];
             const textoLower = texto.toLowerCase().trim();
             console.debug('parsearAlimentos inicio. texto:', textoLower, 'alimentos cargados:', alimentosGlobal.length);
