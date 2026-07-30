@@ -415,61 +415,262 @@
 
         function parsearAlimentos(texto) {
             const alimentosEncontrados = [];
-            const textoLower = texto.toLowerCase();
+            const textoLower = texto.toLowerCase().trim();
             
-            for (const item of alimentos) {
-                const nombreLower = item.nombre.toLowerCase();
-                const primeraPalabra = nombreLower.split(' ')[0];
+            // ===== MAPA DE PORCIONES COMUNES (para estimar gramos) =====
+            const porcionesGramos = {
+                'taza': 240, 'tazas': 240,
+                'vaso': 240, 'vasos': 240,
+                'cucharada': 15, 'cucharadas': 15,
+                'cucharadita': 5, 'cucharaditas': 5,
+                'puñado': 30, 'puñados': 30,
+                'rebanada': 30, 'rebanadas': 30,
+                'tajada': 40, 'tajadas': 40,
+                'rodaja': 15, 'rodajas': 15,
+                'unidad': 1, 'unidades': 1,
+                'plato': 300, 'platos': 300,
+                'copa': 200, 'copas': 200,
+                'botella': 330, 'botellas': 330,
+                'lata': 330, 'latas': 330,
+                'porción': 100, 'porciones': 100,
+                'scoop': 30, 'scoops': 30,
+                'diente': 3, 'dientes': 3,
+                'hoja': 1, 'hojas': 1,
+                'presa': 150, 'presas': 150,
+                'filete': 150, 'filetes': 150,
+                'trozo': 100, 'trozos': 100,
+                'barra': 40, 'barras': 40,
+                'paquete': 50, 'paquetes': 50,
+                'onza': 28, 'onzas': 28
+            };
+
+            // ===== NORMALIZAR NOMBRES DE ALIMENTOS =====
+            // Palabras que debemos ignorar (artículos, preposiciones, etc.)
+            const stopWords = new Set(['de', 'del', 'la', 'el', 'los', 'las', 'un', 'una', 'unos', 'unas',
+                'con', 'sin', 'y', 'e', 'al', 'en', 'por', 'para', 'a', 'que']);
+
+            // Función para obtener palabras clave de un nombre de alimento
+            function getPalabrasClave(nombre) {
+                const nombreLimpio = nombre.toLowerCase()
+                    .replace(/\([^)]*\)/g, '') // quitar paréntesis
+                    .replace(/[^a-záéíóúüñ\s]/g, ' ') // quitar caracteres especiales
+                    .trim();
+                const palabras = nombreLimpio.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                return [...new Set(palabras)]; // eliminar duplicados
+            }
+
+            // Construir índice de búsqueda
+            const indiceAlimentos = alimentos.map(item => ({
+                item: item,
+                palabrasClave: getPalabrasClave(item.nombre),
+                nombreLower: item.nombre.toLowerCase(),
+                score: 0
+            }));
+
+            // ===== EXTRAER TODOS LOS NÚMEROS CON SUS UNIDADES =====
+            // Patrones: "200g de pollo", "2 huevos", "1 taza de arroz", "1/2 aguacate", "100 gramos de carne"
+            const tokens = [];
+            
+            // Patrón: número + posible unidad + "de" + texto
+            const regexToken = /(\d+(?:\.\d+)?(?:\s*\/\s*\d+)?)\s*(g|gr|gramos|ml|litros|taza|tazas|vaso|vasos|cucharada|cucharadas|cucharadita|cucharaditas|puñado|puñados|rebanada|rebanadas|tajada|tajadas|unidad|unidades|plato|platos|copa|copas|botella|botellas|lata|latas|porción|porciones|scoop|scoops|diente|dientes|hoja|hojas|presa|presas|filete|filetes|trozo|trozos|barra|barras|paquete|paquetes|onza|onzas)?\s*(?:de\s+)?/gi;
+
+            let match;
+            while ((match = regexToken.exec(textoLower)) !== null) {
+                // Determinar la palabra a buscar (después del patrón numérico)
+                const afterMatch = textoLower.slice(match.index + match[0].length);
+                const palabrasRestantes = afterMatch.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
                 
-                // Buscar si el texto incluye la primera palabra como palabra completa
-                const regex = new RegExp('\\b' + primeraPalabra.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
-                const incluyePrimera = regex.test(textoLower);
-                
-                // O si incluye el nombre completo
-                const incluyeNombre = textoLower.includes(nombreLower);
-                
-                if (incluyePrimera || incluyeNombre) {
-                    let cantidad = 1;
-                    
-                    // Extraer cantidad del texto - buscar números cerca de la palabra
-                    const palabras = textoLower.split(/\s+/);
-                    const indexPrimera = palabras.findIndex(p => p === primeraPalabra);
-                    
-                    if (indexPrimera > 0) {
-                        const posibleCantidad = palabras[indexPrimera - 1];
-                        if (/^\d+(?:\.\d+)?$|^\d+\/\d+$/.test(posibleCantidad)) {
-                            if (posibleCantidad.includes('/')) {
-                                const [numerador, denominador] = posibleCantidad.split('/').map(Number);
-                                cantidad = numerador / denominador;
-                            } else {
-                                cantidad = parseFloat(posibleCantidad);
-                            }
+                // Tomar hasta 3 palabras como posible nombre de alimento
+                const nombreCandidato = palabrasRestantes.slice(0, 3).join(' ');
+
+                // Parsear cantidad
+                let cantidad = 1;
+                const cantidadStr = match[1].replace(/\s/g, '');
+                if (cantidadStr.includes('/')) {
+                    const partes = cantidadStr.split('/');
+                    cantidad = parseFloat(partes[0]) / parseFloat(partes[1]);
+                } else {
+                    cantidad = parseFloat(cantidadStr);
+                }
+
+                // Ajustar por unidad de medida
+                const unidad = (match[2] || '').toLowerCase();
+                if (unidad === 'g' || unidad === 'gr' || unidad === 'gramos') {
+                    // cantidad está en gramos, la usaremos directamente como multiplicador
+                    // Guardar cantidad como gramos
+                    cantidad = cantidad / 100; // convertir a "porciones de 100g"
+                } else if (porcionesGramos[unidad]) {
+                    const gramosPorcion = porcionesGramos[unidad];
+                    // Convertir a "porciones según la base de datos"
+                    cantidad = cantidad; // la cantidad es el número de porciones
+                }
+
+                tokens.push({
+                    cantidad: cantidad || 1,
+                    unidad: unidad,
+                    nombreCandidato: nombreCandidato,
+                    startPos: match.index
+                });
+            }
+
+            // También buscar alimentos mencionados sin cantidad numérica
+            // Ej: "pollo" en "voy a comer pollo"
+            const fragmentos = textoLower.split(/,|\.|;|y\s+|\n/).filter(f => f.trim());
+            
+            fragmentos.forEach(fragmento => {
+                const tieneNumero = /\d/.test(fragmento);
+                if (!tieneNumero) {
+                    // Buscar si alguna palabra coincide con un alimento
+                    const palabras = fragmento.trim().split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                    palabras.forEach(palabra => {
+                        // Verificar si esta palabra es un alimento conocido
+                        const matchAlimento = alimentos.find(a => {
+                            const palabrasClave = getPalabrasClave(a.nombre);
+                            return palabrasClave.includes(palabra);
+                        });
+                        if (matchAlimento && !tokens.some(t => t.nombreCandidato.includes(palabra))) {
+                            tokens.push({
+                                cantidad: 1,
+                                unidad: '',
+                                nombreCandidato: palabra,
+                                startPos: -1
+                            });
                         }
-                    }
-                    
-                    // Si no encontró cantidad antes, buscar cualquier número en el texto
-                    if (cantidad === 1) {
-                        const numeroRegex = /(\d+(?:\.\d+)?|\d+\/\d+)/g;
-                        const matches = textoLower.match(numeroRegex);
-                        if (matches && matches.length > 0) {
-                            const cantidadStr = matches[0]; // Tomar el primer número
-                            if (cantidadStr.includes('/')) {
-                                const [numerador, denominador] = cantidadStr.split('/').map(Number);
-                                cantidad = numerador / denominador;
-                            } else {
-                                cantidad = parseFloat(cantidadStr);
-                            }
-                        }
-                    }
-                    
-                    alimentosEncontrados.push({
-                        nombre: item.nombre,
-                        cantidad: cantidad,
-                        datos: item
                     });
                 }
+            });
+
+            // ===== MATCHING: encontrar el mejor alimento para cada token =====
+            const alimentosUsados = new Set();
+
+            tokens.forEach(token => {
+                let mejorMatch = null;
+                let mejorScore = 0;
+
+                indiceAlimentos.forEach(({ item, palabrasClave, nombreLower }) => {
+                    if (alimentosUsados.has(item.id)) return; // ya usado
+
+                    let score = 0;
+                    const candidatoLower = token.nombreCandidato.toLowerCase();
+
+                    // 1. Coincidencia exacta del nombre
+                    if (nombreLower === candidatoLower) {
+                        score = 100;
+                    }
+                    // 2. Coincidencia de nombre completo dentro del candidato
+                    else if (nombreLower.includes(candidatoLower) || candidatoLower.includes(nombreLower)) {
+                        score = 80 - Math.abs(nombreLower.length - candidatoLower.length) * 2;
+                    }
+                    // 3. Coincidencia de palabras clave
+                    else {
+                        const palabrasCandidato = candidatoLower.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                        let coincidencias = 0;
+                        palabrasClave.forEach(pc => {
+                            if (palabrasCandidato.some(pc2 => 
+                                pc2 === pc || pc2.includes(pc) || pc.includes(pc2)
+                            )) {
+                                coincidencias++;
+                            }
+                        });
+                        if (coincidencias > 0) {
+                            score = (coincidencias / Math.max(palabrasClave.length, palabrasCandidato.length)) * 70;
+                        }
+                        // 4. Coincidencia por palabra suelta (ej: "huevos" -> "huevo")
+                        if (score === 0) {
+                            palabrasCandidato.forEach(pc => {
+                                palabrasClave.forEach(pk => {
+                                    if (pc.startsWith(pk) || pk.startsWith(pc) || 
+                                        (pc.length > 3 && pk.length > 3 && (pc.includes(pk) || pk.includes(pc)))) {
+                                        score = Math.max(score, 40);
+                                    }
+                                });
+                            });
+                        }
+                    }
+
+                    if (score > mejorScore) {
+                        mejorScore = score;
+                        mejorMatch = item;
+                    }
+                });
+
+                if (mejorMatch && mejorScore >= 25) {
+                    let cantidadFinal = token.cantidad;
+                    
+                    // Ajustar cantidad según la unidad
+                    if (token.unidad === '' || token.unidad === 'unidad' || token.unidad === 'unidades') {
+                        // La cantidad es directamente el número de porciones (ej: "2 huevos")
+                        // La base de datos tiene valores por "unidad" ya
+                        cantidadFinal = token.cantidad || 1;
+                    } else if (token.unidad === 'taza' || token.unidad === 'tazas') {
+                        // Por taza: comparar con la porción de la BD
+                        if (mejorMatch.porcion.toLowerCase() === 'taza' || mejorMatch.porcion.includes('taza')) {
+                            cantidadFinal = token.cantidad;
+                        } else {
+                            // Estimar: la BD tiene datos por cierta cantidad de gramos
+                            const gramosPorcion = porcionesGramos['taza'];
+                            cantidadFinal = (token.cantidad * gramosPorcion) / mejorMatch.gramos;
+                        }
+                    } else if (token.unidad === 'g' || token.unidad === 'gr' || token.unidad === 'gramos') {
+                        // Ya convertimos a "por cada 100g", ajustar según los gramos reales de la BD
+                        cantidadFinal = (token.cantidad * 100) / mejorMatch.gramos;
+                    } else if (porcionesGramos[token.unidad]) {
+                        // Para otras unidades (cucharada, puñado, etc.)
+                        const gramosEstimados = porcionesGramos[token.unidad];
+                        cantidadFinal = (token.cantidad * gramosEstimados) / mejorMatch.gramos;
+                    }
+
+                    alimentosEncontrados.push({
+                        nombre: mejorMatch.nombre,
+                        cantidad: Math.round(cantidadFinal * 100) / 100 || 1,
+                        datos: mejorMatch,
+                        score: mejorScore
+                    });
+                    
+                    alimentosUsados.add(mejorMatch.id);
+                }
+            });
+
+            // ===== SI NO ENCONTRÓ NADA CON TOKENS, INTENTAR BÚSQUEDA SIMPLE =====
+            if (alimentosEncontrados.length === 0) {
+                // Búsqueda directa por palabras sueltas
+                const palabrasTexto = textoLower.split(/\s+/).filter(p => p.length > 2 && !stopWords.has(p));
+                const alimentosYaMatch = new Set();
+
+                for (const item of alimentos) {
+                    const palabrasClave = getPalabrasClave(item.nombre);
+                    for (const palabra of palabrasTexto) {
+                        for (const pk of palabrasClave) {
+                            if (palabra === pk || palabra.includes(pk) || pk.includes(palabra)) {
+                                if (!alimentosYaMatch.has(item.id)) {
+                                    // Buscar si hay un número antes de esta palabra
+                                    let cantidad = 1;
+                                    const regex = new RegExp('(\\d+(?:\\.\\d+)?|\\d+/\\d+)\\s*(?:' + palabra.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'i');
+                                    const numMatch = textoLower.match(regex);
+                                    if (numMatch) {
+                                        const numStr = numMatch[1];
+                                        if (numStr.includes('/')) {
+                                            const partes = numStr.split('/');
+                                            cantidad = parseFloat(partes[0]) / parseFloat(partes[1]);
+                                        } else {
+                                            cantidad = parseFloat(numStr);
+                                        }
+                                    }
+
+                                    alimentosEncontrados.push({
+                                        nombre: item.nombre,
+                                        cantidad: cantidad,
+                                        datos: item,
+                                        score: 10
+                                    });
+                                    alimentosYaMatch.add(item.id);
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            
+
             return alimentosEncontrados;
         }
 
