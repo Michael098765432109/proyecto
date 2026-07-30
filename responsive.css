@@ -101,6 +101,28 @@ table th, table td { white-space: nowrap; }
   body > * { max-width: 100vw !important; }
 }
 
+/* Final layer: force full-bleed background and prevent any element from creating horizontal gap */
+html, body {
+  max-width: 100vw !important;
+}
+
+/* Make container truly responsive and centered without exceeding viewport */
+.container {
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Clip any overflowing children as last resort */
+body, main, header, footer { overflow-x: hidden !important; }
+
+/* Remove potential outline/shadow that extends beyond box on cards */
+.card-dark, .card { box-shadow: none !important; }
+
 /* Fix: header / selector area wrapping and buttons on small screens */
 .gradient-header .container .flex {
   display: flex;
