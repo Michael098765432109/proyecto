@@ -152,37 +152,46 @@ textarea { min-height: 120px; max-height: 60vh; }
   .gradient-button.w-full, button.w-full { width: 100% !important; }
 }
 
-/* Mobile header: stack logout + theme button vertically and keep text above */
+/* Mobile header: keep title left and actions visible on the right; ensure theme button not clipped */
 @media (max-width: 480px) {
   .gradient-header .container .flex {
-    flex-direction: column !important;
-    align-items: flex-start !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     gap: 0.5rem !important;
   }
   .gradient-header .container .text-left {
-    width: 100% !important;
+    flex: 1 1 auto !important;
     text-align: left !important;
-    order: 1 !important;
+    margin-right: 0.5rem !important;
   }
-  /* make the actions stack below the title */
   .gradient-header .container .flex > .flex.items-center {
+    flex: 0 0 auto !important;
     order: 2 !important;
-    width: auto !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
   }
   .theme-dropdown {
-    order: 3 !important;
-    width: auto !important;
-    margin-left: 0 !important;
-    margin-top: 0 !important;
-  }
-  /* ensure buttons are visible and not clipped */
-  #logout-btn, #themeDropdownOuterBtn {
+    overflow: visible !important;
+    z-index: 9999 !important;
     display: inline-flex !important;
-    width: auto !important;
-    padding-left: 0.6rem !important;
-    padding-right: 0.6rem !important;
-    min-width: 0 !important;
+    align-items: center !important;
   }
-  /* make the dropdown menu align under its button and within viewport */
-  .theme-dropdown-menu { right: auto !important; left: 0 !important; top: calc(100% + 6px) !important; }
+  #themeDropdownOuterBtn {
+    white-space: nowrap !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    min-width: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+  .theme-dropdown .ml-2 {
+    width: auto !important;
+    min-width: 0 !important;
+    display: inline-flex !important;
+  }
+  header, .gradient-header { overflow: visible !important; }
+  .theme-dropdown-menu { right: 0 !important; left: auto !important; top: calc(100% + 6px) !important; }
 }
