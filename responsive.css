@@ -65,11 +65,19 @@ table th, table td { white-space: nowrap; }
   .gradient-button, .btn-primary, button { padding-top: 0.9rem; padding-bottom: 0.9rem; }
 }
 
-/* Hide decorative vertical rays and prevent horizontal overflow on small screens */
-@media (max-width: 768px) {
+/* Hide decorative vertical rays and prevent horizontal overflow on touch devices (Android/tablets) */
+@media (max-width: 768px), (pointer: coarse) {
   .rayos, .rayo { display: none !important; }
   html, body { overflow-x: hidden; }
-  .container, main, header, footer { padding-left: 1rem !important; padding-right: 1rem !important; }
+  /* Ensure main layout containers don't produce horizontal overflow on mobile */
+  .container, main, header, footer { padding-left: 1rem !important; padding-right: 1rem !important; box-sizing: border-box; }
+  /* Avoid fixed-width helper elements that can push layout */
+  .w-24 { min-width: 0 !important; width: auto !important; }
+}
+
+/* Fallback: for coarse pointers enforce no horizontal scroll to eliminate right gap */
+@media (pointer: coarse) {
+  html, body { overflow-x: hidden; }
 }
 
 /* Fix: header / selector area wrapping and buttons on small screens */
