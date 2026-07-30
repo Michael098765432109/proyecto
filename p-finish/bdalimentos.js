@@ -1012,7 +1012,7 @@ const alimentos = [
     { id: 921, nombre: 'Jengibre encurtido (Gari)', calorias: 15, proteinas: 0.2, carbohidratos: 3.5, grasas: 0.1, porcion: 'porcion pequeña', gramos: 20 },
     { id: 922, nombre: 'Galletas de la fortuna', calorias: 380, proteinas: 5.5, carbohidratos: 85.0, grasas: 2.5, porcion: '1 unidad', gramos: 5 },
     { id: 923, nombre: 'Pan de ajo', calorias: 350, proteinas: 8.0, carbohidratos: 45.0, grasas: 15.0, porcion: '1 rebanada', gramos: 40 },
-    { id: 924, nombre: 'Aros de cebolla fritos', calorias: 410, proteinas: 4.0, carbohidratos: 48.0, grasSpecial: 22.0, porcion: '6 unidades', gramos: 100 },
+    { id: 924, nombre: 'Aros de cebolla fritos', calorias: 410, proteinas: 4.0, carbohidratos: 48.0, grasas: 22.0, porcion: '6 unidades', gramos: 100 },
     { id: 925, nombre: 'Mozzarella Sticks fritos', calorias: 330, proteinas: 14.0, carbohidratos: 28.0, grasas: 18.0, porcion: '3 unidades', gramos: 90 },
     { id: 926, nombre: 'Nachos con queso y chile', calorias: 306, proteinas: 10.0, carbohidratos: 35.0, grasas: 15.0, porcion: 'plato mediano', gramos: 200 },
     { id: 927, nombre: 'Alitas Búfalo (con salsa)', calorias: 230, proteinas: 15.0, carbohidratos: 2.0, grasas: 18.0, porcion: '1 unidad', gramos: 50 },

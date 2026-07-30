@@ -386,17 +386,22 @@
     </script>
 
     <script>
-        // Usar alimentos desde window
-        const alimentos = window.alimentos;
+        // Usar alimentos desde window (más tolerante si no existe).
+        // Evitar redeclarar `alimentos` si ya existe en global (bdalimentos.js)
+        const alimentosGlobal = window.alimentos || [];
 
-        console.log("Total de alimentos cargados:", alimentos.length);
+        if (!window.alimentos || !Array.isArray(window.alimentos)) {
+            console.warn('bdalimentos.js no expuso `window.alimentos` o está vacío.');
+        }
+
+        console.log("Total de alimentos cargados:", alimentosGlobal.length);
 
         // Variable global para el gráfico
         let macroChart;
 
         // Convertir alimentos array a objeto para compatibilidad
         const alimentosDB = {};
-        alimentos.forEach(alimento => {
+        alimentosGlobal.forEach(alimento => {
             const nombreLower = alimento.nombre.toLowerCase();
             alimentosDB[nombreLower] = {
                 calorias: alimento.calorias,
@@ -416,6 +421,7 @@
         function parsearAlimentos(texto) {
             const alimentosEncontrados = [];
             const textoLower = texto.toLowerCase().trim();
+            console.debug('parsearAlimentos inicio. texto:', textoLower, 'alimentos cargados:', alimentosGlobal.length);
             
             // ===== MAPA DE PORCIONES COMUNES (para estimar gramos) =====
             const porcionesGramos = {
@@ -460,7 +466,7 @@
             }
 
             // Construir índice de búsqueda
-            const indiceAlimentos = alimentos.map(item => ({
+            const indiceAlimentos = alimentosGlobal.map(item => ({
                 item: item,
                 palabrasClave: getPalabrasClave(item.nombre),
                 nombreLower: item.nombre.toLowerCase(),
@@ -524,7 +530,7 @@
                     const palabras = fragmento.trim().split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
                     palabras.forEach(palabra => {
                         // Verificar si esta palabra es un alimento conocido
-                        const matchAlimento = alimentos.find(a => {
+                        const matchAlimento = alimentosGlobal.find(a => {
                             const palabrasClave = getPalabrasClave(a.nombre);
                             return palabrasClave.includes(palabra);
                         });
@@ -633,11 +639,11 @@
 
             // ===== SI NO ENCONTRÓ NADA CON TOKENS, INTENTAR BÚSQUEDA SIMPLE =====
             if (alimentosEncontrados.length === 0) {
-                // Búsqueda directa por palabras sueltas
+                // Búsqueda directa: cada palabra del texto contra cada palabra del nombre del alimento
                 const palabrasTexto = textoLower.split(/\s+/).filter(p => p.length > 2 && !stopWords.has(p));
                 const alimentosYaMatch = new Set();
 
-                for (const item of alimentos) {
+                for (const item of alimentosGlobal) {
                     const palabrasClave = getPalabrasClave(item.nombre);
                     for (const palabra of palabrasTexto) {
                         for (const pk of palabrasClave) {
@@ -670,6 +676,21 @@
                     }
                 }
             }
+
+            // Último recurso: búsqueda por inclusión directa (muy tolerante)
+            if (alimentosEncontrados.length === 0) {
+                const palabrasTexto = textoLower.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                for (const item of alimentosGlobal) {
+                    const nombreLower = item.nombre.toLowerCase();
+                    // Si el nombre del alimento está incluido en el texto o alguna palabra clave aparece
+                    if (textoLower.includes(nombreLower) || palabrasTexto.some(p => nombreLower.includes(p) || p.includes(nombreLower))) {
+                        alimentosEncontrados.push({ nombre: item.nombre, cantidad: 1, datos: item, score: 5 });
+                    }
+                    if (alimentosEncontrados.length > 0) break;
+                }
+            }
+
+            console.debug('parsearAlimentos resultado:', alimentosEncontrados);
 
             return alimentosEncontrados;
         }
@@ -973,28 +994,7 @@
                     const macros = calcularMacronutrientes(alimentosEncontrados);
                     mostrarResultados(macros);
                     
-                    // Guardar en localStorage para el visor de calorías (aislado por usuario)
-                    try {
-                        const userId = localStorage.getItem('nutry_current_user_id') || 'anonymous';
-                        const foodLogKey = 'nutry_food_log_' + userId;
-                        const foodLog = JSON.parse(localStorage.getItem(foodLogKey) || '[]');
-                        foodLog.push({
-                            fecha: new Date().toISOString(),
-                            tipo: 'comida',
-                            calorias: macros.calorias,
-                            proteinas: macros.proteinas,
-                            carbohidratos: macros.carbohidratos,
-                            grasas: macros.grasas,
-                            descripcion: input.substring(0, 100)
-                        });
-                        // Mantener solo los últimos 100 registros
-                        if (foodLog.length > 100) foodLog.splice(0, foodLog.length - 100);
-                        localStorage.setItem(foodLogKey, JSON.stringify(foodLog));
-                    } catch (e) {
-                        console.error('Error guardando registro de comida:', e);
-                    }
-
-                    // Guardar también en la nube
+                    // Guardar en localStorage + nube (cloudStorage.js maneja ambos)
                     try {
                         if (window.__guardarComidaCloud) {
                             window.__guardarComidaCloud({
@@ -1003,10 +1003,25 @@
                                 proteinas: macros.proteinas,
                                 carbohidratos: macros.carbohidratos,
                                 grasas: macros.grasas
-                            }).catch(() => {});
+                            });
+                        } else {
+                            // Fallback: guardar solo en localStorage si cloud no cargó
+                            const userId = localStorage.getItem('nutry_current_user_id') || 'anonymous';
+                            const foodLogKey = 'nutry_food_log_' + userId;
+                            const foodLog = JSON.parse(localStorage.getItem(foodLogKey) || '[]');
+                            foodLog.push({
+                                fecha: new Date().toISOString(),
+                                descripcion: input.substring(0, 100),
+                                calorias: macros.calorias,
+                                proteinas: macros.proteinas,
+                                carbohidratos: macros.carbohidratos,
+                                grasas: macros.grasas
+                            });
+                            if (foodLog.length > 100) foodLog.splice(0, foodLog.length - 100);
+                            localStorage.setItem(foodLogKey, JSON.stringify(foodLog));
                         }
                     } catch (e) {
-                        console.warn('No se pudo guardar comida en la nube:', e);
+                        console.warn('No se pudo guardar comida:', e);
                     }
                     
                 } catch (error) {
