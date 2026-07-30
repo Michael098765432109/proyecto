@@ -170,35 +170,41 @@ textarea { min-height: 120px; max-height: 60vh; }
 }
 
 /* Targeted fix: center the password-toggle inside the login/register cards
-   We switch the parent to a small flex layout and place the toggle inline with
-   a negative margin so it overlaps the input while staying vertically centered. */
+   Use absolute positioning within the .relative container so the icon sits
+   inside the right padding of the input and remains vertically centered. */
 #login-section .relative,
 #register-section .relative {
-  display: flex !important;
-  align-items: center !important;
+  position: relative !important;
 }
 #login-section .relative .input-dark,
 #register-section .relative .input-dark {
-  flex: 1 1 auto !important;
-  margin: 0 !important;
+  padding-right: 3.2rem !important; /* leave room for the toggle */
+  box-sizing: border-box !important;
 }
 #login-section .relative .password-toggle,
 #register-section .relative .password-toggle {
-  position: relative !important;
-  margin-left: -2.4rem !important;
+  position: absolute !important;
+  right: 0.75rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
   height: calc(100% - 8px) !important;
   width: 2.2rem !important;
-  right: auto !important;
-  top: auto !important;
-  transform: none !important;
+  padding: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  margin: 0 !important;
 }
 #login-section .relative .password-toggle i,
 #register-section .relative .password-toggle i {
   font-size: 1.05rem !important;
   line-height: 1 !important;
+}
+@media (max-width: 480px) {
+  #login-section .relative .input-dark,
+  #register-section .relative .input-dark { padding-right: 2.8rem !important; }
+  #login-section .relative .password-toggle,
+  #register-section .relative .password-toggle { right: 0.6rem !important; width: 1.9rem !important; }
 }
 
 /* Reduce padding on cards for narrow screens to avoid overflow */
