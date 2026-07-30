@@ -406,8 +406,13 @@
         </div>
     </div>
 
+    <script type="module">
+        import { guardarCumplimiento, obtenerCumplimientos, obtenerComidas, obtenerCalculosMetabolicos, sincronizarTodo } from './cloudStorage.js';
+        window.__cloud = { guardarCumplimiento, obtenerCumplimientos, obtenerComidas, obtenerCalculosMetabolicos, sincronizarTodo };
+    </script>
+
     <script>
-        (function () {
+        (async function () {
             const THEME_KEY = 'nutry_theme';
             const root = document.documentElement;
             const storedTheme = localStorage.getItem(THEME_KEY);
@@ -445,16 +450,16 @@
         // ===== VARIABLES GLOBALES =====
         let calorieChart = null;
         let complianceChart = null;
-        let complianceData = JSON.parse(localStorage.getItem(complianceLogKey) || '[]');
         const currentUserId = localStorage.getItem('nutry_current_user_id') || 'anonymous';
         const foodLogKey = 'nutry_food_log_' + currentUserId;
         const metaLogKey = 'nutry_meta_log_' + currentUserId;
         const complianceLogKey = 'nutry_compliance_log_' + currentUserId;
         let foodLog = JSON.parse(localStorage.getItem(foodLogKey) || '[]');
         let metaLog = JSON.parse(localStorage.getItem(metaLogKey) || '[]');
+        let complianceData = JSON.parse(localStorage.getItem(complianceLogKey) || '[]');
 
         // ===== MODAL FUNCTIONS =====
-        function registrarRespuesta(respuesta) {
+        async function registrarRespuesta(respuesta) {
             const hoy = new Date().toISOString().split('T')[0];
             
             // Check if already registered today
@@ -478,6 +483,16 @@
 
             localStorage.setItem(complianceLogKey, JSON.stringify(complianceData));
             cerrarModal();
+            
+            // Guardar también en la nube si es posible
+            try {
+                if (window.__cloud) {
+                    await window.__cloud.guardarCumplimiento(respuesta);
+                }
+            } catch (e) {
+                console.warn('No se pudo guardar cumplimiento en la nube:', e);
+            }
+            
             actualizarDashboard();
         }
 
@@ -752,9 +767,48 @@
         }
 
         // ===== INIT =====
-        document.addEventListener('DOMContentLoaded', function() {
-            actualizarDashboard();
-        });
+        (async function initCloud() {
+            try {
+                // Esperar a que el módulo cloud cargue (está en script type="module" arriba)
+                await new Promise(resolve => {
+                    // Si ya está disponible, resolver inmediato
+                    if (window.__cloud) return resolve();
+                    // Si no, esperar un pequeño tiempo
+                    const check = setInterval(() => {
+                        if (window.__cloud) {
+                            clearInterval(check);
+                            resolve();
+                        }
+                    }, 100);
+                    // Timeout de seguridad después de 5 segundos
+                    setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+                });
+
+                if (window.__cloud) {
+                    // Intentar sincronizar datos locales no subidos
+                    const userId = localStorage.getItem('nutry_current_user_id');
+                    if (userId) {
+                        // Sincronizar datos locales a la nube (silenciosamente)
+                        window.__cloud.sincronizarTodo().catch(() => {});
+                        
+                        // Traer datos de la nube
+                        const [comidas, cumplimientos, metas] = await Promise.all([
+                            window.__cloud.obtenerComidas(),
+                            window.__cloud.obtenerCumplimientos(),
+                            window.__cloud.obtenerCalculosMetabolicos()
+                        ]);
+                        
+                        foodLog = comidas;
+                        complianceData = cumplimientos;
+                        metaLog = metas;
+                    }
+                }
+            } catch (e) {
+                console.warn('Error inicializando cloud:', e);
+            } finally {
+                actualizarDashboard();
+            }
+        })();
     </script>
 </body>
 </html>

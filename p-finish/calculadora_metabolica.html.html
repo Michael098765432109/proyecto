@@ -1030,6 +1030,31 @@
         console.error('Error guardando registro metabólico:', e);
       }
 
+      // Guardar también en la nube si es posible
+      try {
+        if (window.__guardarCalculoMetabolico) {
+          window.__guardarCalculoMetabolico({
+            tipo: 'metabolico',
+            datos: {
+              tmb: Math.round(tmb),
+              tdee: Math.round(tdee),
+              calorias_objetivo: Math.round(calorias),
+              objetivo: objetivo,
+              peso: peso,
+              proteinas_g: proteinas_g,
+              grasas_g: grasas_g,
+              carbohidratos_g: carbohidratos_g,
+              tipo_entreno: tipoEntreno,
+              edad: edad,
+              sexo: sexo,
+              actividad: actividad
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('No se pudo guardar en la nube:', e);
+      }
+
       // Actualizar todas las vistas
       updateQuickPreview();
       updateMainResults();
@@ -1637,6 +1662,11 @@
         console.error('Error loading data:', error);
       }
     }
+  </script>
+  <script type="module">
+    import { guardarCalculoMetabolico } from './cloudStorage.js';
+    // Exponer la función para usarla en el script inline
+    window.__guardarCalculoMetabolico = guardarCalculoMetabolico;
   </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>

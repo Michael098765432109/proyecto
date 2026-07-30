@@ -366,6 +366,9 @@
 
     <script src="bdalimentos.js"></script>
     <script type="module">
+        import { guardarComida } from './cloudStorage.js';
+        window.__guardarComidaCloud = guardarComida;
+
         // Usar alimentos desde window
         const alimentos = window.alimentos;
 
@@ -771,6 +774,21 @@
                         localStorage.setItem(foodLogKey, JSON.stringify(foodLog));
                     } catch (e) {
                         console.error('Error guardando registro de comida:', e);
+                    }
+
+                    // Guardar también en la nube
+                    try {
+                        if (window.__guardarComidaCloud) {
+                            window.__guardarComidaCloud({
+                                descripcion: input.substring(0, 100),
+                                calorias: macros.calorias,
+                                proteinas: macros.proteinas,
+                                carbohidratos: macros.carbohidratos,
+                                grasas: macros.grasas
+                            }).catch(() => {});
+                        }
+                    } catch (e) {
+                        console.warn('No se pudo guardar comida en la nube:', e);
                     }
                     
                 } catch (error) {
