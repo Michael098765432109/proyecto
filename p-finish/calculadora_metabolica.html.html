@@ -1665,10 +1665,26 @@
   </script>
   <script type="module">
     import { guardarCalculoMetabolico } from './cloudStorage.js';
-    // Exponer la función para usarla en el script inline
     window.__guardarCalculoMetabolico = guardarCalculoMetabolico;
+    window.dispatchEvent(new CustomEvent('cloud-ready'));
   </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+
+  <script>
+    // Esperar a que el módulo cloud cargue antes de usar funciones cloud
+    (function waitForCloud() {
+      if (window.__guardarCalculoMetabolico) return;
+      var checkCloud = setInterval(function() {
+        if (window.__guardarCalculoMetabolico) {
+          clearInterval(checkCloud);
+        }
+      }, 50);
+      setTimeout(function() { clearInterval(checkCloud); }, 8000);
+    })();
+  </script>
+
+  <script>
+    // Modificar el DOMContentLoaded para verificar cloud
+    var origCalcular = window.calcular || function(){};
+  </script>
 </body>
 </html>

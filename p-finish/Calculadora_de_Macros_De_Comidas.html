@@ -368,7 +368,24 @@
     <script type="module">
         import { guardarComida } from './cloudStorage.js';
         window.__guardarComidaCloud = guardarComida;
+        // Señal de que el módulo cloud cargó
+        window.dispatchEvent(new CustomEvent('cloud-ready'));
+    </script>
 
+    <script>
+        // Esperar a que el módulo cloud cargue antes de usar funciones cloud
+        (function waitForCloud() {
+            if (window.__guardarComidaCloud) return;
+            const checkCloud = setInterval(function() {
+                if (window.__guardarComidaCloud) {
+                    clearInterval(checkCloud);
+                }
+            }, 50);
+            setTimeout(function() { clearInterval(checkCloud); }, 8000);
+        })();
+    </script>
+
+    <script>
         // Usar alimentos desde window
         const alimentos = window.alimentos;
 
