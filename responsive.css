@@ -65,6 +65,13 @@ table th, table td { white-space: nowrap; }
   .gradient-button, .btn-primary, button { padding-top: 0.9rem; padding-bottom: 0.9rem; }
 }
 
+/* Hide decorative vertical rays and prevent horizontal overflow on small screens */
+@media (max-width: 768px) {
+  .rayos, .rayo { display: none !important; }
+  html, body { overflow-x: hidden; }
+  .container, main, header, footer { padding-left: 1rem !important; padding-right: 1rem !important; }
+}
+
 /* Fix: header / selector area wrapping and buttons on small screens */
 .gradient-header .container .flex {
   display: flex;
