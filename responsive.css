@@ -3,6 +3,16 @@ html { font-size: 16px; -webkit-text-size-adjust: 100%; }
 body { margin: 0; box-sizing: border-box; }
 *, *::before, *::after { box-sizing: inherit; }
 
+/* Android / touch device fixes */
+html, body { -webkit-text-size-adjust: 100%; -ms-touch-action: manipulation; touch-action: manipulation; }
+button, a, input, textarea { -webkit-tap-highlight-color: rgba(0,0,0,0.05); }
+
+/* Disable hover transforms on touch devices to avoid layout jumps */
+@media (hover: none) and (pointer: coarse) {
+  .card-dark:hover, .card-dark:active { transform: none !important; }
+  .gradient-button:hover { transform: none !important; }
+}
+
 /* Imágenes y canvas escalables */
 img, picture, video, canvas { max-width: 100%; height: auto; display: block; }
 
@@ -16,6 +26,9 @@ button { touch-action: manipulation; }
 
 /* Chart container adaptable */
 .chart-container { width: 100% !important; max-width: 100%; }
+
+/* Ensure chart canvas uses device pixel ratio for clarity on high-DPI Android screens */
+.chart-container canvas { width: 100% !important; height: auto !important; image-rendering: auto; }
 
 /* Tarjetas y contenedores con padding flexible */
 .container, .card-dark, .card, .result-card { padding: 1rem; }
@@ -45,6 +58,11 @@ table th, table td { white-space: nowrap; }
 /* Forzar lectura cómoda en pantallas pequeñas */
 @media (max-width: 420px) {
   body { padding: 0.5rem; }
+}
+
+/* Make touch targets slightly larger on small Android screens */
+@media (max-width: 480px) {
+  .gradient-button, .btn-primary, button { padding-top: 0.9rem; padding-bottom: 0.9rem; }
 }
 
 /* Fix: header / selector area wrapping and buttons on small screens */
