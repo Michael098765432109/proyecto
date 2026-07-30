@@ -1,0 +1,48 @@
+/* Reglas globales responsivas para Android / PC */
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body { margin: 0; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: inherit; }
+
+/* Imágenes y canvas escalables */
+img, picture, video, canvas { max-width: 100%; height: auto; display: block; }
+
+/* Tablas responsivas */
+table { width: 100%; border-collapse: collapse; }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Formularios y botones adaptativos */
+input, textarea, select, button { font-size: 1rem; max-width: 100%; }
+button { touch-action: manipulation; }
+
+/* Chart container adaptable */
+.chart-container { width: 100% !important; max-width: 100%; }
+
+/* Tarjetas y contenedores con padding flexible */
+.container, .card-dark, .card, .result-card { padding: 1rem; }
+
+/* Ajustes de grid y columnas para móviles */
+@media (max-width: 1024px) {
+  html { font-size: 15px; }
+}
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+  .chart-container { height: 220px !important; }
+  .login-container { width: auto !important; padding: 18px !important; }
+}
+@media (max-width: 480px) {
+  html { font-size: 13px; }
+  .chart-container { height: 180px !important; }
+  .grid, .grid-cols-2, .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr !important; }
+  .badge-animate { padding: 0.6rem !important; }
+}
+
+/* Mejoras de accesibilidad táctil */
+button, .btn-primary, .gradient-button, .gradient-calories { min-height: 44px; }
+
+/* Evitar que tablas rompan el diseño */
+table th, table td { white-space: nowrap; }
+
+/* Forzar lectura cómoda en pantallas pequeñas */
+@media (max-width: 420px) {
+  body { padding: 0.5rem; }
+}
