@@ -1,0 +1,761 @@
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Calorías - MyFitnessPal</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-card-hover: #1e2749;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-blue: #1e40af;
+            --accent-emerald: #059669;
+            --accent-cyan: #22d3ee;
+        }
+
+        :root[data-theme="light"]{
+            --bg-primary: #f6fff9;
+            --bg-secondary: #eafff1;
+            --bg-card: #dff8ea;
+            --bg-card-hover: #c9f0d8;
+            --text-primary: #0b2a19;
+            --text-secondary: #2a5c42;
+            --accent-blue: #0ea37a;
+            --accent-emerald: #0ea37a;
+            --accent-cyan: #0ea37a;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+
+        .card-dark {
+            background: var(--bg-card);
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .card-dark:hover {
+            background: var(--bg-card-hover);
+            border-color: #475569;
+        }
+
+        .gradient-button {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+            transition: all 0.3s ease;
+        }
+
+        .gradient-button:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+            transform: translateY(-1px);
+        }
+
+        .rayos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .rayo {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6), transparent);
+            animation: rayoAnim 4s infinite ease-in-out;
+        }
+
+        .rayo:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .rayo:nth-child(2) { left: 25%; animation-delay: 1s; }
+        .rayo:nth-child(3) { left: 40%; animation-delay: 2s; }
+        .rayo:nth-child(4) { left: 55%; animation-delay: 3s; }
+        .rayo:nth-child(5) { left: 70%; animation-delay: 0.5s; }
+        .rayo:nth-child(6) { left: 85%; animation-delay: 1.5s; }
+
+        @keyframes rayoAnim {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+
+        :root[data-theme="light"] h1,
+        :root[data-theme="light"] h2,
+        :root[data-theme="light"] h3,
+        :root[data-theme="light"] h4,
+        :root[data-theme="light"] h5,
+        :root[data-theme="light"] h6 {
+            color: var(--text-primary) !important;
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.95),
+                 1px -1px 0 rgba(255,255,255,0.95),
+                -1px  1px 0 rgba(255,255,255,0.95),
+                 1px  1px 0 rgba(255,255,255,0.95),
+                 0   0px 6px rgba(255,255,255,0.35);
+        }
+
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300,
+        :root[data-theme="light"] .text-slate-300 {
+            color: var(--text-primary) !important;
+        }
+
+        :root[data-theme="light"] .text-slate-400,
+        :root[data-theme="light"] .text-slate-300 {
+            color: var(--text-secondary) !important;
+        }
+
+        :root[data-theme="light"] .text-blue-400,
+        :root[data-theme="light"] .text-emerald-400,
+        :root[data-theme="light"] .text-cyan-400,
+        :root[data-theme="light"] .text-indigo-400,
+        :root[data-theme="light"] .text-purple-400,
+        :root[data-theme="light"] .text-yellow-400 {
+            color: var(--accent-emerald) !important;
+        }
+
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300,
+        :root[data-theme="light"] .text-slate-300,
+        :root[data-theme="light"] .text-red-300,
+        :root[data-theme="light"] .text-yellow-300,
+        :root[data-theme="light"] .text-green-300,
+        :root[data-theme="light"] .text-blue-200,
+        :root[data-theme="light"] .text-cyan-100 {
+            color: var(--text-primary) !important;
+            text-shadow:
+                0 1px 0 rgba(0,0,0,0.18),
+                0 0 2px rgba(0,0,0,0.10) !important;
+        }
+
+        :root[data-theme="light"] .text-slate-200,
+        :root[data-theme="light"] .text-slate-400,
+        :root[data-theme="light"] .text-slate-500,
+        :root[data-theme="light"] .text-secondary,
+        :root[data-theme="light"] .text-slate-300 {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .respuesta-btn {
+            transition: all 0.2s ease;
+            border: 1px solid #334155;
+        }
+
+        .respuesta-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .respuesta-btn.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(34, 211, 238, 0.1);
+        }
+
+        .badge-cumplido {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border: 1px solid #059669;
+        }
+
+        .badge-no-cumplido {
+            background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+            border: 1px solid #d97706;
+        }
+
+        .badge-parcial {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            border: 1px solid #3b82f6;
+        }
+
+        .table-dark {
+            background: var(--bg-secondary);
+        }
+
+        .table-dark th {
+            background: var(--bg-card);
+            border-bottom: 2px solid #374151;
+        }
+
+        .table-dark tr:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .table-dark td {
+            border-bottom: 1px solid #374151;
+        }
+
+        /* Leaves */
+        .leaves-layer{
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+            display: none;
+        }
+        :root[data-theme="light"] .leaves-layer{ display: block; }
+
+        .leaf{
+            position: absolute;
+            top: -10vh;
+            width: var(--leaf-size, 18px);
+            height: auto;
+            opacity: 0.85;
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+            animation-name: leaf-fall;
+            animation-timing-function: linear;
+            animation-iteration-count: 1;
+            animation-duration: var(--leaf-duration, 7s);
+            transform: translateX(var(--leaf-x, 0)) rotate(var(--leaf-rot, 0deg));
+        }
+        @keyframes leaf-fall {
+            0% { transform: translateX(var(--leaf-x, 0)) translateY(-10vh) rotate(var(--leaf-rot, 0deg)); }
+            100% { transform: translateX(calc(var(--leaf-x, 0) + var(--leaf-drift, 40px))) translateY(110vh) rotate(calc(var(--leaf-rot, 0deg) + 220deg)); opacity: 0.25; }
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+    <div class="rayos">
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+    </div>
+    <div class="leaves-layer" aria-hidden="true" id="leavesLayer"></div>
+
+    <!-- Modal de Bienvenida -->
+    <div id="welcomeModal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <div class="text-6xl mb-6">
+                <i class="fas fa-clipboard-check text-emerald-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-3">¡Bienvenido al Visor de Calorías!</h2>
+            <p class="text-slate-300 mb-6">
+                Aquí podrás ver tu historial de calorías registradas y el seguimiento metabólico.
+            </p>
+            <p class="text-slate-400 mb-8 text-sm">
+                ¿Seguiste las recomendaciones de calorías hoy?
+            </p>
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <button onclick="registrarRespuesta('si')" class="respuesta-btn bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-xl p-4 font-semibold">
+                    <i class="fas fa-check-circle text-2xl mb-1 block"></i>
+                    Sí
+                </button>
+                <button onclick="registrarRespuesta('no')" class="respuesta-btn bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl p-4 font-semibold">
+                    <i class="fas fa-times-circle text-2xl mb-1 block"></i>
+                    No
+                </button>
+                <button onclick="registrarRespuesta('parcial')" class="respuesta-btn bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 rounded-xl p-4 font-semibold">
+                    <i class="fas fa-minus-circle text-2xl mb-1 block"></i>
+                    Parcial
+                </button>
+            </div>
+            <button onclick="cerrarModal()" class="text-slate-400 hover:text-slate-200 text-sm underline">
+                Omitir y ver historial
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="gradient-header py-8 px-4">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center hover:shadow-lg transition-all duration-300">
+                    <i class="fas fa-home mr-2"></i>
+                    Lobby
+                </a>
+                <div class="text-center flex-1">
+                    <h1 class="text-4xl font-bold mb-2">
+                        <i class="fas fa-chart-line mr-3 text-cyan-400"></i>Visor de Calorías
+                    </h1>
+                    <p class="text-slate-300">Historial de calorías y cumplimiento de objetivos</p>
+                </div>
+                <div class="w-24"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Stats Overview -->
+        <div class="grid md:grid-cols-4 gap-4 mb-8">
+            <div class="card-dark rounded-xl p-5 text-center">
+                <i class="fas fa-utensils text-2xl text-blue-400 mb-2"></i>
+                <div class="text-3xl font-bold text-blue-400" id="totalComidas">0</div>
+                <div class="text-sm text-slate-400">Comidas registradas</div>
+            </div>
+            <div class="card-dark rounded-xl p-5 text-center">
+                <i class="fas fa-fire text-2xl text-red-400 mb-2"></i>
+                <div class="text-3xl font-bold text-red-400" id="promedioCalorias">0</div>
+                <div class="text-sm text-slate-400">Calorías promedio</div>
+            </div>
+            <div class="card-dark rounded-xl p-5 text-center">
+                <i class="fas fa-calculator text-2xl text-purple-400 mb-2"></i>
+                <div class="text-3xl font-bold text-purple-400" id="totalCalculos">0</div>
+                <div class="text-sm text-slate-400">Cálculos metabólicos</div>
+            </div>
+            <div class="card-dark rounded-xl p-5 text-center">
+                <i class="fas fa-check-circle text-2xl text-emerald-400 mb-2"></i>
+                <div class="text-3xl font-bold text-emerald-400" id="porcentajeCumplimiento">0%</div>
+                <div class="text-sm text-slate-400">Cumplimiento</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <!-- Calorie Trend Chart -->
+            <div class="card-dark rounded-2xl p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-cyan-400 mr-3"></i>
+                    Tendencia de Calorías
+                </h3>
+                <div class="chart-container p-4" style="height: 300px;">
+                    <canvas id="calorieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Compliance Pie Chart -->
+            <div class="card-dark rounded-2xl p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-chart-pie text-purple-400 mr-3"></i>
+                    Cumplimiento de Objetivos
+                </h3>
+                <div class="chart-container p-4" style="height: 300px;">
+                    <canvas id="complianceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registro de Cumplimiento -->
+        <div class="card-dark rounded-2xl p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-clipboard-list text-emerald-400 mr-3"></i>
+                    Registro de Cumplimiento Diario
+                </h3>
+                <button onclick="abrirModalHoy()" class="gradient-button text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                    <i class="fas fa-plus mr-1"></i> Registrar hoy
+                </button>
+            </div>
+            <div id="cumplimientoList" class="overflow-x-auto">
+                <div class="text-center text-slate-400 py-8">
+                    <i class="fas fa-clock text-4xl mb-3"></i>
+                    <p>No hay registros de cumplimiento aún</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial Detallado -->
+        <div class="card-dark rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-6 flex items-center">
+                <i class="fas fa-history text-indigo-400 mr-3"></i>
+                Historial Completo de Alimentos
+            </h3>
+            <div id="historialAlimentos" class="overflow-x-auto">
+                <div class="text-center text-slate-400 py-8">
+                    <i class="fas fa-database text-4xl mb-3"></i>
+                    <p>No hay alimentos registrados aún. Usa la Calculadora de Macros para empezar.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const THEME_KEY = 'nutry_theme';
+            const root = document.documentElement;
+            const storedTheme = localStorage.getItem(THEME_KEY);
+            if (storedTheme === 'light') {
+                root.setAttribute('data-theme', 'light');
+                spawnLeaves();
+            } else {
+                root.removeAttribute('data-theme');
+            }
+
+            function spawnLeaves() {
+                const leavesLayer = document.getElementById('leavesLayer');
+                if (!leavesLayer || leavesLayer.dataset.spawned === '1') return;
+                leavesLayer.dataset.spawned = '1';
+                const leafCount = 28;
+                for (let i = 0; i < leafCount; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.className = 'leaf';
+                    const x = Math.random() * 100;
+                    const drift = 20 + Math.random() * 60;
+                    leaf.style.setProperty('--leaf-x', x + 'vw');
+                    leaf.style.setProperty('--leaf-drift', drift + 'px');
+                    leaf.style.setProperty('--leaf-rot', (Math.random() * 40 - 20) + 'deg');
+                    leaf.style.setProperty('--leaf-duration', (5 + Math.random() * 6) + 's');
+                    const size = 14 + Math.random() * 18;
+                    leaf.style.setProperty('--leaf-size', size + 'px');
+                    leaf.textContent = '🍂';
+                    leaf.style.fontSize = size + 'px';
+                    leaf.style.lineHeight = '1';
+                    leavesLayer.appendChild(leaf);
+                }
+            }
+        })();
+
+        // ===== VARIABLES GLOBALES =====
+        let calorieChart = null;
+        let complianceChart = null;
+        let complianceData = JSON.parse(localStorage.getItem(complianceLogKey) || '[]');
+        const currentUserId = localStorage.getItem('nutry_current_user_id') || 'anonymous';
+        const foodLogKey = 'nutry_food_log_' + currentUserId;
+        const metaLogKey = 'nutry_meta_log_' + currentUserId;
+        const complianceLogKey = 'nutry_compliance_log_' + currentUserId;
+        let foodLog = JSON.parse(localStorage.getItem(foodLogKey) || '[]');
+        let metaLog = JSON.parse(localStorage.getItem(metaLogKey) || '[]');
+
+        // ===== MODAL FUNCTIONS =====
+        function registrarRespuesta(respuesta) {
+            const hoy = new Date().toISOString().split('T')[0];
+            
+            // Check if already registered today
+            const existingIndex = complianceData.findIndex(entry => entry.fecha === hoy);
+            const entry = {
+                fecha: hoy,
+                respuesta: respuesta,
+                timestamp: new Date().toISOString()
+            };
+
+            if (existingIndex >= 0) {
+                complianceData[existingIndex] = entry;
+            } else {
+                complianceData.push(entry);
+            }
+
+            // Keep only last 365 days
+            if (complianceData.length > 365) {
+                complianceData.splice(0, complianceData.length - 365);
+            }
+
+            localStorage.setItem(complianceLogKey, JSON.stringify(complianceData));
+            cerrarModal();
+            actualizarDashboard();
+        }
+
+        function cerrarModal() {
+            document.getElementById('welcomeModal').style.display = 'none';
+        }
+
+        function abrirModalHoy() {
+            document.getElementById('welcomeModal').style.display = 'flex';
+        }
+
+        // ===== DASHBOARD UPDATE =====
+        function actualizarDashboard() {
+            // Stats
+            document.getElementById('totalComidas').textContent = foodLog.length;
+            document.getElementById('totalCalculos').textContent = metaLog.length;
+
+            const totalCal = foodLog.reduce((sum, item) => sum + (item.calorias || 0), 0);
+            const avgCal = foodLog.length > 0 ? Math.round(totalCal / foodLog.length) : 0;
+            document.getElementById('promedioCalorias').textContent = avgCal;
+
+            const totalCumplidos = complianceData.filter(d => d.respuesta === 'si').length;
+            const pctCumplimiento = complianceData.length > 0 
+                ? Math.round((totalCumplidos / complianceData.length) * 100) 
+                : 0;
+            document.getElementById('porcentajeCumplimiento').textContent = pctCumplimiento + '%';
+
+            // Charts
+            actualizarCalorieChart();
+            actualizarComplianceChart();
+
+            // Tables
+            actualizarCumplimientoList();
+            actualizarHistorialAlimentos();
+        }
+
+        // ===== CALORIE CHART =====
+        function actualizarCalorieChart() {
+            const ctx = document.getElementById('calorieChart').getContext('2d');
+            
+            if (calorieChart) calorieChart.destroy();
+
+            // Prepare daily aggregation
+            const dailyCalories = {};
+            foodLog.forEach(item => {
+                const fecha = item.fecha.split('T')[0];
+                if (!dailyCalories[fecha]) dailyCalories[fecha] = 0;
+                dailyCalories[fecha] += item.calorias || 0;
+            });
+
+            // Get last 7 days
+            const labels = [];
+            const data = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayName = d.toLocaleDateString('es', { weekday: 'short' });
+                labels.push(dayName);
+                data.push(dailyCalories[dateStr] || 0);
+            }
+
+            calorieChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Calorías',
+                        data: data,
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#22d3ee',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) { return value + ' kcal'; }
+                            },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== COMPLIANCE CHART =====
+        function actualizarComplianceChart() {
+            const ctx = document.getElementById('complianceChart').getContext('2d');
+            
+            if (complianceChart) complianceChart.destroy();
+
+            const si = complianceData.filter(d => d.respuesta === 'si').length;
+            const no = complianceData.filter(d => d.respuesta === 'no').length;
+            const parcial = complianceData.filter(d => d.respuesta === 'parcial').length;
+
+            complianceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sí cumplí', 'No cumplí', 'Parcialmente'],
+                    datasets: [{
+                        data: [si, no, parcial],
+                        backgroundColor: ['#059669', '#d97706', '#3b82f6'],
+                        borderWidth: 2,
+                        borderColor: '#16213e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { size: 12 },
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== CUMPLIMIENTO LIST =====
+        function actualizarCumplimientoList() {
+            const container = document.getElementById('cumplimientoList');
+            
+            if (complianceData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-slate-400 py-8">
+                        <i class="fas fa-clock text-4xl mb-3"></i>
+                        <p>No hay registros de cumplimiento aún</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const reversed = [...complianceData].reverse().slice(0, 30);
+            
+            let html = `
+                <table class="w-full text-sm table-dark rounded-xl overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th class="text-left py-3 px-4 font-bold text-slate-200">Fecha</th>
+                            <th class="text-center py-3 px-4 font-bold text-slate-200">Cumplimiento</th>
+                            <th class="text-center py-3 px-4 font-bold text-slate-200">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            reversed.forEach(entry => {
+                const fecha = new Date(entry.fecha + 'T12:00:00').toLocaleDateString('es', {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                });
+                
+                let badgeClass = '';
+                let icono = '';
+                let texto = '';
+
+                if (entry.respuesta === 'si') {
+                    badgeClass = 'badge-cumplido';
+                    icono = 'fas fa-check-circle';
+                    texto = 'Cumplí';
+                } else if (entry.respuesta === 'no') {
+                    badgeClass = 'badge-no-cumplido';
+                    icono = 'fas fa-times-circle';
+                    texto = 'No cumplí';
+                } else {
+                    badgeClass = 'badge-parcial';
+                    icono = 'fas fa-minus-circle';
+                    texto = 'Parcial';
+                }
+
+                html += `
+                    <tr class="transition-colors duration-200">
+                        <td class="py-3 px-4 font-medium text-slate-200">${fecha}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="${badgeClass} text-white px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center">
+                                <i class="${icono} mr-1"></i> ${texto}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            ${entry.respuesta === 'si' 
+                                ? '<span class="text-emerald-400 text-xs">¡Bien hecho!</span>'
+                                : entry.respuesta === 'no'
+                                ? '<span class="text-yellow-400 text-xs">Ánimo, mañana será mejor</span>'
+                                : '<span class="text-blue-400 text-xs">Vas por buen camino</span>'
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ===== HISTORIAL DE ALIMENTOS =====
+        function actualizarHistorialAlimentos() {
+            const container = document.getElementById('historialAlimentos');
+
+            if (foodLog.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-slate-400 py-8">
+                        <i class="fas fa-database text-4xl mb-3"></i>
+                        <p>No hay alimentos registrados aún. Usa la Calculadora de Macros para empezar.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const reversed = [...foodLog].reverse().slice(0, 50);
+
+            let html = `
+                <table class="w-full text-sm table-dark rounded-xl overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th class="text-left py-3 px-4 font-bold text-slate-200">Fecha</th>
+                            <th class="text-left py-3 px-4 font-bold text-slate-200">Descripción</th>
+                            <th class="text-center py-3 px-4 font-bold text-slate-200">Calorías</th>
+                            <th class="text-center py-3 px-4 font-bold text-slate-200">Proteínas</th>
+                            <th class="text-center py-3 px-4 font-bold text-slate-200">Carbos</th>
+                            <th class="text-center py-3 px-4 font-bold text-slate-200">Grasas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            reversed.forEach(item => {
+                const fecha = new Date(item.fecha).toLocaleDateString('es', {
+                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                html += `
+                    <tr class="transition-colors duration-200">
+                        <td class="py-3 px-4 text-slate-300 text-xs">${fecha}</td>
+                        <td class="py-3 px-4 font-medium text-slate-200 text-sm max-w-xs truncate">${item.descripcion || '—'}</td>
+                        <td class="py-3 px-4 text-center font-bold text-red-400">${item.calorias}</td>
+                        <td class="py-3 px-4 text-center text-blue-400">${item.proteinas || 0}g</td>
+                        <td class="py-3 px-4 text-center text-emerald-400">${item.carbohidratos || 0}g</td>
+                        <td class="py-3 px-4 text-center text-yellow-400">${item.grasas || 0}g</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+
+            if (foodLog.length > 50) {
+                html += `<div class="text-center text-slate-400 text-xs mt-4">Mostrando los últimos 50 registros de ${foodLog.length} totales</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarDashboard();
+        });
+    </script>
+</body>
+</html>
+

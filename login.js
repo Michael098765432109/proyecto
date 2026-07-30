@@ -347,4 +347,11 @@ switchToLoginBtn?.addEventListener('click', () => {
 // ===== Auth redirect =====
 supabase.auth.onAuthStateChange((event, session) => {
   redirectIfSignedIn(session, event)
+
+  // Guardar el ID del usuario autenticado en localStorage para aislar datos por usuario
+  if (event === 'SIGNED_IN' && session?.user?.id) {
+    localStorage.setItem('nutry_current_user_id', session.user.id)
+  } else if (event === 'SIGNED_OUT') {
+    localStorage.removeItem('nutry_current_user_id')
+  }
 })

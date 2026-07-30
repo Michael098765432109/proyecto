@@ -1006,6 +1006,30 @@
         carbCal: carbohidratos_g * 4
       };
 
+      // Guardar en localStorage para el visor de calorías (aislado por usuario)
+      try {
+        const userId = localStorage.getItem('nutry_current_user_id') || 'anonymous';
+        const metaLogKey = 'nutry_meta_log_' + userId;
+        const metaLog = JSON.parse(localStorage.getItem(metaLogKey) || '[]');
+        metaLog.push({
+          fecha: new Date().toISOString(),
+          tipo: 'metabolico',
+          tmb: Math.round(tmb),
+          tdee: Math.round(tdee),
+          calorias_objetivo: Math.round(calorias),
+          objetivo: objetivo,
+          peso: peso,
+          proteinas_g: proteinas_g,
+          grasas_g: grasas_g,
+          carbohidratos_g: carbohidratos_g
+        });
+        // Mantener solo los últimos 50 registros
+        if (metaLog.length > 50) metaLog.splice(0, metaLog.length - 50);
+        localStorage.setItem(metaLogKey, JSON.stringify(metaLog));
+      } catch (e) {
+        console.error('Error guardando registro metabólico:', e);
+      }
+
       // Actualizar todas las vistas
       updateQuickPreview();
       updateMainResults();

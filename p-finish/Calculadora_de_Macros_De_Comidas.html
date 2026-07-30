@@ -752,6 +752,27 @@
                     const macros = calcularMacronutrientes(alimentosEncontrados);
                     mostrarResultados(macros);
                     
+                    // Guardar en localStorage para el visor de calorías (aislado por usuario)
+                    try {
+                        const userId = localStorage.getItem('nutry_current_user_id') || 'anonymous';
+                        const foodLogKey = 'nutry_food_log_' + userId;
+                        const foodLog = JSON.parse(localStorage.getItem(foodLogKey) || '[]');
+                        foodLog.push({
+                            fecha: new Date().toISOString(),
+                            tipo: 'comida',
+                            calorias: macros.calorias,
+                            proteinas: macros.proteinas,
+                            carbohidratos: macros.carbohidratos,
+                            grasas: macros.grasas,
+                            descripcion: input.substring(0, 100)
+                        });
+                        // Mantener solo los últimos 100 registros
+                        if (foodLog.length > 100) foodLog.splice(0, foodLog.length - 100);
+                        localStorage.setItem(foodLogKey, JSON.stringify(foodLog));
+                    } catch (e) {
+                        console.error('Error guardando registro de comida:', e);
+                    }
+                    
                 } catch (error) {
                     resultado.innerHTML = `
                         <div class="text-center text-red-400 py-12">
