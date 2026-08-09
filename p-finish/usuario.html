@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mi Información - MyFitnessPal</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../responsive.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-card-hover: #1e2749;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-blue: #1e40af;
+            --accent-emerald: #059669;
+            --accent-cyan: #22d3ee;
+        }
+
+        :root[data-theme="light"]{
+            --bg-primary: #f6fff9;
+            --bg-secondary: #eafff1;
+            --bg-card: #dff8ea;
+            --bg-card-hover: #c9f0d8;
+            --text-primary: #0b2a19;
+            --text-secondary: #2a5c42;
+            --accent-blue: #0ea37a;
+            --accent-emerald: #0ea37a;
+            --accent-cyan: #0ea37a;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+
+        .card-dark {
+            background: var(--bg-card);
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .card-dark:hover {
+            background: var(--bg-card-hover);
+            border-color: #475569;
+        }
+
+        .gradient-button {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+            transition: all 0.3s ease;
+        }
+
+        .gradient-button:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+            transform: translateY(-1px);
+        }
+
+        .rayos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .rayo {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6), transparent);
+            animation: rayoAnim 4s infinite ease-in-out;
+        }
+
+        .rayo:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .rayo:nth-child(2) { left: 25%; animation-delay: 1s; }
+        .rayo:nth-child(3) { left: 40%; animation-delay: 2s; }
+        .rayo:nth-child(4) { left: 55%; animation-delay: 3s; }
+        .rayo:nth-child(5) { left: 70%; animation-delay: 0.5s; }
+        .rayo:nth-child(6) { left: 85%; animation-delay: 1.5s; }
+
+        @keyframes rayoAnim {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+
+        /* ===== Accesibilidad en tema claro ===== */
+        :root[data-theme="light"] h1,
+        :root[data-theme="light"] h2,
+        :root[data-theme="light"] h3,
+        :root[data-theme="light"] h4,
+        :root[data-theme="light"] h5,
+        :root[data-theme="light"] h6 {
+            color: var(--text-primary) !important;
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.95),
+                 1px -1px 0 rgba(255,255,255,0.95),
+                -1px  1px 0 rgba(255,255,255,0.95),
+                 1px  1px 0 rgba(255,255,255,0.95),
+                 0   0px 6px rgba(255,255,255,0.35);
+        }
+
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300,
+        :root[data-theme="light"] .text-slate-300 {
+            color: var(--text-primary) !important;
+        }
+
+        :root[data-theme="light"] .text-slate-400,
+        :root[data-theme="light"] .text-slate-500,
+        :root[data-theme="light"] .text-slate-200 {
+            color: var(--text-secondary) !important;
+        }
+
+        :root[data-theme="light"] .text-blue-400,
+        :root[data-theme="light"] .text-emerald-400,
+        :root[data-theme="light"] .text-cyan-400,
+        :root[data-theme="light"] .text-red-400,
+        :root[data-theme="light"] .text-yellow-400 {
+            color: var(--accent-emerald) !important;
+        }
+
+        :root[data-theme="light"] .text-white,
+        :root[data-theme="light"] .text-gray-300,
+        :root[data-theme="light"] .text-slate-300,
+        :root[data-theme="light"] .text-slate-200 {
+            color: var(--text-primary) !important;
+            text-shadow:
+                0 1px 0 rgba(0,0,0,0.18),
+                0 0 2px rgba(0,0,0,0.10) !important;
+        }
+
+:root[data-theme="light"] .border-slate-700 {
+            border-color: rgba(0,0,0,0.12) !important;
+        }
+
+/* ===== Modal de personalización ===== */
+        .settings-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+        }
+        .settings-modal-overlay.open {
+            display: flex;
+        }
+        .settings-modal {
+            background: var(--bg-card);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            max-width: 520px;
+            width: 100%;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .settings-modal input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid #334155;
+            color: var(--text-primary);
+            border-radius: 8px;
+            transition: border-color 0.2s ease;
+        }
+        .settings-modal input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+        }
+        :root[data-theme="light"] .settings-modal input[type="text"] {
+            border-color: rgba(0,0,0,0.15);
+        }
+        :root[data-theme="light"] .settings-modal {
+            border-color: rgba(0,0,0,0.12);
+        }
+
+/* ===== Interruptor de tema (switch on/off) ===== */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #334155;
+            border-radius: 34px;
+            transition: 0.3s;
+        }
+        .switch .slider::before {
+            content: '';
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        .switch input:checked + .slider {
+            background: var(--accent-emerald);
+        }
+        .switch input:checked + .slider::before {
+            transform: translateX(24px);
+        }
+        :root[data-theme="light"] .switch .slider {
+            background: rgba(0,0,0,0.2);
+        }
+        :root[data-theme="light"] .switch input:checked + .slider {
+            background: var(--accent-emerald);
+        }
+
+        /* ===== Selector de avatar ===== */
+        .avatar-option {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border: 2px solid #334155;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+            min-height: 44px;
+        }
+
+        .avatar-option:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-cyan);
+            background: var(--bg-card-hover);
+        }
+
+        .avatar-option.avatar-selected {
+            border-color: var(--accent-cyan);
+            background: rgba(34, 211, 238, 0.15);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+        }
+
+        :root[data-theme="light"] .avatar-option {
+            background: var(--bg-secondary);
+            border-color: rgba(0,0,0,0.15);
+        }
+
+        :root[data-theme="light"] .avatar-option:hover {
+            border-color: var(--accent-emerald);
+            background: var(--bg-card-hover);
+        }
+
+        :root[data-theme="light"] .avatar-option.avatar-selected {
+            border-color: var(--accent-emerald);
+            background: rgba(14, 163, 122, 0.15);
+            box-shadow: 0 0 0 3px rgba(14, 163, 122, 0.2);
+        }
+
+        /* ===== Animación de hojas (solo tema claro) ===== */
+        .leaves-layer{
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+            display: none;
+        }
+        :root[data-theme="light"] .leaves-layer{ display: block; }
+
+        .leaf{
+            position: absolute;
+            top: -10vh;
+            width: var(--leaf-size, 18px);
+            height: auto;
+            opacity: 0.85;
+            filter: drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+            animation-name: leaf-fall;
+            animation-timing-function: linear;
+            animation-iteration-count: 1;
+            animation-duration: var(--leaf-duration, 7s);
+            transform: translateX(var(--leaf-x, 0)) rotate(var(--leaf-rot, 0deg));
+        }
+        @keyframes leaf-fall {
+            0% { transform: translateX(var(--leaf-x, 0)) translateY(-10vh) rotate(var(--leaf-rot, 0deg)); }
+            100% { transform: translateX(calc(var(--leaf-x, 0) + var(--leaf-drift, 40px))) translateY(110vh) rotate(calc(var(--leaf-rot, 0deg) + 220deg)); opacity: 0.25; }
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+    <div class="rayos">
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+        <div class="rayo"></div>
+    </div>
+
+    <!-- Hojas cayendo (solo tema claro) -->
+    <div class="leaves-layer" aria-hidden="true" id="leavesLayer"></div>
+
+    <!-- Header -->
+    <div class="gradient-header py-8 px-4">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center hover:shadow-lg transition-all duration-300">
+                    <i class="fas fa-home mr-2"></i>
+                    Lobby
+                </a>
+                <div class="text-center flex-1">
+                    <h1 class="text-4xl font-bold mb-2">
+                        <i class="fas fa-user-circle mr-3 text-cyan-400"></i><span id="profile-title">Mi Información</span>
+                    </h1>
+                    <p class="text-slate-300">Datos de tu cuenta</p>
+                </div>
+                <div class="w-24"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <div id="profile-content">
+            <!-- Cargado por usuario.js -->
+            <div class="text-center py-12">
+                <div class="inline-block w-12 h-12 border-4 border-gray-600 rounded-full mb-4" style="border-top-color: var(--accent-emerald); animation: spin 0.8s linear infinite;"></div>
+                <p class="text-slate-400">Cargando tu información...</p>
+            </div>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+        </div>
+    </div>
+
+<!-- Modal de personalización (avatar + nombre de usuario) -->
+    <div class="settings-modal-overlay" id="settings-modal-overlay">
+        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="settings-modal-title" class="text-2xl font-bold text-slate-200 flex items-center">
+                    <i class="fas fa-user-cog mr-3" style="color: var(--accent-cyan)"></i>
+                    Personalizar perfil
+                </h3>
+                <button type="button" id="settings-modal-close" class="text-slate-400 hover:text-white text-2xl leading-none transition" aria-label="Cerrar">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Nombre de usuario -->
+            <div class="mb-6">
+                <label for="settings-username" class="block text-slate-300 font-semibold mb-2">
+                    Nombre de usuario (nametag)
+                </label>
+                <p class="text-slate-400 text-sm mb-3">
+                    Este será el nombre que vistas para tu cuenta. Queda guardado junto a tu correo.
+                </p>
+                <input type="text" id="settings-username" maxlength="24" placeholder="Ej: Fitness_Ana" />
+                <div class="text-xs text-slate-400 mt-1" id="settings-username-hint"></div>
+            </div>
+
+            <!-- Selector de avatar -->
+            <div class="mb-6">
+                <label class="block text-slate-300 font-semibold mb-2">Elige tu avatar</label>
+                <div class="grid grid-cols-4 sm:grid-cols-6 gap-3" id="settings-avatar-grid">
+                    <!-- Opciones generadas por JS -->
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" id="settings-save-btn" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center justify-center flex-1 hover:shadow-lg transition-all duration-300">
+                    <i class="fas fa-save mr-2"></i> Guardar cambios
+                </button>
+                <button type="button" id="settings-cancel-btn" class="w-auto px-6 py-3 rounded-lg font-semibold border border-gray-600 text-slate-300 hover:bg-white/5 transition">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const THEME_KEY = 'nutry_theme';
+            const root = document.documentElement;
+            const storedTheme = localStorage.getItem(THEME_KEY);
+            if (storedTheme === 'light') {
+                root.setAttribute('data-theme', 'light');
+                spawnLeaves();
+            } else {
+                root.removeAttribute('data-theme');
+            }
+
+            function spawnLeaves() {
+                const leavesLayer = document.getElementById('leavesLayer');
+                if (!leavesLayer || leavesLayer.dataset.spawned === '1') return;
+                leavesLayer.dataset.spawned = '1';
+                const leafCount = 28;
+                for (let i = 0; i < leafCount; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.className = 'leaf';
+                    const x = Math.random() * 100;
+                    const drift = 20 + Math.random() * 60;
+                    leaf.style.setProperty('--leaf-x', x + 'vw');
+                    leaf.style.setProperty('--leaf-drift', drift + 'px');
+                    leaf.style.setProperty('--leaf-rot', (Math.random() * 40 - 20) + 'deg');
+                    leaf.style.setProperty('--leaf-duration', (5 + Math.random() * 6) + 's');
+                    const size = 14 + Math.random() * 18;
+                    leaf.style.setProperty('--leaf-size', size + 'px');
+                    leaf.textContent = '🍂';
+                    leaf.style.fontSize = size + 'px';
+                    leaf.style.lineHeight = '1';
+                    leavesLayer.appendChild(leaf);
+                }
+            }
+        })();
+    </script>
+
+    <script type="module" src="./usuario.js"></script>
+</body>
+</html>

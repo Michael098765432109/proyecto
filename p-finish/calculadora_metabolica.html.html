@@ -429,18 +429,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="input-group">
                 <label for="peso">Peso (kg)</label>
-                <input id="peso" type="number" min="1" max="200" step="0.1" value="67" required>
+<input id="peso" type="number" min="30" max="200" step="0.1" value="67" required>
               </div>
               <div class="input-group">
                 <label for="altura">Altura (cm)</label>
-                <input id="altura" type="number" min="30" max="250" step="0.1" value="176" required>
+<input id="altura" type="number" min="140" max="250" step="0.1" value="176" required>
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="input-group">
                 <label for="edad">¿Qué edad tienes?</label>
-                <input id="edad" type="number" min="10" max="60" step="1" value="17" required>
+<input id="edad" type="number" min="16" max="60" step="1" value="17" required>
               </div>
               <div class="input-group">
                 <label for="sexo">¿Eres hombre o mujer?</label>
@@ -937,9 +937,9 @@
     // Aplicar estado inicial (por si cargan con 1.2 ya seleccionado)
     updateTipoEntrenoVisibility();
 
-    form.addEventListener('submit', (e) => {
+form.addEventListener('submit', (e) => {
       e.preventDefault();
-      calcular();
+      calcular(true); // El usuario presionó "¡Calcular ya!" -> mostrar el GIF
     });
 
     numComidas.addEventListener('change', () => {
@@ -953,25 +953,23 @@ document.getElementById('btnSave').addEventListener('click', guardarDatos);
 
 // ===== LIMITAR VALOR MÁXIMO EN CAMPOS NUMÉRICOS =====
     // Evita que el usuario escriba un valor mayor al máximo permitido (peso ≤ 200, altura ≤ 250, edad ≤ 60)
+    // NO fuerza el valor mínimo, para que puedas borrar el campo y escribir lo que quieras.
     function limitarValorMax(input) {
-      const min = parseFloat(input.getAttribute('min'));
       const max = parseFloat(input.getAttribute('max'));
       if (isNaN(max)) return; // si no tiene max, no limitamos
 
       input.addEventListener('input', () => {
+        // Si el campo está vacío, dejar que el usuario escriba (no bloquear)
+        if (input.value === '') return;
+
         // Quitar cualquier signo negativo
         if (input.value.startsWith('-')) {
           input.value = input.value.replace('-', '');
         }
 
         // Si el valor supera el máximo, fijarlo al máximo permitido
-        if (input.value !== '' && parseFloat(input.value) > max) {
+        if (parseFloat(input.value) > max) {
           input.value = String(max);
-        }
-
-        // Si el valor es menor al mínimo, fijarlo al mínimo permitido (excepto si está vacío)
-        if (input.value !== '' && !isNaN(min) && parseFloat(input.value) < min) {
-          input.value = String(min);
         }
       });
     }
@@ -981,8 +979,8 @@ document.getElementById('btnSave').addEventListener('click', guardarDatos);
     limitarValorMax(document.getElementById('altura')); // máx 250 cm
     limitarValorMax(document.getElementById('edad'));   // máx 60 años
 
-    // ===== FUNCIONES PRINCIPALES =====
-    function calcular() {
+// ===== FUNCIONES PRINCIPALES =====
+    function calcular(mostrarGif = false) {
       const peso = parseFloat(document.getElementById('peso').value);
       const altura = parseFloat(document.getElementById('altura').value);
       const edad = parseInt(document.getElementById('edad').value);
@@ -997,16 +995,16 @@ if (!peso || !altura || !edad) {
       }
 
       // Validar rangos de datos (edad hasta 60, altura hasta 250, peso hasta 200, sin negativos)
-      if (peso < 1 || peso > 200) {
-        alert('El peso debe estar entre 1 y 200 kg. Porfa revisa ese dato.');
+if (peso < 30 || peso > 200) {
+        alert('El peso debe estar entre 30 y 200 kg. Porfa revisa ese dato.');
         return;
       }
-      if (altura < 30 || altura > 250) {
-        alert('La altura debe estar entre 30 y 250 cm. Porfa revisa ese dato.');
+      if (altura < 140 || altura > 250) {
+        alert('La altura debe estar entre 140 y 250 cm. Porfa revisa ese dato.');
         return;
       }
-      if (edad < 10 || edad > 60) {
-        alert('La edad debe estar entre 10 y 60 años. Porfa revisa ese dato.');
+if (edad < 16 || edad > 60) {
+        alert('La edad debe estar entre 16 y 60 años. Porfa revisa ese dato.');
         return;
       }
 
@@ -1100,8 +1098,8 @@ if (!peso || !altura || !edad) {
         console.warn('No se pudo guardar en la nube:', e);
       }
 
-      // Actualizar todas las vistas
-      updateQuickPreview();
+// Actualizar todas las vistas
+      updateQuickPreview(mostrarGif);
       updateMainResults();
       updateMetabolismInfo();
       updateProgressInfo();
@@ -1111,7 +1109,22 @@ if (!peso || !altura || !edad) {
       generateMealDistribution();
     }
 
-    function updateQuickPreview() {
+function updateQuickPreview(mostrarGif = false) {
+      const el = document.getElementById('quickPreview');
+
+      // El GIF (y la animación de carga) solo se muestra cuando el usuario
+      // calcula sus resultados manualmente (clic en "¡Calcular ya!").
+      if (!mostrarGif) {
+        el.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-check-circle text-4xl mb-3" style="color: var(--accent)"></i>
+            <p class="text-primary font-semibold text-lg">Tus datos están listos 👍</p>
+            <p class="text-muted text-sm mt-2">Presiona <strong>¡Calcular ya!</strong> para ver tu plan.</p>
+          </div>
+        `;
+        return;
+      }
+
       const loadingHtml = `
         <div class="text-center py-8">
           <div class="inline-block w-12 h-12 border-4 border-gray-600 rounded-full mb-4" style="border-top-color: var(--accent); animation: gs-spin 0.8s linear infinite;"></div>
@@ -1132,9 +1145,21 @@ if (!peso || !altura || !edad) {
           </div>
         </div>
       `;
-      const el = document.getElementById('quickPreview');
-      el.innerHTML = loadingHtml;
+el.innerHTML = loadingHtml;
+
+      // Muestra el GIF a los 1.8 segundos
       setTimeout(() => { el.innerHTML = readyHtml; }, 1800);
+
+      // Después de 6 segundos, restaura el estado inicial para poder calcular de nuevo
+      setTimeout(() => {
+        el.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-check-circle text-4xl mb-3" style="color: var(--accent)"></i>
+            <p class="text-primary font-semibold text-lg">Tus datos están listos 👍</p>
+            <p class="text-muted text-sm mt-2">Presiona <strong>¡Calcular ya!</strong> para ver tu plan.</p>
+          </div>
+        `;
+      }, 6000);
     }
 
     function updateMainResults() {
