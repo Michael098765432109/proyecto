@@ -282,33 +282,33 @@ async function handleRegisterSubmit(e) {
       return
     }
 
-    if (data?.session?.access_token) {
+if (data?.session?.access_token) {
+      // Si hay sesión inmediata (confirmación de correo desactivada en Supabase),
+      // redirige normalmente.
       window.location.href = SUCCESS_REDIRECT_URL
       return
     }
 
-    // Si no hay sesión inmediata, intentar login para no pedir confirmación extra
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+// ===== Verificación por correo obligatoria =====
+    // Cuando Supabase tiene "Confirm email" activado, el registro NO devuelve
+    // una sesión. No hacemos auto-login para no saltarnos la verificación.
+    // Pasamos al modo login para que, una vez verificado el correo, pueda entrar.
+    isLogin = true
+    clearResendButton()
+    syncSectionsUI()
 
-      if (signInError) {
-        const msg = (signInError.message || '').toLowerCase()
-        if (msg.includes('not confirmed') || msg.includes('email not confirmed')) {
-          setCurrentMessage(
-            'Cuenta creada. Intenta iniciar sesión de nuevo cuando esté habilitada.',
-            '#3ecf8e'
-          )
-          return
-        }
+    const titleEl = document.getElementById('form-title')
+    if (titleEl) titleEl.innerText = 'Iniciar sesión'
 
-        setCurrentMessage(signInError.message || 'Cuenta creada. Intenta iniciar sesión para continuar.', '#ff4d4d')
-        return
-      }
+    setCurrentMessage(
+      '¡Cuenta creada! Te enviamos un correo de verificación. Revisa tu bandeja de entrada (y el spam) y haz clic en el enlace para activar tu cuenta antes de iniciar sesión.',
+      '#3ecf8e'
+    )
+    showResendButton(email)
 
-      window.location.href = SUCCESS_REDIRECT_URL
-    } catch {
-      setCurrentMessage('Cuenta creada. Inicia sesión para continuar.', '#3ecf8e')
-    }
+    // Limpiar el campo de contraseña por seguridad
+    const pw = document.getElementById('register-password') || document.getElementById('password')
+    if (pw) pw.value = ''
   } finally {
     setSubmittingState(false)
   }

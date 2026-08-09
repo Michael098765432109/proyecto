@@ -437,6 +437,40 @@
         })();
     </script>
 
+<!-- Modal de confirmación para eliminar cuenta -->
+    <div class="settings-modal-overlay" id="delete-modal-overlay">
+        <div class="settings-modal border-red-500/40" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="delete-modal-title" class="text-2xl font-bold text-red-400 flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-3"></i>
+                    ¿Eliminar tu cuenta?
+                </h3>
+                <button type="button" id="delete-modal-close" class="text-slate-400 hover:text-white text-2xl leading-none transition" aria-label="Cerrar">
+                    &times;
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-slate-300 mb-3">
+                    Esta acción <strong class="text-red-400">borrará de forma permanente</strong> tu cuenta de <span class="font-semibold text-slate-200" id="delete-account-email"></span>.
+                </p>
+                <p class="text-slate-400 mb-3">
+                    Se eliminarán tu usuario, tus datos de perfil y todo tu historial de la aplicación. <strong class="text-slate-200">No se puede deshacer.</strong>
+                </p>
+                <div class="text-xs text-slate-400 mt-1" id="delete-account-hint"></div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="button" id="delete-confirm-btn" class="flex-1 px-6 py-3 rounded-lg font-semibold inline-flex items-center justify-center border border-red-500/50 bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-all duration-300">
+                    <i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta
+                </button>
+                <button type="button" id="delete-cancel-btn" class="w-auto px-6 py-3 rounded-lg font-semibold border border-gray-600 text-slate-300 hover:bg-white/5 transition">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="./usuario.js"></script>
 </body>
 </html>

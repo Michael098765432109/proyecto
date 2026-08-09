@@ -204,7 +204,7 @@ function renderProfile(user) {
         </div>
       </div>
 
-        <!-- Preferencias: cambio de tema -->
+<!-- Preferencias: cambio de tema -->
         <div class="card-dark rounded-2xl p-8">
           <h3 class="text-xl font-bold text-slate-200 mb-2 flex items-center">
             <i class="fas fa-palette mr-3" style="color: var(--accent-cyan)"></i>
@@ -226,6 +226,25 @@ function renderProfile(user) {
             </label>
           </div>
         </div>
+
+        <!-- Zona de peligro: eliminar cuenta -->
+        <div class="card-dark rounded-2xl p-8 border-red-500/40">
+          <h3 class="text-xl font-bold text-red-400 mb-2 flex items-center">
+            <i class="fas fa-exclamation-triangle mr-3"></i>
+            Zona de peligro
+          </h3>
+          <p class="text-slate-400 text-sm mb-6">
+            Al eliminar tu cuenta se borrarán de forma permanente tu usuario, tus datos y todo tu historial. Esta acción no se puede deshacer.
+          </p>
+          <button
+            type="button"
+            id="delete-account-btn"
+            class="w-auto px-6 py-3 rounded-lg font-semibold inline-flex items-center border border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all duration-300"
+          >
+            <i class="fas fa-trash-alt mr-2"></i>
+            Eliminar mi cuenta
+          </button>
+        </div>
     </div>
   `
 
@@ -235,8 +254,78 @@ function renderProfile(user) {
     openBtn.addEventListener('click', () => openSettingsModal())
   }
 
-  // ===== Cambio de tema (switch on/off) =====
+// ===== Cambio de tema (switch on/off) =====
   setupThemeSwitch()
+
+  // ===== Botón eliminar cuenta =====
+  const deleteBtn = document.getElementById('delete-account-btn')
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => openDeleteAccountModal(user))
+  }
+}
+
+// ===== Modal de confirmación para eliminar cuenta =====
+function openDeleteAccountModal(user) {
+  const overlay = document.getElementById('delete-modal-overlay')
+  if (!overlay) return
+  const emailSpan = document.getElementById('delete-account-email')
+  if (emailSpan) emailSpan.textContent = user.email || ''
+  overlay.classList.add('open')
+}
+
+function closeDeleteAccountModal() {
+  const overlay = document.getElementById('delete-modal-overlay')
+  if (overlay) overlay.classList.remove('open')
+}
+
+async function confirmDeleteAccount() {
+  const overlay = document.getElementById('delete-modal-overlay')
+  const confirmBtn = document.getElementById('delete-confirm-btn')
+  const hint = document.getElementById('delete-account-hint')
+
+  if (!confirmBtn) return
+
+  // Estado de carga
+  confirmBtn.disabled = true
+  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Eliminando...'
+  if (hint) {
+    hint.textContent = 'Eliminando tu cuenta y todos tus datos...'
+    hint.style.color = '#94a3b8'
+  }
+
+  try {
+    // 1) Intentar eliminar mediante la función RPC (requiere configuración en Supabase)
+    const { error: rpcError } = await supabase.rpc('delete_user_account')
+
+    if (rpcError) {
+      console.warn('delete_user_account RPC falló:', rpcError.message)
+    }
+
+    // 2) Cerrar sesión localmente y limpiar datos
+    await supabase.auth.signOut()
+    localStorage.removeItem('nutry_current_user_id')
+    localStorage.removeItem('nutry_theme')
+    // Limpiar datos locales por usuario
+    const keysToRemove = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('nutry_')) keysToRemove.push(key)
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k))
+
+    // 3) Redirigir al login
+    window.location.href = '../index.html'
+  } catch (e) {
+    console.error('Error eliminando cuenta:', e)
+    if (hint) {
+      hint.textContent = 'No se pudo eliminar la cuenta. Inténtalo de nuevo.'
+      hint.style.color = '#f87171'
+    }
+    if (confirmBtn) {
+      confirmBtn.disabled = false
+      confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
+    }
+  }
 }
 
 // ===== Gestión del tema (persistido en localStorage: nutry_theme) =====
@@ -446,10 +535,28 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-  // Cerrar con tecla Escape
+// Cerrar con tecla Escape
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSettingsModal()
+    if (e.key === 'Escape') {
+      closeSettingsModal()
+      closeDeleteAccountModal()
+    }
   })
+
+  // ===== Modal de eliminar cuenta =====
+  const deleteCloseBtn = document.getElementById('delete-modal-close')
+  const deleteCancelBtn = document.getElementById('delete-cancel-btn')
+  const deleteConfirmBtn = document.getElementById('delete-confirm-btn')
+  const deleteOverlay = document.getElementById('delete-modal-overlay')
+
+  if (deleteCloseBtn) deleteCloseBtn.addEventListener('click', closeDeleteAccountModal)
+  if (deleteCancelBtn) deleteCancelBtn.addEventListener('click', closeDeleteAccountModal)
+  if (deleteConfirmBtn) deleteConfirmBtn.addEventListener('click', confirmDeleteAccount)
+  if (deleteOverlay) {
+    deleteOverlay.addEventListener('click', (e) => {
+      if (e.target === deleteOverlay) closeDeleteAccountModal()
+    })
+  }
 })
 
 // ===== Carga de datos =====
