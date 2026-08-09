@@ -951,26 +951,35 @@
 document.getElementById('btnSave').addEventListener('click', guardarDatos);
     document.getElementById('btnLoad').addEventListener('click', loadDatos);
 
-    // ===== LIMITAR DÍGITOS EN CAMPOS NUMÉRICOS =====
-    // Evita que el usuario escriba más dígitos de los permitidos por el valor máximo
-    function limitarDigitos(input) {
+// ===== LIMITAR VALOR MÁXIMO EN CAMPOS NUMÉRICOS =====
+    // Evita que el usuario escriba un valor mayor al máximo permitido (peso ≤ 200, altura ≤ 250, edad ≤ 60)
+    function limitarValorMax(input) {
+      const min = parseFloat(input.getAttribute('min'));
       const max = parseFloat(input.getAttribute('max'));
       if (isNaN(max)) return; // si no tiene max, no limitamos
-      const maxDigitos = String(Math.floor(max)).length;
+
       input.addEventListener('input', () => {
-        const valor = input.value.replace('-', ''); // quitar signo negativo
-        if (valor.length > maxDigitos) {
-          input.value = valor.slice(0, maxDigitos);
-        } else if (parseFloat(valor) > max) {
-          input.value = valor.slice(0, maxDigitos);
+        // Quitar cualquier signo negativo
+        if (input.value.startsWith('-')) {
+          input.value = input.value.replace('-', '');
+        }
+
+        // Si el valor supera el máximo, fijarlo al máximo permitido
+        if (input.value !== '' && parseFloat(input.value) > max) {
+          input.value = String(max);
+        }
+
+        // Si el valor es menor al mínimo, fijarlo al mínimo permitido (excepto si está vacío)
+        if (input.value !== '' && !isNaN(min) && parseFloat(input.value) < min) {
+          input.value = String(min);
         }
       });
     }
 
-    // Aplicar límite a peso, altura y edad
-    limitarDigitos(document.getElementById('peso'));   // máx 200 → 3 dígitos
-    limitarDigitos(document.getElementById('altura')); // máx 250 → 3 dígitos
-    limitarDigitos(document.getElementById('edad'));   // máx 60  → 2 dígitos
+    // Aplicar límite máximo a peso, altura y edad
+    limitarValorMax(document.getElementById('peso'));   // máx 200 kg
+    limitarValorMax(document.getElementById('altura')); // máx 250 cm
+    limitarValorMax(document.getElementById('edad'));   // máx 60 años
 
     // ===== FUNCIONES PRINCIPALES =====
     function calcular() {
