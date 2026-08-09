@@ -27,15 +27,12 @@ function getRegisterEmail() {
   return document.getElementById('register-email')?.value || document.getElementById('email')?.value || ''
 }
 function getRegisterPassword() {
-  // en tu index.html el input se llama "password" (sección registro)
   return document.getElementById('register-password')?.value || document.getElementById('password')?.value || ''
 }
 
-// Sections wrapper (solo si existen)
+// Sections wrapper
 const loginSectionEl = document.getElementById('login-section')
 const registerSectionEl = document.getElementById('register-section')
-
-// (Ya no hay confirm-password, lo dejamos por compatibilidad si existiera)
 const registerExtraEl = document.getElementById('register-extra')
 
 // ===== Estado =====
@@ -144,7 +141,6 @@ function showResendButton(email) {
     }
   })
 
-  // Append en el formulario actual
   const wrapper = document.createElement('div')
   wrapper.className = 'mt-3 text-center'
   wrapper.appendChild(btn)
@@ -163,22 +159,20 @@ function clearResendButton() {
 
 // ===== Switch sections =====
 function syncSectionsUI() {
-  isLogin = !(!isLogin) // noop, solo para claridad
-
   if (loginSectionEl) loginSectionEl.classList.toggle('hidden', !isLogin)
   if (registerSectionEl) registerSectionEl.classList.toggle('hidden', isLogin)
 
   if (registerExtraEl) {
-    // por compatibilidad, si existiera algún recuadro extra
     registerExtraEl.classList.toggle('hidden', isLogin)
   }
 }
 
 // ===== Auth state redirect =====
 function redirectIfSignedIn(session, eventName) {
-  if (eventName !== 'SIGNED_IN') return
-  if (!isUserSubmitting) return
-  if (session?.access_token) window.location.href = SUCCESS_REDIRECT_URL
+  // CORRECCIÓN 1: Permite que el enlace del correo redirija automáticamente al volver a la app
+  if (eventName === 'SIGNED_IN' && session?.access_token) {
+    window.location.href = SUCCESS_REDIRECT_URL
+  }
 }
 
 syncSectionsUI()
@@ -269,10 +263,14 @@ async function handleRegisterSubmit(e) {
   try {
     const emailRedirectTo = `${window.location.origin}${window.location.pathname}`
 
-    const { data, error } = await supabase.auth.signUp(
-      { email, password },
-      { emailRedirectTo }
-    )
+    // CORRECCIÓN 2: Sintaxis de Supabase v2 (options envuelto)
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo
+      }
+    })
 
     if (error) {
       console.error('Supabase signUp error:', error)
@@ -297,7 +295,6 @@ async function handleRegisterSubmit(e) {
       const msg = (error.message || '').toLowerCase()
 
       if (msg.includes('user already registered') || msg.includes('already registered')) {
-        // Cambiar a login
         isLogin = true
         clearResendButton()
         syncSectionsUI()
@@ -312,17 +309,12 @@ async function handleRegisterSubmit(e) {
       return
     }
 
-if (data?.session?.access_token) {
-      // Si hay sesión inmediata (confirmación de correo desactivada en Supabase),
-      // redirige normalmente.
+    if (data?.session?.access_token) {
       window.location.href = SUCCESS_REDIRECT_URL
       return
     }
 
-// ===== Verificación por correo obligatoria =====
-    // Cuando Supabase tiene "Confirm email" activado, el registro NO devuelve
-    // una sesión. No hacemos auto-login para no saltarnos la verificación.
-    // Pasamos al modo login para que, una vez verificado el correo, pueda entrar.
+    // Verificación por correo obligatoria
     isLogin = true
     clearResendButton()
     syncSectionsUI()
@@ -336,7 +328,6 @@ if (data?.session?.access_token) {
     )
     showResendButton(email)
 
-    // Limpiar el campo de contraseña por seguridad
     const pw = document.getElementById('register-password') || document.getElementById('password')
     if (pw) pw.value = ''
   } finally {
@@ -378,7 +369,6 @@ switchToLoginBtn?.addEventListener('click', () => {
 supabase.auth.onAuthStateChange((event, session) => {
   redirectIfSignedIn(session, event)
 
-  // Guardar el ID del usuario autenticado en localStorage para aislar datos por usuario
   if (event === 'SIGNED_IN' && session?.user?.id) {
     localStorage.setItem('nutry_current_user_id', session.user.id)
   } else if (event === 'SIGNED_OUT') {
