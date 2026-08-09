@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient.js'
+import { supabase } from './supabaseClient.js?v=2'
 
 const SUCCESS_REDIRECT_URL = './p-finish/index.html'
 
@@ -254,12 +254,25 @@ async function handleRegisterSubmit(e) {
     return
   }
 
+  if (window.location.protocol === 'file:') {
+    setCurrentMessage(
+      'Abre la app desde un servidor web (HTTP/HTTPS). El registro y la confirmación por correo no funcionan con file://.',
+      '#ff4d4d'
+    )
+    return
+  }
+
   clearResendButton()
   setCurrentMessage('', '#3ecf8e')
   setSubmittingState(true)
 
   try {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const emailRedirectTo = `${window.location.origin}${window.location.pathname}`
+
+    const { data, error } = await supabase.auth.signUp(
+      { email, password },
+      { emailRedirectTo }
+    )
 
     if (error) {
       console.error('Supabase signUp error:', error)
