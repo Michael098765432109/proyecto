@@ -43,7 +43,7 @@ let isLogin = true
 let isUserSubmitting = false
 
 // ===== Cooldown (rate limit) =====
-const RATE_LIMIT_COOLDOWN_MS = 30 * 60 * 1000
+const RATE_LIMIT_COOLDOWN_MS = 5 * 60 * 1000
 const COOLDOWN_KEY = 'nutry_rate_limit_until_ms'
 const storedCooldownUntil = Number(localStorage.getItem(COOLDOWN_KEY) || '0')
 
@@ -244,6 +244,16 @@ async function handleRegisterSubmit(e) {
   const email = getRegisterEmail()
   const password = getRegisterPassword()
 
+  if (!email || !password) {
+    setCurrentMessage('Escribe un correo y una contraseña válidos.', '#ff4d4d')
+    return
+  }
+
+  if (password.length < 6) {
+    setCurrentMessage('La contraseña debe tener al menos 6 caracteres.', '#ff4d4d')
+    return
+  }
+
   clearResendButton()
   setCurrentMessage('', '#3ecf8e')
   setSubmittingState(true)
@@ -255,10 +265,17 @@ async function handleRegisterSubmit(e) {
       console.error('Supabase signUp error:', error)
 
       if (error.status === 429) {
-        applyCooldown()
-        const secondsLeft = Math.max(1, Math.ceil(RATE_LIMIT_COOLDOWN_MS / 1000))
+        const msg = (error.message || '').toLowerCase()
+        if (msg.includes('email rate limit')) {
+          setCurrentMessage(
+            'Ya se envió un correo de confirmación a ese correo. Revisa tu bandeja de entrada (y spam) antes de intentar registrarte otra vez.',
+            '#ff4d4d'
+          )
+          return
+        }
+
         setCurrentMessage(
-          `Demasiados intentos. Espera ${secondsLeft} segundos y vuelve a intentar.\n(${error.message || 'rate limit'})`,
+          'Demasiados intentos con este correo. Supabase ha bloqueado temporalmente el registro. Espera unos minutos e intenta de nuevo.',
           '#ff4d4d'
         )
         return
