@@ -169,8 +169,8 @@ function syncSectionsUI() {
 
 // ===== Auth state redirect =====
 function redirectIfSignedIn(session, eventName) {
-  // CORRECCIÓN 1: Permite que el enlace del correo redirija automáticamente al volver a la app
-  if (eventName === 'SIGNED_IN' && session?.access_token) {
+  // Redirige automáticamente al detectar sesión iniciada (al presionar login o al volver del enlace de correo)
+  if ((eventName === 'SIGNED_IN' || eventName === 'TOKEN_REFRESHED') && session?.access_token) {
     window.location.href = SUCCESS_REDIRECT_URL
   }
 }
@@ -263,7 +263,7 @@ async function handleRegisterSubmit(e) {
   try {
     const emailRedirectTo = `${window.location.origin}${window.location.pathname}`
 
-    // CORRECCIÓN 2: Sintaxis de Supabase v2 (options envuelto)
+    // Sintaxis Supabase v2
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -314,7 +314,7 @@ async function handleRegisterSubmit(e) {
       return
     }
 
-    // Verificación por correo obligatoria
+    // Registro requiring email verification
     isLogin = true
     clearResendButton()
     syncSectionsUI()
