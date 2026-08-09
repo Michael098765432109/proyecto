@@ -948,8 +948,29 @@
       }
     });
 
-    document.getElementById('btnSave').addEventListener('click', guardarDatos);
+document.getElementById('btnSave').addEventListener('click', guardarDatos);
     document.getElementById('btnLoad').addEventListener('click', loadDatos);
+
+    // ===== LIMITAR DÍGITOS EN CAMPOS NUMÉRICOS =====
+    // Evita que el usuario escriba más dígitos de los permitidos por el valor máximo
+    function limitarDigitos(input) {
+      const max = parseFloat(input.getAttribute('max'));
+      if (isNaN(max)) return; // si no tiene max, no limitamos
+      const maxDigitos = String(Math.floor(max)).length;
+      input.addEventListener('input', () => {
+        const valor = input.value.replace('-', ''); // quitar signo negativo
+        if (valor.length > maxDigitos) {
+          input.value = valor.slice(0, maxDigitos);
+        } else if (parseFloat(valor) > max) {
+          input.value = valor.slice(0, maxDigitos);
+        }
+      });
+    }
+
+    // Aplicar límite a peso, altura y edad
+    limitarDigitos(document.getElementById('peso'));   // máx 200 → 3 dígitos
+    limitarDigitos(document.getElementById('altura')); // máx 250 → 3 dígitos
+    limitarDigitos(document.getElementById('edad'));   // máx 60  → 2 dígitos
 
     // ===== FUNCIONES PRINCIPALES =====
     function calcular() {
