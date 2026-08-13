@@ -1,5 +1,9 @@
 import { supabase } from '../supabaseClient.js'
 
+// Opcional: si despliegas una Edge Function/endpoint seguro que borra el
+// usuario en auth (requiere SERVICE_ROLE), pon aquí su URL pública.
+// Ejemplo: const DELETE_USER_EDGE_URL = 'https://.../delete-user'
+const DELETE_USER_EDGE_URL = ''
 // ===== Utilidades de formato =====
 function formatDate(iso) {
   if (!iso) return '—'
@@ -271,6 +275,43 @@ function openDeleteAccountModal(user) {
   const emailSpan = document.getElementById('delete-account-email')
   if (emailSpan) emailSpan.textContent = user.email || ''
   overlay.classList.add('open')
+
+  // Preparar input de confirmación y estado del botón
+  const confirmInput = document.getElementById('delete-account-confirm-input')
+  const confirmBtn = document.getElementById('delete-confirm-btn')
+  const hint = document.getElementById('delete-account-hint')
+
+  if (confirmBtn) {
+    confirmBtn.disabled = true
+    confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
+  }
+
+  if (confirmInput) {
+    confirmInput.value = ''
+    confirmInput.focus()
+
+    // Quitar listener previo si existía
+    confirmInput.oninput = null
+    confirmInput.addEventListener('input', (e) => {
+      const val = (e.target.value || '').trim().toLowerCase()
+      const targetEmail = (user.email || '').trim().toLowerCase()
+      if (val && val === targetEmail) {
+        if (confirmBtn) {
+          confirmBtn.disabled = false
+        }
+        if (hint) {
+          hint.textContent = 'Correo confirmado. Presiona el botón para eliminar permanentemente.'
+          hint.style.color = '#f87171'
+        }
+      } else {
+        if (confirmBtn) confirmBtn.disabled = true
+        if (hint) {
+          hint.textContent = 'Escribe exactamente tu correo para habilitar la eliminación.'
+          hint.style.color = '#94a3b8'
+        }
+      }
+    })
+  }
 }
 
 function closeDeleteAccountModal() {
@@ -288,17 +329,62 @@ async function confirmDeleteAccount() {
   // Estado de carga
   confirmBtn.disabled = true
   confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Eliminando...'
-  if (hint) {
-    hint.textContent = 'Eliminando tu cuenta y todos tus datos...'
-    hint.style.color = '#94a3b8'
-  }
-
   try {
-    // 1) Intentar eliminar mediante la función RPC (requiere configuración en Supabase)
+    // Seguridad extra: verificar que el email del usuario autenticado coincide
+    const { data: sessionData } = await supabase.auth.getSession()
+    const sessionEmail = sessionData?.session?.user?.email || ''
+    const inputEl = document.getElementById('delete-account-confirm-input')
+    const typed = (inputEl?.value || '').trim().toLowerCase()
+    if (typed !== (sessionEmail || '').toLowerCase()) {
+      if (hint) {
+        hint.textContent = 'El correo escrito no coincide con el usuario autenticado.'
+        hint.style.color = '#f87171'
+      }
+      if (confirmBtn) {
+        confirmBtn.disabled = false
+        confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
+      }
+      return
+    }
+    // 1) Intentar eliminar mediante la función RPC (elimina datos en tus tablas)
     const { error: rpcError } = await supabase.rpc('delete_user_account')
 
     if (rpcError) {
       console.warn('delete_user_account RPC falló:', rpcError.message)
+      if (hint) {
+        hint.textContent = 'No se pudieron borrar todos los datos en la nube.'
+        hint.style.color = '#f87171'
+      }
+    }
+
+    // 1.5) Opcional: intentar solicitar la eliminación del registro de auth
+    // mediante una Edge Function/endpoint que use la Service Role key.
+    if (DELETE_USER_EDGE_URL && DELETE_USER_EDGE_URL.trim() !== '') {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData?.session?.access_token
+        if (token) {
+          const res = await fetch(DELETE_USER_EDGE_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          })
+
+          if (!res.ok) {
+            console.warn('Edge function delete failed:', await res.text())
+            if (hint) {
+              hint.textContent = 'Datos borrados, pero no se pudo eliminar el registro de autenticación.'
+              hint.style.color = '#f87171'
+            }
+          }
+        } else {
+          console.warn('No se obtuvo token de sesión para llamar la Edge Function')
+        }
+      } catch (err) {
+        console.warn('Llamada a Edge Function falló:', err)
+      }
     }
 
     // 2) Cerrar sesión localmente y limpiar datos
@@ -314,6 +400,18 @@ async function confirmDeleteAccount() {
     keysToRemove.forEach(k => localStorage.removeItem(k))
 
     // 3) Redirigir al login
+    window.location.href = '../index.html'
+  } catch (e) {
+    console.error('Error eliminando cuenta:', e)
+    if (hint) {
+      hint.textContent = 'No se pudo eliminar la cuenta. Inténtalo de nuevo.'
+      hint.style.color = '#f87171'
+    }
+    if (confirmBtn) {
+      confirmBtn.disabled = false
+      confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
+    }
+  }
     window.location.href = '../index.html'
   } catch (e) {
     console.error('Error eliminando cuenta:', e)

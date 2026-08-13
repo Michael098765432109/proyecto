@@ -458,6 +458,12 @@
                     Se eliminarán tu usuario, tus datos de perfil y todo tu historial de la aplicación. <strong class="text-slate-200">No se puede deshacer.</strong>
                 </p>
                 <div class="text-xs text-slate-400 mt-1" id="delete-account-hint"></div>
+
+                <!-- Confirmación adicional: escribir el correo para habilitar eliminación -->
+                <div class="mt-4">
+                    <label for="delete-account-confirm-input" class="text-sm text-slate-300 mb-2 block">Escribe tu correo para confirmar:</label>
+                    <input id="delete-account-confirm-input" type="email" placeholder="tu@correo.com" class="w-full px-3 py-2 rounded-md bg-slate-800 border border-gray-700 text-white" />
+                </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3">
