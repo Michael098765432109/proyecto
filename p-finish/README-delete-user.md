@@ -31,8 +31,51 @@ Despliegue rápido en Vercel (opcional):
 - Crear un nuevo proyecto, subir `delete-user-edge-example.js`, configurar `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` en Environment Variables.
 - Desplegar; la ruta será `https://<tu-project>.vercel.app/api/delete-user`.
 
-Actualizar `p-finish/usuario.js`:
-- Poner la URL pública del endpoint en `DELETE_USER_EDGE_URL`.
-- El cliente hará la llamada automáticamente si la variable está configurada.
+Despliegue recomendado: Edge Function en Supabase (Deno)
 
-Si quieres, despliego el ejemplo como función (ajusto rutas y export para Vercel/Netlify/Cloud Run) y actualizo `DELETE_USER_EDGE_URL` temporalmente con una URL de ejemplo.
+- He incluido `delete-user-edge-supabase.ts` como ejemplo para Supabase Functions.
+- Pasos rápidos para desplegar con `supabase` CLI:
+
+   1. Instala y autentica el CLI: https://supabase.com/docs/guides/cli
+
+   2. Crea una nueva función:
+
+```bash
+supabase functions new delete-user
+```
+
+   3. Copia el contenido de `p-finish/delete-user-edge-supabase.ts` en `functions/delete-user/index.ts` (o `index.ts` según la plantilla).
+
+   4. Añade el secret `SUPABASE_SERVICE_ROLE_KEY` de forma local/remota:
+
+```bash
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY="<tu_service_role_key>"
+supabase secrets set SUPABASE_URL="https://<your-project>.supabase.co"
+```
+
+   5. Deploy:
+
+```bash
+supabase functions deploy delete-user --project-ref <tu-ref>
+```
+
+   6. Obtén la URL de la función (por ejemplo `https://<project>.functions.supabase.co/delete-user`) y configúrala en `p-finish/usuario.js` asignando `DELETE_USER_EDGE_URL` a esa URL.
+
+Actualizar `p-finish/usuario.js`:
+- Poner la URL pública del endpoint (la función desplegada) en la constante `DELETE_USER_EDGE_URL`.
+- El cliente enviará el `Authorization: Bearer <access_token>` automáticamente y la función borrará el usuario.
+
+Pruebas:
+
+- Inicia sesión con el usuario que quieras eliminar.
+- Ve a `p-finish/usuario.html`, abre "Eliminar cuenta" y escribe exactamente tu email en el campo de confirmación.
+- Presiona eliminar; el cliente llamará la RPC (si existe) y luego la función Edge para borrar el `auth.user`.
+
+Comprobación manual alternativa:
+- Puedes borrar manualmente el usuario desde el Dashboard: Authentication → Users → borrar el usuario.
+
+Seguridad:
+- Nunca subas la `SERVICE_ROLE` key a repositorios públicos.
+- Protege la función con límites de acceso adicionales si lo deseas (rate limiting, logging, etc.).
+
+Si quieres, despliego y configuro la función por ti (necesitaría que me indiques si tienes acceso al `supabase` CLI y el `project-ref`, o prefieres las instrucciones paso a paso).
