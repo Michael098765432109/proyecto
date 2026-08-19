@@ -412,18 +412,6 @@ async function confirmDeleteAccount() {
       confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
     }
   }
-    window.location.href = '../index.html'
-  } catch (e) {
-    console.error('Error eliminando cuenta:', e)
-    if (hint) {
-      hint.textContent = 'No se pudo eliminar la cuenta. Inténtalo de nuevo.'
-      hint.style.color = '#f87171'
-    }
-    if (confirmBtn) {
-      confirmBtn.disabled = false
-      confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
-    }
-  }
 }
 
 // ===== Gestión del tema (persistido en localStorage: nutry_theme) =====
