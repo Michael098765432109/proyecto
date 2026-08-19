@@ -650,20 +650,24 @@ async function loadUser() {
   showLoading()
 
   try {
-    const { data, error } = await supabase.auth.getUser()
+    // La sesión ya se conserva localmente; no bloqueamos la vista esperando
+    // una validación remota que puede quedar pendiente.
+    const sessionResult = await Promise.race([
+      supabase.auth.getSession(),
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('La sesión tardó demasiado en responder.')), 8000)
+      })
+    ])
+    const { data, error } = sessionResult
 
     if (error) {
-      // Si no hay sesión, mostrar mensaje
-      if (error.message && /no session|not logged|invalid|token/i.test(error.message)) {
-        showNoSession()
-      } else {
-        showError(error.message)
-      }
+      showError(error.message)
       return
     }
 
-    if (data?.user) {
-      renderProfile(data.user)
+    const user = data?.session?.user
+    if (user) {
+      renderProfile(user)
     } else {
       showNoSession()
     }
