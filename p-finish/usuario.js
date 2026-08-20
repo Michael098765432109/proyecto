@@ -1,7 +1,8 @@
 import { supabase } from '../supabaseClient.js?v=3'
 
 const DELETE_USER_EDGE_URL =
-  'https://nkptwdzfzjoyssbfwvlh.supabase.co/functions/v1/delete-user'
+  'https://nkptwdzfjoyssbfwvlh.supabase.co/functions/v1/delete-user-edge-supabase'
+
 // ===== Utilidades de formato =====
 function formatDate(iso) {
   if (!iso) return '—'
@@ -35,9 +36,9 @@ function escapeHtml(str) {
   if (str === null || str === undefined) return ''
   return String(str)
     .replace(/&/g, '&amp;')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
 }
 
@@ -123,16 +124,13 @@ function renderProfile(user) {
   const createdAt = user.created_at
   const lastSignIn = user.last_sign_in_at
   const metadata = user.user_metadata || {}
-  const id = user.id
 
-  // Metadata del perfil (guardada en la cuenta)
   currentUsername = metadata.username || null
   currentAvatar = metadata.avatar || null
 
   const displayName = currentUsername || email
   const avatarDisplay = currentAvatar || escapeHtml(getInitial(email))
 
-  // Título personalizado
   if (titleEl) {
     titleEl.textContent = 'Mi Información'
   }
@@ -154,7 +152,7 @@ function renderProfile(user) {
         </button>
       </div>
 
-<!-- Datos de la cuenta -->
+      <!-- Datos de la cuenta -->
       <div class="md:col-span-2 space-y-6">
         <div class="card-dark rounded-2xl p-8">
           <h3 class="text-xl font-bold text-slate-200 mb-2 flex items-center">
@@ -163,50 +161,50 @@ function renderProfile(user) {
           </h3>
           <p class="text-slate-400 text-sm mb-6">Información asociada a tu correo de inicio de sesión.</p>
 
-        <div class="space-y-4">
-          <div class="flex items-start justify-between py-3 border-b border-slate-700">
-            <div class="flex items-center text-slate-300">
-              <i class="fas fa-user mr-3 text-slate-400"></i>
-              <span>Nombre de usuario</span>
+          <div class="space-y-4">
+            <div class="flex items-start justify-between py-3 border-b border-slate-700">
+              <div class="flex items-center text-slate-300">
+                <i class="fas fa-user mr-3 text-slate-400"></i>
+                <span>Nombre de usuario</span>
+              </div>
+              <span class="font-semibold text-slate-200 text-right break-all">${currentUsername ? '@' + escapeHtml(currentUsername) : 'Sin asignar'}</span>
             </div>
-            <span class="font-semibold text-slate-200 text-right break-all">${currentUsername ? '@' + escapeHtml(currentUsername) : 'Sin asignar'}</span>
-          </div>
 
-          <div class="flex items-start justify-between py-3 border-b border-slate-700">
-            <div class="flex items-center text-slate-300">
-              <i class="fas fa-envelope mr-3 text-slate-400"></i>
-              <span>Correo electrónico</span>
+            <div class="flex items-start justify-between py-3 border-b border-slate-700">
+              <div class="flex items-center text-slate-300">
+                <i class="fas fa-envelope mr-3 text-slate-400"></i>
+                <span>Correo electrónico</span>
+              </div>
+              <span class="font-semibold text-slate-200 text-right break-all">${escapeHtml(email)}</span>
             </div>
-            <span class="font-semibold text-slate-200 text-right break-all">${escapeHtml(email)}</span>
-          </div>
 
-          <div class="flex items-start justify-between py-3 border-b border-slate-700">
-            <div class="flex items-center text-slate-300">
-              <i class="fas fa-calendar-plus mr-3 text-slate-400"></i>
-              <span>Miembro desde</span>
+            <div class="flex items-start justify-between py-3 border-b border-slate-700">
+              <div class="flex items-center text-slate-300">
+                <i class="fas fa-calendar-plus mr-3 text-slate-400"></i>
+                <span>Miembro desde</span>
+              </div>
+              <span class="font-semibold text-slate-200 text-right">${escapeHtml(formatDateShort(createdAt))}</span>
             </div>
-            <span class="font-semibold text-slate-200 text-right">${escapeHtml(formatDateShort(createdAt))}</span>
-          </div>
 
-          <div class="flex items-start justify-between py-3 border-b border-slate-700">
-            <div class="flex items-center text-slate-300">
-              <i class="fas fa-clock mr-3 text-slate-400"></i>
-              <span>Último acceso</span>
+            <div class="flex items-start justify-between py-3 border-b border-slate-700">
+              <div class="flex items-center text-slate-300">
+                <i class="fas fa-clock mr-3 text-slate-400"></i>
+                <span>Último acceso</span>
+              </div>
+              <span class="font-semibold text-slate-200 text-right">${escapeHtml(formatDate(lastSignIn))}</span>
             </div>
-            <span class="font-semibold text-slate-200 text-right">${escapeHtml(formatDate(lastSignIn))}</span>
-          </div>
 
-<div class="flex items-start justify-between py-3">
-            <div class="flex items-center text-slate-300">
-              <i class="fas fa-verified mr-3 text-slate-400"></i>
-              <span>Proveedor</span>
+            <div class="flex items-start justify-between py-3">
+              <div class="flex items-center text-slate-300">
+                <i class="fas fa-verified mr-3 text-slate-400"></i>
+                <span>Proveedor</span>
+              </div>
+              <span class="font-semibold text-slate-200 text-right capitalize">${escapeHtml(metadata.provider || 'email')}</span>
             </div>
-            <span class="font-semibold text-slate-200 text-right capitalize">${escapeHtml(metadata.provider || 'email')}</span>
           </div>
         </div>
-      </div>
 
-<!-- Preferencias: cambio de tema -->
+        <!-- Preferencias: cambio de tema -->
         <div class="card-dark rounded-2xl p-8">
           <h3 class="text-xl font-bold text-slate-200 mb-2 flex items-center">
             <i class="fas fa-palette mr-3" style="color: var(--accent-cyan)"></i>
@@ -247,19 +245,17 @@ function renderProfile(user) {
             Eliminar mi cuenta
           </button>
         </div>
+      </div>
     </div>
   `
 
-// Abrir modal de personalización
   const openBtn = document.getElementById('open-settings-btn')
   if (openBtn) {
     openBtn.addEventListener('click', () => openSettingsModal())
   }
 
-// ===== Cambio de tema (switch on/off) =====
   setupThemeSwitch()
 
-  // ===== Botón eliminar cuenta =====
   const deleteBtn = document.getElementById('delete-account-btn')
   if (deleteBtn) {
     deleteBtn.addEventListener('click', () => openDeleteAccountModal(user))
@@ -274,7 +270,6 @@ function openDeleteAccountModal(user) {
   if (emailSpan) emailSpan.textContent = user.email || ''
   overlay.classList.add('open')
 
-  // Preparar input de confirmación y estado del botón
   const confirmInput = document.getElementById('delete-account-confirm-input')
   const confirmBtn = document.getElementById('delete-confirm-btn')
   const hint = document.getElementById('delete-account-hint')
@@ -288,15 +283,12 @@ function openDeleteAccountModal(user) {
     confirmInput.value = ''
     confirmInput.focus()
 
-    // Quitar listener previo si existía
     confirmInput.oninput = null
     confirmInput.addEventListener('input', (e) => {
       const val = (e.target.value || '').trim().toLowerCase()
       const targetEmail = (user.email || '').trim().toLowerCase()
       if (val && val === targetEmail) {
-        if (confirmBtn) {
-          confirmBtn.disabled = false
-        }
+        if (confirmBtn) confirmBtn.disabled = false
         if (hint) {
           hint.textContent = 'Correo confirmado. Presiona el botón para eliminar permanentemente.'
           hint.style.color = '#f87171'
@@ -318,21 +310,19 @@ function closeDeleteAccountModal() {
 }
 
 async function confirmDeleteAccount() {
-  const overlay = document.getElementById('delete-modal-overlay')
   const confirmBtn = document.getElementById('delete-confirm-btn')
   const hint = document.getElementById('delete-account-hint')
 
   if (!confirmBtn) return
 
-  // Estado de carga
   confirmBtn.disabled = true
   confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Eliminando...'
   try {
-    // Seguridad extra: verificar que el email del usuario autenticado coincide
     const { data: sessionData } = await supabase.auth.getSession()
     const sessionEmail = sessionData?.session?.user?.email || ''
     const inputEl = document.getElementById('delete-account-confirm-input')
     const typed = (inputEl?.value || '').trim().toLowerCase()
+
     if (typed !== (sessionEmail || '').toLowerCase()) {
       if (hint) {
         hint.textContent = 'El correo escrito no coincide con el usuario autenticado.'
@@ -344,6 +334,7 @@ async function confirmDeleteAccount() {
       }
       return
     }
+
     const token = sessionData?.session?.access_token
     if (!token) throw new Error('No se obtuvo el token de sesión')
 
@@ -361,16 +352,15 @@ async function confirmDeleteAccount() {
         const body = await res.json()
         if (body?.error) details = body.error
       } catch {
-        // Mantener el mensaje general si la respuesta no es JSON.
+        // Ignorar error de lectura de JSON
       }
       throw new Error(details)
     }
 
-    // Cerrar sesión localmente y limpiar datos solo después de confirmar el borrado.
     await supabase.auth.signOut()
     localStorage.removeItem('nutry_current_user_id')
     localStorage.removeItem('nutry_theme')
-    // Limpiar datos locales por usuario
+
     const keysToRemove = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
@@ -378,12 +368,11 @@ async function confirmDeleteAccount() {
     }
     keysToRemove.forEach(k => localStorage.removeItem(k))
 
-    // 3) Redirigir al login
     window.location.href = '../index.html'
   } catch (e) {
     console.error('Error eliminando cuenta:', e)
     if (hint) {
-      hint.textContent = 'No se pudo eliminar la cuenta. Inténtalo de nuevo.'
+      hint.textContent = e.message || 'No se pudo eliminar la cuenta. Inténtalo de nuevo.'
       hint.style.color = '#f87171'
     }
     if (confirmBtn) {
@@ -393,7 +382,7 @@ async function confirmDeleteAccount() {
   }
 }
 
-// ===== Gestión del tema (persistido en localStorage: nutry_theme) =====
+// ===== Gestión del tema =====
 const THEME_KEY = 'nutry_theme'
 
 function getCurrentTheme() {
@@ -405,7 +394,6 @@ function applyTheme(theme) {
   if (theme === 'light') root.setAttribute('data-theme', 'light')
   else root.removeAttribute('data-theme')
 
-  // Mostrar hojas en tema claro
   const leavesLayer = document.getElementById('leavesLayer')
   if (leavesLayer) {
     if (theme === 'light' && leavesLayer.dataset.spawned !== '1') {
@@ -454,7 +442,7 @@ function setupThemeSwitch() {
   })
 }
 
-// ===== Modal de personalización (avatar + nombre de usuario) =====
+// ===== Modal de personalización =====
 function buildAvatarOptions(selectedEmoji) {
   return AVATARS.map(a => {
     const isSelected = selectedEmoji === a.emoji
@@ -474,7 +462,6 @@ function openSettingsModal() {
   const hint = document.getElementById('settings-username-hint')
   if (!overlay) return
 
-  // Precargar valores actuales
   usernameInput.value = currentUsername || ''
   hint.textContent = currentUsername ? 'Tu nombre de usuario actual.' : 'Crea un nombre para tu cuenta.'
 
@@ -507,14 +494,12 @@ async function saveSettings() {
   const username = (usernameInput.value || '').trim()
   const selectedEmoji = overlay.querySelector('.avatar-option.avatar-selected')?.dataset?.emoji || currentAvatar || null
 
-  // Validación básica del nombre de usuario
   if (username && !/^[a-zA-Z0-9_.-]+$/.test(username)) {
     hint.textContent = 'Solo letras, números, puntos, guiones y guiones bajos.'
     hint.style.color = '#f87171'
     return
   }
 
-  // Mostrar estado de guardado
   if (saveBtn) {
     saveBtn.disabled = true
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...'
@@ -527,7 +512,7 @@ async function saveSettings() {
     if (selectedEmoji) meta.avatar = selectedEmoji
     else delete meta.avatar
 
-    const { data, error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
       data: meta
     })
 
@@ -539,11 +524,9 @@ async function saveSettings() {
       return
     }
 
-    // Actualizar estado
     currentUsername = username || null
     currentAvatar = selectedEmoji || null
 
-    // Feedback
     if (saveBtn) {
       saveBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Guardado'
       saveBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)'
@@ -555,7 +538,6 @@ async function saveSettings() {
 
     setTimeout(() => {
       closeSettingsModal()
-      // Recargar el perfil para reflejar los cambios
       loadUser()
     }, 1000)
   } catch (e) {
@@ -584,7 +566,7 @@ async function getCurrentMetadata() {
   }
 }
 
-// ===== Eventos del modal =====
+// ===== Eventos del DOM =====
 document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById('settings-modal-close')
   const cancelBtn = document.getElementById('settings-cancel-btn')
@@ -600,7 +582,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-// Cerrar con tecla Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeSettingsModal()
@@ -634,8 +615,6 @@ async function loadUser() {
   showLoading()
 
   try {
-    // La sesión ya se conserva localmente; no bloqueamos la vista esperando
-    // una validación remota que puede quedar pendiente.
     const sessionResult = await Promise.race([
       supabase.auth.getSession(),
       new Promise((_, reject) => {
