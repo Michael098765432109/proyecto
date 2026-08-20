@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient.js'
+import { supabase } from '../supabaseClient.js?v=3'
 
 // Opcional: si despliegas una Edge Function/endpoint seguro que borra el
 // usuario en auth (requiere SERVICE_ROLE), pon aquí su URL pública.
@@ -647,6 +647,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== Carga de datos =====
 async function loadUser() {
+  if (window.location.protocol === 'file:') {
+    showError('Abre el proyecto con un servidor HTTP, por ejemplo Live Server en VS Code. Supabase no puede conservar la sesión desde file://.')
+    return
+  }
+
   showLoading()
 
   try {
