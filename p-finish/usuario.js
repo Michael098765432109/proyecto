@@ -1,9 +1,42 @@
+// ==========================================
+// 1. IMPORTS Y CONFIGURACIÓN
+// ==========================================
 import { supabase } from '../supabaseClient.js?v=3'
 
+// URL exacta de la Edge Function en Supabase
 const DELETE_USER_EDGE_URL =
   'https://nkptwdzfjoyssbfwvlh.supabase.co/functions/v1/delete-user-edge-supabase'
 
-// ===== Utilidades de formato =====
+const THEME_KEY = 'nutry_theme'
+
+// ==========================================
+// 2. ESTADO GLOBAL Y CONSTANTES
+// ==========================================
+let currentUsername = null
+let currentAvatar = null
+
+const AVATARS = [
+  { emoji: '🥑', label: 'Aguacate' },
+  { emoji: '💪', label: 'Músculo' },
+  { emoji: '🏋️', label: 'Gimnasio' },
+  { emoji: '🍎', label: 'Manzana' },
+  { emoji: '🥦', label: 'Brócoli' },
+  { emoji: '🐔', label: 'Pollo' },
+  { emoji: '🐟', label: 'Pescado' },
+  { emoji: '🥛', label: 'Leche' },
+  { emoji: '🥚', label: 'Huevo' },
+  { emoji: '🔥', label: 'Fuego' },
+  { emoji: '⚡', label: 'Rayo' },
+  { emoji: '🌱', label: 'Planta' },
+  { emoji: '🏃', label: 'Corredor' },
+  { emoji: '🧘', label: 'Yoga' },
+  { emoji: '🚴', label: 'Ciclista' },
+  { emoji: '🏆', label: 'Trofeo' }
+]
+
+// ==========================================
+// 3. UTILIDADES Y FORMATO
+// ==========================================
 function formatDate(iso) {
   if (!iso) return '—'
   try {
@@ -42,37 +75,72 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;')
 }
 
-// ===== Helpers de DOM =====
 function getInitial(email) {
   if (!email) return '?'
   return email.trim().charAt(0).toUpperCase()
 }
 
-// ===== AVATARES DISPONIBLES =====
-const AVATARS = [
-  { emoji: '🥑', label: 'Aguacate' },
-  { emoji: '💪', label: 'Músculo' },
-  { emoji: '🏋️', label: 'Gimnasio' },
-  { emoji: '🍎', label: 'Manzana' },
-  { emoji: '🥦', label: 'Brócoli' },
-  { emoji: '🐔', label: 'Pollo' },
-  { emoji: '🐟', label: 'Pescado' },
-  { emoji: '🥛', label: 'Leche' },
-  { emoji: '🥚', label: 'Huevo' },
-  { emoji: '🔥', label: 'Fuego' },
-  { emoji: '⚡', label: 'Rayo' },
-  { emoji: '🌱', label: 'Planta' },
-  { emoji: '🏃', label: 'Corredor' },
-  { emoji: '🧘', label: 'Yoga' },
-  { emoji: '🚴', label: 'Ciclista' },
-  { emoji: '🏆', label: 'Trofeo' }
-]
+// ==========================================
+// 4. GESTIÓN DEL TEMA (CLARO / OSCURO)
+// ==========================================
+function getCurrentTheme() {
+  return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'
+}
 
-// ===== Estado global del perfil =====
-let currentUsername = null
-let currentAvatar = null
+function applyTheme(theme) {
+  const root = document.documentElement
+  if (theme === 'light') root.setAttribute('data-theme', 'light')
+  else root.removeAttribute('data-theme')
 
-// ===== Render =====
+  const leavesLayer = document.getElementById('leavesLayer')
+  if (leavesLayer && theme === 'light' && leavesLayer.dataset.spawned !== '1') {
+    leavesLayer.dataset.spawned = '1'
+    spawnLeaves()
+  }
+}
+
+function spawnLeaves() {
+  const leavesLayer = document.getElementById('leavesLayer')
+  if (!leavesLayer) return
+  const leafCount = 28
+  for (let i = 0; i < leafCount; i++) {
+    const leaf = document.createElement('div')
+    leaf.className = 'leaf'
+    const x = Math.random() * 100
+    const drift = 20 + Math.random() * 60
+    leaf.style.setProperty('--leaf-x', x + 'vw')
+    leaf.style.setProperty('--leaf-drift', drift + 'px')
+    leaf.style.setProperty('--leaf-rot', (Math.random() * 40 - 20) + 'deg')
+    leaf.style.setProperty('--leaf-duration', (5 + Math.random() * 6) + 's')
+    const size = 14 + Math.random() * 18
+    leaf.style.setProperty('--leaf-size', size + 'px')
+    leaf.textContent = '🍂'
+    leaf.style.fontSize = size + 'px'
+    leaf.style.lineHeight = '1'
+    leavesLayer.appendChild(leaf)
+  }
+}
+
+function setupThemeSwitch() {
+  const switchEl = document.getElementById('theme-toggle-switch')
+  const statusText = document.getElementById('theme-status-text')
+  if (!switchEl) return
+
+  const isLight = getCurrentTheme() === 'light'
+  switchEl.checked = isLight
+  if (statusText) statusText.textContent = isLight ? 'Claro' : 'Oscuro'
+
+  switchEl.addEventListener('change', () => {
+    const next = switchEl.checked ? 'light' : 'dark'
+    localStorage.setItem(THEME_KEY, next)
+    applyTheme(next)
+    if (statusText) statusText.textContent = next === 'light' ? 'Claro' : 'Oscuro'
+  })
+}
+
+// ==========================================
+// 5. RENDERS PRINCIPALES DE LA VISTA
+// ==========================================
 function showLoading() {
   const container = document.getElementById('profile-content')
   if (!container) return
@@ -204,7 +272,7 @@ function renderProfile(user) {
           </div>
         </div>
 
-        <!-- Preferencias: cambio de tema -->
+        <!-- Preferencias: Cambio de tema -->
         <div class="card-dark rounded-2xl p-8">
           <h3 class="text-xl font-bold text-slate-200 mb-2 flex items-center">
             <i class="fas fa-palette mr-3" style="color: var(--accent-cyan)"></i>
@@ -227,7 +295,7 @@ function renderProfile(user) {
           </div>
         </div>
 
-        <!-- Zona de peligro: eliminar cuenta -->
+        <!-- Zona de peligro: Eliminar cuenta -->
         <div class="card-dark rounded-2xl p-8 border-red-500/40">
           <h3 class="text-xl font-bold text-red-400 mb-2 flex items-center">
             <i class="fas fa-exclamation-triangle mr-3"></i>
@@ -262,187 +330,9 @@ function renderProfile(user) {
   }
 }
 
-// ===== Modal de confirmación para eliminar cuenta =====
-function openDeleteAccountModal(user) {
-  const overlay = document.getElementById('delete-modal-overlay')
-  if (!overlay) return
-  const emailSpan = document.getElementById('delete-account-email')
-  if (emailSpan) emailSpan.textContent = user.email || ''
-  overlay.classList.add('open')
-
-  const confirmInput = document.getElementById('delete-account-confirm-input')
-  const confirmBtn = document.getElementById('delete-confirm-btn')
-  const hint = document.getElementById('delete-account-hint')
-
-  if (confirmBtn) {
-    confirmBtn.disabled = true
-    confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
-  }
-
-  if (confirmInput) {
-    confirmInput.value = ''
-    confirmInput.focus()
-
-    confirmInput.oninput = null
-    confirmInput.addEventListener('input', (e) => {
-      const val = (e.target.value || '').trim().toLowerCase()
-      const targetEmail = (user.email || '').trim().toLowerCase()
-      if (val && val === targetEmail) {
-        if (confirmBtn) confirmBtn.disabled = false
-        if (hint) {
-          hint.textContent = 'Correo confirmado. Presiona el botón para eliminar permanentemente.'
-          hint.style.color = '#f87171'
-        }
-      } else {
-        if (confirmBtn) confirmBtn.disabled = true
-        if (hint) {
-          hint.textContent = 'Escribe exactamente tu correo para habilitar la eliminación.'
-          hint.style.color = '#94a3b8'
-        }
-      }
-    })
-  }
-}
-
-function closeDeleteAccountModal() {
-  const overlay = document.getElementById('delete-modal-overlay')
-  if (overlay) overlay.classList.remove('open')
-}
-
-async function confirmDeleteAccount() {
-  const confirmBtn = document.getElementById('delete-confirm-btn')
-  const hint = document.getElementById('delete-account-hint')
-
-  if (!confirmBtn) return
-
-  confirmBtn.disabled = true
-  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Eliminando...'
-  try {
-    const { data: sessionData } = await supabase.auth.getSession()
-    const sessionEmail = sessionData?.session?.user?.email || ''
-    const inputEl = document.getElementById('delete-account-confirm-input')
-    const typed = (inputEl?.value || '').trim().toLowerCase()
-
-    if (typed !== (sessionEmail || '').toLowerCase()) {
-      if (hint) {
-        hint.textContent = 'El correo escrito no coincide con el usuario autenticado.'
-        hint.style.color = '#f87171'
-      }
-      if (confirmBtn) {
-        confirmBtn.disabled = false
-        confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
-      }
-      return
-    }
-
-    const token = sessionData?.session?.access_token
-    if (!token) throw new Error('No se obtuvo el token de sesión')
-
-    const res = await fetch(DELETE_USER_EDGE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    })
-
-    if (!res.ok) {
-      let details = 'No se pudo eliminar la cuenta en Supabase.'
-      try {
-        const body = await res.json()
-        if (body?.error) details = body.error
-      } catch {
-        // Ignorar error de lectura de JSON
-      }
-      throw new Error(details)
-    }
-
-    await supabase.auth.signOut()
-    localStorage.removeItem('nutry_current_user_id')
-    localStorage.removeItem('nutry_theme')
-
-    const keysToRemove = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && key.startsWith('nutry_')) keysToRemove.push(key)
-    }
-    keysToRemove.forEach(k => localStorage.removeItem(k))
-
-    window.location.href = '../index.html'
-  } catch (e) {
-    console.error('Error eliminando cuenta:', e)
-    if (hint) {
-      hint.textContent = e.message || 'No se pudo eliminar la cuenta. Inténtalo de nuevo.'
-      hint.style.color = '#f87171'
-    }
-    if (confirmBtn) {
-      confirmBtn.disabled = false
-      confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
-    }
-  }
-}
-
-// ===== Gestión del tema =====
-const THEME_KEY = 'nutry_theme'
-
-function getCurrentTheme() {
-  return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'
-}
-
-function applyTheme(theme) {
-  const root = document.documentElement
-  if (theme === 'light') root.setAttribute('data-theme', 'light')
-  else root.removeAttribute('data-theme')
-
-  const leavesLayer = document.getElementById('leavesLayer')
-  if (leavesLayer) {
-    if (theme === 'light' && leavesLayer.dataset.spawned !== '1') {
-      leavesLayer.dataset.spawned = '1'
-      spawnLeaves()
-    }
-  }
-}
-
-function spawnLeaves() {
-  const leavesLayer = document.getElementById('leavesLayer')
-  if (!leavesLayer) return
-  const leafCount = 28
-  for (let i = 0; i < leafCount; i++) {
-    const leaf = document.createElement('div')
-    leaf.className = 'leaf'
-    const x = Math.random() * 100
-    const drift = 20 + Math.random() * 60
-    leaf.style.setProperty('--leaf-x', x + 'vw')
-    leaf.style.setProperty('--leaf-drift', drift + 'px')
-    leaf.style.setProperty('--leaf-rot', (Math.random() * 40 - 20) + 'deg')
-    leaf.style.setProperty('--leaf-duration', (5 + Math.random() * 6) + 's')
-    const size = 14 + Math.random() * 18
-    leaf.style.setProperty('--leaf-size', size + 'px')
-    leaf.textContent = '🍂'
-    leaf.style.fontSize = size + 'px'
-    leaf.style.lineHeight = '1'
-    leavesLayer.appendChild(leaf)
-  }
-}
-
-function setupThemeSwitch() {
-  const switchEl = document.getElementById('theme-toggle-switch')
-  const statusText = document.getElementById('theme-status-text')
-  if (!switchEl) return
-
-  const isLight = getCurrentTheme() === 'light'
-  switchEl.checked = isLight
-  if (statusText) statusText.textContent = isLight ? 'Claro' : 'Oscuro'
-
-  switchEl.addEventListener('change', () => {
-    const next = switchEl.checked ? 'light' : 'dark'
-    localStorage.setItem(THEME_KEY, next)
-    applyTheme(next)
-    if (statusText) statusText.textContent = next === 'light' ? 'Claro' : 'Oscuro'
-  })
-}
-
-// ===== Modal de personalización =====
+// ==========================================
+// 6. MODAL: PERSONALIZACIÓN DE PERFIL
+// ==========================================
 function buildAvatarOptions(selectedEmoji) {
   return AVATARS.map(a => {
     const isSelected = selectedEmoji === a.emoji
@@ -566,49 +456,130 @@ async function getCurrentMetadata() {
   }
 }
 
-// ===== Eventos del DOM =====
-document.addEventListener('DOMContentLoaded', () => {
-  const closeBtn = document.getElementById('settings-modal-close')
-  const cancelBtn = document.getElementById('settings-cancel-btn')
-  const saveBtn = document.getElementById('settings-save-btn')
-  const overlay = document.getElementById('settings-modal-overlay')
+// ==========================================
+// 7. MODAL Y LÓGICA: ELIMINAR CUENTA
+// ==========================================
+function openDeleteAccountModal(user) {
+  const overlay = document.getElementById('delete-modal-overlay')
+  if (!overlay) return
+  const emailSpan = document.getElementById('delete-account-email')
+  if (emailSpan) emailSpan.textContent = user.email || ''
+  overlay.classList.add('open')
 
-  if (closeBtn) closeBtn.addEventListener('click', closeSettingsModal)
-  if (cancelBtn) cancelBtn.addEventListener('click', closeSettingsModal)
-  if (saveBtn) saveBtn.addEventListener('click', saveSettings)
-  if (overlay) {
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeSettingsModal()
-    })
+  const confirmInput = document.getElementById('delete-account-confirm-input')
+  const confirmBtn = document.getElementById('delete-confirm-btn')
+  const hint = document.getElementById('delete-account-hint')
+
+  if (confirmBtn) {
+    confirmBtn.disabled = true
+    confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
   }
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeSettingsModal()
-      closeDeleteAccountModal()
+  if (confirmInput) {
+    confirmInput.value = ''
+    confirmInput.focus()
+
+    confirmInput.oninput = null
+    confirmInput.addEventListener('input', (e) => {
+      const val = (e.target.value || '').trim().toLowerCase()
+      const targetEmail = (user.email || '').trim().toLowerCase()
+      if (val && val === targetEmail) {
+        if (confirmBtn) confirmBtn.disabled = false
+        if (hint) {
+          hint.textContent = 'Correo confirmado. Presiona el botón para eliminar permanentemente.'
+          hint.style.color = '#f87171'
+        }
+      } else {
+        if (confirmBtn) confirmBtn.disabled = true
+        if (hint) {
+          hint.textContent = 'Escribe exactamente tu correo para habilitar la eliminación.'
+          hint.style.color = '#94a3b8'
+        }
+      }
+    })
+  }
+}
+
+function closeDeleteAccountModal() {
+  const overlay = document.getElementById('delete-modal-overlay')
+  if (overlay) overlay.classList.remove('open')
+}
+
+async function confirmDeleteAccount() {
+  const confirmBtn = document.getElementById('delete-confirm-btn')
+  const hint = document.getElementById('delete-account-hint')
+
+  if (!confirmBtn) return
+
+  confirmBtn.disabled = true
+  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Eliminando...'
+
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError || !sessionData?.session) {
+      throw new Error('No se pudo validar la sesión activa. Por favor inicia sesión nuevamente.')
     }
-  })
 
-  // ===== Modal de eliminar cuenta =====
-  const deleteCloseBtn = document.getElementById('delete-modal-close')
-  const deleteCancelBtn = document.getElementById('delete-cancel-btn')
-  const deleteConfirmBtn = document.getElementById('delete-confirm-btn')
-  const deleteOverlay = document.getElementById('delete-modal-overlay')
+    const sessionEmail = sessionData.session.user?.email || ''
+    const inputEl = document.getElementById('delete-account-confirm-input')
+    const typed = (inputEl?.value || '').trim().toLowerCase()
 
-  if (deleteCloseBtn) deleteCloseBtn.addEventListener('click', closeDeleteAccountModal)
-  if (deleteCancelBtn) deleteCancelBtn.addEventListener('click', closeDeleteAccountModal)
-  if (deleteConfirmBtn) deleteConfirmBtn.addEventListener('click', confirmDeleteAccount)
-  if (deleteOverlay) {
-    deleteOverlay.addEventListener('click', (e) => {
-      if (e.target === deleteOverlay) closeDeleteAccountModal()
+    if (typed !== sessionEmail.toLowerCase()) {
+      if (hint) {
+        hint.textContent = 'El correo escrito no coincide con el usuario autenticado.'
+        hint.style.color = '#f87171'
+      }
+      confirmBtn.disabled = false
+      confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
+      return
+    }
+
+    const token = sessionData.session.access_token
+
+    const res = await fetch(DELETE_USER_EDGE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
     })
-  }
-})
 
-// ===== Carga de datos =====
+    let body = {}
+    try {
+      body = await res.json()
+    } catch {
+      // Si la respuesta no es JSON
+    }
+
+    if (!res.ok) {
+      throw new Error(body.error || `Error ${res.status}: Ocurrió un problema en el servidor.`)
+    }
+
+    // Si la eliminación fue exitosa, cerrar sesión y limpiar localStorage
+    await supabase.auth.signOut()
+    localStorage.clear()
+
+    window.location.href = '../index.html'
+
+  } catch (e) {
+    console.error('Error eliminando cuenta:', e)
+    if (hint) {
+      hint.textContent = e.message || 'No se pudo eliminar la cuenta.'
+      hint.style.color = '#f87171'
+    }
+    if (confirmBtn) {
+      confirmBtn.disabled = false
+      confirmBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Sí, eliminar mi cuenta'
+    }
+  }
+}
+
+// ==========================================
+// 8. CARGA DE DATOS E INICIALIZACIÓN
+// ==========================================
 async function loadUser() {
   if (window.location.protocol === 'file:') {
-    showError('Abre el proyecto con un servidor HTTP, por ejemplo Live Server en VS Code. Supabase no puede conservar la sesión desde file://.')
+    showError('Abre el proyecto con un servidor HTTP (ej. Live Server). Supabase no puede conservar la sesión desde file://.')
     return
   }
 
@@ -640,5 +611,48 @@ async function loadUser() {
   }
 }
 
-// Cargar al iniciar
+document.addEventListener('DOMContentLoaded', () => {
+  // Modal de Personalización
+  const closeBtn = document.getElementById('settings-modal-close')
+  const cancelBtn = document.getElementById('settings-cancel-btn')
+  const saveBtn = document.getElementById('settings-save-btn')
+  const overlay = document.getElementById('settings-modal-overlay')
+
+  if (closeBtn) closeBtn.addEventListener('click', closeSettingsModal)
+  if (cancelBtn) cancelBtn.addEventListener('click', closeSettingsModal)
+  if (saveBtn) saveBtn.addEventListener('click', saveSettings)
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeSettingsModal()
+    })
+  }
+
+  // Modal de Eliminar Cuenta
+  const deleteCloseBtn = document.getElementById('delete-modal-close')
+  const deleteCancelBtn = document.getElementById('delete-cancel-btn')
+  const deleteConfirmBtn = document.getElementById('delete-confirm-btn')
+  const deleteOverlay = document.getElementById('delete-modal-overlay')
+
+  if (deleteCloseBtn) deleteCloseBtn.addEventListener('click', closeDeleteAccountModal)
+  if (deleteCancelBtn) deleteCancelBtn.addEventListener('click', closeDeleteAccountModal)
+  if (deleteConfirmBtn) deleteConfirmBtn.addEventListener('click', confirmDeleteAccount)
+  if (deleteOverlay) {
+    deleteOverlay.addEventListener('click', (e) => {
+      if (e.target === deleteOverlay) closeDeleteAccountModal()
+    })
+  }
+
+  // Tecla Escape para cerrar modales
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSettingsModal()
+      closeDeleteAccountModal()
+    }
+  })
+
+  // Aplicar tema guardado al cargar
+  applyTheme(getCurrentTheme())
+})
+
+// Cargar usuario
 loadUser()
