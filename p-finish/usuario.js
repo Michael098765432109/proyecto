@@ -3,9 +3,11 @@
 // ==========================================
 import { supabase } from '../supabaseClient.js?v=3'
 
-// URL exacta de la Edge Function en Supabase
 const DELETE_USER_EDGE_URL =
-  'https://nkptwdzfjoyssbfwvlh.supabase.co/functions/v1/delete-user-edge-supabase'
+  'https://nkptwdzfzjoyssbfwvlh.supabase.co/functions/v1/delete-user-edge-supabase'
+
+const SUPABASE_ANON_KEY =
+  'sb_publishable_0EeFLywIf5yqmqRTT8-V7A_NQKzr9sD'
 
 const THEME_KEY = 'nutry_theme'
 
@@ -540,7 +542,8 @@ async function confirmDeleteAccount() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'apikey': SUPABASE_ANON_KEY
       }
     })
 
@@ -548,14 +551,14 @@ async function confirmDeleteAccount() {
     try {
       body = await res.json()
     } catch {
-      // Si la respuesta no es JSON
+      // Manejo en caso de que la respuesta no contenga un JSON válido
     }
 
     if (!res.ok) {
-      throw new Error(body.error || `Error ${res.status}: Ocurrió un problema en el servidor.`)
+      throw new Error(body.error || `Error ${res.status}: No se pudo completar la eliminación.`)
     }
 
-    // Si la eliminación fue exitosa, cerrar sesión y limpiar localStorage
+    // Limpieza total tras confirmación exitosa
     await supabase.auth.signOut()
     localStorage.clear()
 
@@ -612,7 +615,7 @@ async function loadUser() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Modal de Personalización
+  // Configurar Modal de Personalización
   const closeBtn = document.getElementById('settings-modal-close')
   const cancelBtn = document.getElementById('settings-cancel-btn')
   const saveBtn = document.getElementById('settings-save-btn')
@@ -627,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-  // Modal de Eliminar Cuenta
+  // Configurar Modal de Eliminar Cuenta
   const deleteCloseBtn = document.getElementById('delete-modal-close')
   const deleteCancelBtn = document.getElementById('delete-cancel-btn')
   const deleteConfirmBtn = document.getElementById('delete-confirm-btn')
@@ -642,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-  // Tecla Escape para cerrar modales
+  // Cierre con tecla Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeSettingsModal()
@@ -650,9 +653,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  // Aplicar tema guardado al cargar
   applyTheme(getCurrentTheme())
 })
 
-// Cargar usuario
+// Cargar estado de la cuenta
 loadUser()
