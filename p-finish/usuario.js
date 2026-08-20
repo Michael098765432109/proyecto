@@ -1,9 +1,7 @@
 import { supabase } from '../supabaseClient.js?v=3'
 
-// Opcional: si despliegas una Edge Function/endpoint seguro que borra el
-// usuario en auth (requiere SERVICE_ROLE), pon aquí su URL pública.
-// Ejemplo: const DELETE_USER_EDGE_URL = 'https://.../delete-user'
-const DELETE_USER_EDGE_URL = ''
+const DELETE_USER_EDGE_URL =
+  'https://nkptwdzfzjoyssbfwvlh.supabase.co/functions/v1/delete-user'
 // ===== Utilidades de formato =====
 function formatDate(iso) {
   if (!iso) return '—'
@@ -346,48 +344,29 @@ async function confirmDeleteAccount() {
       }
       return
     }
-    // 1) Intentar eliminar mediante la función RPC (elimina datos en tus tablas)
-    const { error: rpcError } = await supabase.rpc('delete_user_account')
+    const token = sessionData?.session?.access_token
+    if (!token) throw new Error('No se obtuvo el token de sesión')
 
-    if (rpcError) {
-      console.warn('delete_user_account RPC falló:', rpcError.message)
-      if (hint) {
-        hint.textContent = 'No se pudieron borrar todos los datos en la nube.'
-        hint.style.color = '#f87171'
+    const res = await fetch(DELETE_USER_EDGE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       }
-    }
+    })
 
-    // 1.5) Opcional: intentar solicitar la eliminación del registro de auth
-    // mediante una Edge Function/endpoint que use la Service Role key.
-    if (DELETE_USER_EDGE_URL && DELETE_USER_EDGE_URL.trim() !== '') {
+    if (!res.ok) {
+      let details = 'No se pudo eliminar la cuenta en Supabase.'
       try {
-        const { data: sessionData } = await supabase.auth.getSession()
-        const token = sessionData?.session?.access_token
-        if (token) {
-          const res = await fetch(DELETE_USER_EDGE_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          })
-
-          if (!res.ok) {
-            console.warn('Edge function delete failed:', await res.text())
-            if (hint) {
-              hint.textContent = 'Datos borrados, pero no se pudo eliminar el registro de autenticación.'
-              hint.style.color = '#f87171'
-            }
-          }
-        } else {
-          console.warn('No se obtuvo token de sesión para llamar la Edge Function')
-        }
-      } catch (err) {
-        console.warn('Llamada a Edge Function falló:', err)
+        const body = await res.json()
+        if (body?.error) details = body.error
+      } catch {
+        // Mantener el mensaje general si la respuesta no es JSON.
       }
+      throw new Error(details)
     }
 
-    // 2) Cerrar sesión localmente y limpiar datos
+    // Cerrar sesión localmente y limpiar datos solo después de confirmar el borrado.
     await supabase.auth.signOut()
     localStorage.removeItem('nutry_current_user_id')
     localStorage.removeItem('nutry_theme')
