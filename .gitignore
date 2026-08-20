@@ -1,0 +1,12 @@
+# Entorno y variables secretas
+.env
+keys.env
+*.env
+
+# Archivos de configuración de editores y sistema
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Dependencias (por si usas npm en el futuro)
+node_modules/
