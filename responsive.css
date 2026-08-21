@@ -19,15 +19,17 @@ html.android-device body .top-nav-scroll {
   width: 100%;
   flex: 1 1 100%;
   justify-content: flex-start;
-  flex-wrap: wrap !important;
-  overflow-x: visible;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
   padding-bottom: 2px;
-  touch-action: manipulation;
+  touch-action: pan-x !important;
+  overscroll-behavior-x: contain;
 }
 
 @media (max-width: 768px) and (pointer: coarse) {
   .top-nav-scroll {
-    overflow-x: auto;
+    overflow-x: auto !important;
+    touch-action: pan-x !important;
   }
 }
 
