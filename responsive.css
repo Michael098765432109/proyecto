@@ -1,5 +1,24 @@
 @import url('p-finish/responsive.css');
 
+/* Navegación horizontal táctil para que todos los accesos sigan siendo utilizables en Android. */
+.top-nav-scroll {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+.top-nav-scroll::-webkit-scrollbar { display: none; }
+.top-nav-scroll > a { flex: 0 0 auto; white-space: nowrap; }
+
+@media (max-width: 768px) {
+  .top-nav-scroll { width: 100%; justify-content: flex-start; padding-bottom: 2px; }
+}
+
 /* Refuerzo global de contraste para texto en ambos temas. */
 :root:not([data-theme="light"]) body :where(h1, h2, h3, h4, h5, h6, p, a, button, label, li, td, th, strong, small, span) {
   text-shadow: none !important;
