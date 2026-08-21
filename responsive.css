@@ -31,6 +31,28 @@ html.android-device body .top-header > .container {
   flex-wrap: wrap !important;
 }
 
+html.android-device body .top-header .top-nav-scroll {
+  display: flex !important;
+  flex: 0 0 100% !important;
+  width: calc(100vw - 2rem) !important;
+  max-width: calc(100vw - 2rem) !important;
+  min-width: 0 !important;
+  height: 3.25rem;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  overflow-x: scroll !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
+}
+
+html.android-device body .top-header .top-nav-scroll > a {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  max-width: none !important;
+}
+
 @media (max-width: 768px) and (pointer: coarse) {
   .top-nav-scroll {
     overflow-x: auto !important;
