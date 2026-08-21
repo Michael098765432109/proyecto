@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Visor de Calorías - MyFitnessPal</title>
+    <title>Visor de Calorías - MacroSync</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../responsive.css">
@@ -43,6 +43,8 @@
         .gradient-header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
         }
+        .brand-name { font-size: 1.8rem; font-weight: 800; letter-spacing: .01em; text-shadow: 0 2px 10px rgba(0,0,0,.25); }
+        .brand-profile { display: inline-flex; align-items: center; margin-left: .45rem; padding: .18rem .55rem; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; font-size: 1rem; font-weight: 600; color: #e2e8f0; background: rgba(255,255,255,.08); vertical-align: middle; }
 
         .card-dark {
             background: var(--bg-card);
@@ -63,6 +65,29 @@
         .gradient-button:hover {
             background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
             transform: translateY(-1px);
+        }
+
+        :root[data-theme="light"] .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff !important;
+        }
+
+        :root[data-theme="light"] .gradient-header h1,
+        :root[data-theme="light"] .gradient-header p,
+        :root[data-theme="light"] .gradient-header button,
+        :root[data-theme="light"] .gradient-header a,
+        :root[data-theme="light"] .gradient-header span {
+            color: #fff !important;
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.95),
+                 1px -1px 0 rgba(255,255,255,0.95),
+                -1px  1px 0 rgba(255,255,255,0.95),
+                 1px  1px 0 rgba(255,255,255,0.95);
+        }
+
+        :root[data-theme="light"] .gradient-header .text-cyan-300,
+        :root[data-theme="light"] .gradient-header .text-cyan-400 {
+            color: #67e8f9 !important;
         }
 
         .rayos {
@@ -160,7 +185,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.7);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 100;
@@ -304,23 +329,31 @@
     </div>
 
     <!-- Header -->
-    <div class="gradient-header py-8 px-4">
-        <div class="container mx-auto">
-            <div class="flex items-center justify-between">
-                <a href="index.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center hover:shadow-lg transition-all duration-300">
-                    <i class="fas fa-home mr-2"></i>
-                    Lobby
+    <header class="gradient-header py-5 px-4 shadow-lg">
+        <div class="container mx-auto flex items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center min-w-0 text-white" aria-label="Volver al inicio">
+                <i class="fas fa-dumbbell text-cyan-300 text-2xl mr-3" style="text-shadow: -1px -1px 0 rgba(255,255,255,0.95), 1px -1px 0 rgba(255,255,255,0.95), -1px 1px 0 rgba(255,255,255,0.95), 1px 1px 0 rgba(255,255,255,0.95);" aria-hidden="true"></i>
+                <span class="brand-name">MacroSync</span><span id="header-profile" class="brand-profile"></span>
+            </a>
+            <nav class="flex items-center gap-2">
+                <a href="Calculadora_de_Macros_De_Comidas.html" class="px-3 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm whitespace-nowrap text-white">
+                    <i class="fas fa-utensils mr-1" aria-hidden="true"></i>Comidas
                 </a>
-                <div class="text-center flex-1">
-                    <h1 class="text-4xl font-bold mb-2">
-                        <i class="fas fa-chart-line mr-3 text-cyan-400"></i>Visor de Calorías
-                    </h1>
-                    <p class="text-slate-300">Historial de calorías y cumplimiento de objetivos</p>
-                </div>
-                <div class="w-24"></div>
-            </div>
+                <a href="calculadora_metabolica.html.html" class="px-3 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm whitespace-nowrap text-white">
+                    <i class="fas fa-calculator mr-1" aria-hidden="true"></i>Metabolismo
+                </a>
+                <a href="visor_calorias.html" class="px-3 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm whitespace-nowrap text-white">
+                    <i class="fas fa-chart-line mr-1" aria-hidden="true"></i>Calorías
+                </a>
+                <a href="apartado_ejercicios_recomendados.html" class="px-3 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm whitespace-nowrap text-white">
+                    <i class="fas fa-dumbbell mr-1" aria-hidden="true"></i>Ejercicios
+                </a>
+                <a href="index.html" class="px-3 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm text-white">
+                    <i class="fas fa-house mr-1" aria-hidden="true"></i>Inicio
+                </a>
+            </nav>
         </div>
-    </div>
+    </header>
 
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8 max-w-7xl">
@@ -380,9 +413,6 @@
                     <i class="fas fa-clipboard-list text-emerald-400 mr-3"></i>
                     Registro de Cumplimiento Diario
                 </h3>
-                <button onclick="abrirModalHoy()" class="gradient-button text-white px-4 py-2 rounded-lg text-sm font-semibold">
-                    <i class="fas fa-plus mr-1"></i> Registrar hoy
-                </button>
             </div>
             <div id="cumplimientoList" class="overflow-x-auto">
                 <div class="text-center text-slate-400 py-8">
@@ -455,13 +485,29 @@
         const foodLogKey = 'nutry_food_log_' + currentUserId;
         const metaLogKey = 'nutry_meta_log_' + currentUserId;
         const complianceLogKey = 'nutry_compliance_log_' + currentUserId;
+        const dailyWelcomeKey = 'nutry_compliance_prompt_' + currentUserId;
         let foodLog = JSON.parse(localStorage.getItem(foodLogKey) || '[]');
         let metaLog = JSON.parse(localStorage.getItem(metaLogKey) || '[]');
         let complianceData = JSON.parse(localStorage.getItem(complianceLogKey) || '[]');
 
+        function obtenerFechaLocal() {
+            const ahora = new Date();
+            const year = ahora.getFullYear();
+            const month = String(ahora.getMonth() + 1).padStart(2, '0');
+            const day = String(ahora.getDate()).padStart(2, '0');
+            return year + '-' + month + '-' + day;
+        }
+
+        function prepararAvisoDiario() {
+            const modal = document.getElementById('welcomeModal');
+            if (localStorage.getItem(dailyWelcomeKey) !== obtenerFechaLocal()) {
+                modal.style.display = 'flex';
+            }
+        }
+
         // ===== MODAL FUNCTIONS =====
         async function registrarRespuesta(respuesta) {
-            const hoy = new Date().toISOString().split('T')[0];
+            const hoy = obtenerFechaLocal();
             
             // Check if already registered today
             const existingIndex = complianceData.findIndex(entry => entry.fecha === hoy);
@@ -483,6 +529,7 @@
             }
 
             localStorage.setItem(complianceLogKey, JSON.stringify(complianceData));
+            localStorage.setItem(dailyWelcomeKey, hoy);
             cerrarModal();
             
             // Guardar también en la nube si es posible
@@ -502,8 +549,10 @@
         }
 
         function abrirModalHoy() {
-            document.getElementById('welcomeModal').style.display = 'flex';
+            prepararAvisoDiario();
         }
+
+        prepararAvisoDiario();
 
         // ===== DASHBOARD UPDATE =====
         function actualizarDashboard() {
@@ -810,6 +859,17 @@
                 actualizarDashboard();
             }
         })();
+    </script>
+    <link rel="stylesheet" href="../responsive.css">
+    <script src="../theme-effects.js"></script>
+    <script>
+        (function () {
+            try {
+                const profile = JSON.parse(localStorage.getItem('macrosync_profile') || 'null');
+                const target = document.getElementById('header-profile');
+                if (target && profile) target.textContent = (profile.avatar || '') + (profile.username ? ' @' + profile.username : '');
+            } catch (error) { /* Perfil opcional */ }
+        }());
     </script>
 </body>
 </html>

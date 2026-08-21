@@ -82,6 +82,12 @@ function getInitial(email) {
   return email.trim().charAt(0).toUpperCase()
 }
 
+function updateHeaderProfile() {
+  const target = document.getElementById('header-profile')
+  if (!target) return
+  target.textContent = (currentAvatar || '') + (currentUsername ? ' @' + currentUsername : '')
+}
+
 // ==========================================
 // 4. GESTIÓN DEL TEMA (CLARO / OSCURO)
 // ==========================================
@@ -197,6 +203,8 @@ function renderProfile(user) {
 
   currentUsername = metadata.username || null
   currentAvatar = metadata.avatar || null
+  localStorage.setItem('macrosync_profile', JSON.stringify({ username: currentUsername, avatar: currentAvatar }))
+  updateHeaderProfile()
 
   const displayName = currentUsername || email
   const avatarDisplay = currentAvatar || escapeHtml(getInitial(email))
@@ -298,9 +306,9 @@ function renderProfile(user) {
         </div>
 
         <!-- Zona de peligro: Eliminar cuenta -->
-        <div class="card-dark rounded-2xl p-8 border-red-500/40">
+        <div class="card-dark danger-zone rounded-2xl p-8 border-red-500/40">
           <h3 class="text-xl font-bold text-red-400 mb-2 flex items-center">
-            <i class="fas fa-exclamation-triangle mr-3"></i>
+            <i class="fas fa-exclamation-triangle danger-icon mr-3"></i>
             Zona de peligro
           </h3>
           <p class="text-slate-400 text-sm mb-6">
@@ -418,6 +426,8 @@ async function saveSettings() {
 
     currentUsername = username || null
     currentAvatar = selectedEmoji || null
+    localStorage.setItem('macrosync_profile', JSON.stringify({ username: currentUsername, avatar: currentAvatar }))
+    updateHeaderProfile()
 
     if (saveBtn) {
       saveBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Guardado'

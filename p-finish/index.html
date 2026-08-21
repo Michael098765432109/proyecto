@@ -115,6 +115,56 @@ button:hover {
             transform: translateY(-1px);
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: nowrap;
+        }
+
+        .brand-name { font-size: 2rem; font-weight: 800; letter-spacing: .01em; text-shadow: 0 2px 10px rgba(0,0,0,.25); }
+        .brand-profile { display: inline-flex; align-items: center; margin-left: .45rem; padding: .18rem .55rem; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; font-size: 1rem; font-weight: 600; color: #e2e8f0; background: rgba(255,255,255,.08); vertical-align: middle; }
+
+        .header-actions #logout-btn {
+            background: #3ecf8e;
+            color: #062619;
+            border-color: #3ecf8e;
+        }
+
+        .header-actions #logout-btn:hover {
+            background: #34b27b;
+            border-color: #34b27b;
+        }
+
+        @media (max-width: 640px) {
+            .header-actions { gap: 0.35rem; }
+            .header-actions #logout-btn,
+            .header-actions a { padding-left: 0.65rem; padding-right: 0.65rem; font-size: 0.8rem; }
+        }
+
+        :root[data-theme="light"] .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff !important;
+        }
+
+        :root[data-theme="light"] .gradient-header h1,
+        :root[data-theme="light"] .gradient-header p,
+        :root[data-theme="light"] .gradient-header button,
+        :root[data-theme="light"] .gradient-header a,
+        :root[data-theme="light"] .gradient-header span {
+            color: #fff !important;
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.95),
+                 1px -1px 0 rgba(255,255,255,0.95),
+                -1px  1px 0 rgba(255,255,255,0.95),
+                 1px  1px 0 rgba(255,255,255,0.95);
+        }
+
+        :root[data-theme="light"] .gradient-header .text-cyan-300,
+        :root[data-theme="light"] .gradient-header .text-cyan-400 {
+            color: #67e8f9 !important;
+        }
+
         .rayos {
             position: fixed;
             top: 0;
@@ -290,34 +340,15 @@ button:hover {
         <div class="rayo"></div>
         <div class="rayo"></div>
     </div>
-    <header class="gradient-header py-8 px-4">
-        <div class="container mx-auto text-center">
-                <div class="flex items-start justify-between gap-6 max-w-5xl mx-auto">
-                    <div class="text-left">
-                        <h1 class="text-4xl font-bold text-white mb-2">MyFitnessPal</h1>
-                        <p class="text-xl text-gray-300">Herramientas avanzadas para tu bienestar nutricional</p>
-                    </div>
-
-<div class="flex flex-col items-stretch gap-2">
-                        <button
-                            id="logout-btn"
-                            type="button"
-                            class="w-auto px-4 py-2 rounded-xl shadow-lg font-bold border border-white/20 bg-white/10 hover:bg-white/15 transition text-white"
-                        >
-                            <i class="fas fa-right-from-bracket mr-2"></i>
-                            Cerrar sesión
-                        </button>
-                        <a
-                            href="usuario.html"
-                            class="w-auto px-4 py-2 rounded-xl shadow-lg font-bold border border-white/20 bg-white/10 hover:bg-white/15 transition text-white text-center"
-                            title="Ver datos de mi cuenta"
-                        >
-                            <i class="fas fa-user mr-2"></i>
-                            Mi cuenta
-                        </a>
-                    </div>
-
-                <!-- theme selector removed per user request -->
+    <header class="gradient-header py-5 px-4 shadow-lg">
+        <div class="container mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center min-w-0">
+                <i class="fas fa-dumbbell text-cyan-300 text-2xl mr-3" aria-hidden="true"></i>
+                <h1 class="text-2xl font-bold text-white whitespace-nowrap"><span class="brand-name">MacroSync</span><span id="header-profile" class="brand-profile"></span></h1>
+            </div>
+            <div class="header-actions">
+                <button id="logout-btn" type="button" class="px-4 py-2 rounded-lg border font-bold transition text-sm whitespace-nowrap"><i class="fas fa-right-from-bracket mr-1" aria-hidden="true"></i>Cerrar sesión</button>
+                <a href="usuario.html" class="px-4 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm font-semibold whitespace-nowrap text-white" title="Ver datos de mi cuenta"><i class="fas fa-user mr-1" aria-hidden="true"></i>Mi cuenta</a>
             </div>
         </div>
     </header>
@@ -343,6 +374,13 @@ button:hover {
                 <h2 class="text-2xl font-semibold mb-4">Visor de Calorías</h2>
                 <p class="text-text-secondary mb-6">Visualiza el historial de calorías de tus comidas y seguimiento metabólico. Registra si cumpliste tus objetivos diarios.</p>
                 <a href="visor_calorias.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-block">Acceder</a>
+            </div>
+
+            <div class="card-dark rounded-lg p-6 text-center">
+                <i class="fas fa-dumbbell text-6xl text-accent-emerald mb-4"></i>
+                <h2 class="text-2xl font-semibold mb-4">Ejercicios Recomendados</h2>
+                <p class="text-text-secondary mb-6">Consulta un plan de entrenamiento personalizado según tu actividad, objetivo y tipo de ejercicio.</p>
+                <a href="apartado_ejercicios_recomendados.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-block">Acceder</a>
             </div>
         </div>
     </main>
@@ -408,5 +446,16 @@ button:hover {
         })();
     </script>
     <script type="module" src="./logout.js"></script>
+    <link rel="stylesheet" href="../responsive.css">
+    <script src="../theme-effects.js"></script>
+    <script>
+        (function () {
+            try {
+                const profile = JSON.parse(localStorage.getItem('macrosync_profile') || 'null');
+                const target = document.getElementById('header-profile');
+                if (target && profile) target.textContent = (profile.avatar || '') + (profile.username ? ' @' + profile.username : '');
+            } catch (error) { /* Perfil opcional */ }
+        }());
+    </script>
 </body>
 </html>

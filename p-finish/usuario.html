@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Mi Información - MyFitnessPal</title>
+    <title>Mi Información - MacroSync</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../responsive.css">
@@ -42,6 +42,17 @@
         .gradient-header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
         }
+        .brand-name { font-size: 1.8rem; font-weight: 800; letter-spacing: .01em; text-shadow: 0 2px 10px rgba(0,0,0,.25); }
+        .brand-profile { display: inline-flex; align-items: center; margin-left: .45rem; padding: .18rem .55rem; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; font-size: 1rem; font-weight: 600; color: #e2e8f0; background: rgba(255,255,255,.08); vertical-align: middle; }
+        .danger-zone { background: rgba(127, 29, 29, .28) !important; border: 1px solid rgba(248, 113, 113, .55) !important; }
+        .danger-zone h3, .danger-zone .danger-icon { color: #f87171 !important; }
+        .danger-zone p { color: #fecaca !important; }
+        .danger-zone #delete-account-btn { background: rgba(220, 38, 38, .2); border-color: rgba(248, 113, 113, .65); color: #fca5a5; }
+        .danger-zone #delete-account-btn:hover { background: rgba(220, 38, 38, .4); }
+        :root[data-theme="light"] .danger-zone { background: #fee2e2 !important; border-color: #fca5a5 !important; }
+        :root[data-theme="light"] .danger-zone h3, :root[data-theme="light"] .danger-zone .danger-icon { color: #b91c1c !important; }
+        :root[data-theme="light"] .danger-zone p { color: #7f1d1d !important; }
+        :root[data-theme="light"] .danger-zone #delete-account-btn { background: #dc2626; border-color: #b91c1c; color: #fff !important; }
 
         .card-dark {
             background: var(--bg-card);
@@ -62,6 +73,29 @@
         .gradient-button:hover {
             background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
             transform: translateY(-1px);
+        }
+
+        :root[data-theme="light"] .gradient-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff !important;
+        }
+
+        :root[data-theme="light"] .gradient-header h1,
+        :root[data-theme="light"] .gradient-header p,
+        :root[data-theme="light"] .gradient-header button,
+        :root[data-theme="light"] .gradient-header a,
+        :root[data-theme="light"] .gradient-header span {
+            color: #fff !important;
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.95),
+                 1px -1px 0 rgba(255,255,255,0.95),
+                -1px  1px 0 rgba(255,255,255,0.95),
+                 1px  1px 0 rgba(255,255,255,0.95);
+        }
+
+        :root[data-theme="light"] .gradient-header .text-cyan-300,
+        :root[data-theme="light"] .gradient-header .text-cyan-400 {
+            color: #67e8f9 !important;
         }
 
         .rayos {
@@ -326,23 +360,17 @@
     <div class="leaves-layer" aria-hidden="true" id="leavesLayer"></div>
 
     <!-- Header -->
-    <div class="gradient-header py-8 px-4">
-        <div class="container mx-auto">
-            <div class="flex items-center justify-between">
-                <a href="index.html" class="gradient-button text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center hover:shadow-lg transition-all duration-300">
-                    <i class="fas fa-home mr-2"></i>
-                    Lobby
-                </a>
-                <div class="text-center flex-1">
-                    <h1 class="text-4xl font-bold mb-2">
-                        <i class="fas fa-user-circle mr-3 text-cyan-400"></i><span id="profile-title">Mi Información</span>
-                    </h1>
-                    <p class="text-slate-300">Datos de tu cuenta</p>
-                </div>
-                <div class="w-24"></div>
-            </div>
+    <header class="gradient-header py-5 px-4 shadow-lg">
+        <div class="container mx-auto flex items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center min-w-0 text-white" aria-label="Volver al inicio">
+                <i class="fas fa-dumbbell text-cyan-300 text-2xl mr-3" style="text-shadow: -1px -1px 0 rgba(255,255,255,0.95), 1px -1px 0 rgba(255,255,255,0.95), -1px 1px 0 rgba(255,255,255,0.95), 1px 1px 0 rgba(255,255,255,0.95);" aria-hidden="true"></i>
+                <span class="brand-name">MacroSync</span><span id="header-profile" class="brand-profile"></span>
+            </a>
+            <a href="index.html" class="px-4 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm font-semibold whitespace-nowrap text-white">
+                <i class="fas fa-arrow-left mr-1" aria-hidden="true"></i>Volver a páginas
+            </a>
         </div>
-    </div>
+    </header>
 
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -478,5 +506,16 @@
     </div>
 
     <script type="module" src="./usuario.js?v=3"></script>
+    <link rel="stylesheet" href="../responsive.css">
+    <script src="../theme-effects.js"></script>
+    <script>
+        (function () {
+            try {
+                const profile = JSON.parse(localStorage.getItem('macrosync_profile') || 'null');
+                const target = document.getElementById('header-profile');
+                if (target && profile) target.textContent = (profile.avatar || '') + (profile.username ? ' @' + profile.username : '');
+            } catch (error) { /* Perfil opcional */ }
+        }());
+    </script>
 </body>
 </html>
