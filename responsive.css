@@ -15,8 +15,20 @@
 .top-nav-scroll::-webkit-scrollbar { display: none; }
 .top-nav-scroll > a { flex: 0 0 auto; white-space: nowrap; }
 
-@media (max-width: 768px) {
-  .top-nav-scroll { width: 100%; justify-content: flex-start; padding-bottom: 2px; }
+html.android-device body .top-nav-scroll {
+  width: 100%;
+  flex: 1 1 100%;
+  justify-content: flex-start;
+  flex-wrap: wrap !important;
+  overflow-x: visible;
+  padding-bottom: 2px;
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) and (pointer: coarse) {
+  .top-nav-scroll {
+    overflow-x: auto;
+  }
 }
 
 /* Refuerzo global de contraste para texto en ambos temas. */
