@@ -6,81 +6,66 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-function jsonResponse(data: any, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      ...corsHeaders,
-      'Content-Type': 'application/json',
-    },
-  })
-}
-
 Deno.serve(async (req) => {
-  // Manejar solicitudes preflight (CORS)
+  // 1. Responder inmediatamente a las verificaciones de seguridad CORS (Preflight)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  if (req.method !== 'POST') {
-    return jsonResponse({ error: 'Método no permitido' }, 405)
-  }
-
   try {
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      return jsonResponse(
-        { error: 'Faltan variables de entorno SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en Supabase' },
-        500
+    // 2. Extraer el token Bearer enviado desde el frontend
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Falta el encabezado Authorization.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Extraer y validar el token JWT del usuario
-    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization')
-    const token = authHeader?.replace(/^Bearer\s+/i, '')?.trim()
+    const token = authHeader.replace('Bearer ', '').trim()
 
-    if (!token) {
-      return jsonResponse({ error: 'No se proporcionó token de autorización' }, 401)
-    }
+    // 3. Inicializar el cliente Supabase con la clave SERVICE_ROLE_KEY
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 
-    // Cliente administrador con service_role
-    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false }
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     })
 
-    // Obtener información del usuario autenticado
+    // 4. Validar que el token pertenece a un usuario activo de la sesión
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
+
     if (userError || !user) {
-      return jsonResponse({ error: 'Token inválido o expirado: ' + (userError?.message || '') }, 401)
+      return new Response(
+        JSON.stringify({ error: 'Token inválido o la sesión expiró.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    const userId = user.id
+    // 5. Eliminar al usuario mediante la API de Administración de Supabase Auth
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
 
-    // 1. Limpieza de tablas vinculadas al usuario
-    const tables = ['food_logs', 'compliance_logs', 'meta_logs', 'profiles', 'user_settings']
-    
-    for (const table of tables) {
-      const { error: dbError } = await supabaseAdmin
-        .from(table)
-        .delete()
-        .eq('user_id', userId)
-
-      if (dbError) {
-        console.warn(`Aviso al limpiar tabla ${table}: ${dbError.message}`)
-      }
+    if (deleteError) {
+      return new Response(
+        JSON.stringify({ error: deleteError.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    // 2. Eliminar cuenta en Supabase Auth
-    const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(userId)
-    if (deleteUserError) {
-      return jsonResponse({ error: 'Error al eliminar usuario en Auth: ' + deleteUserError.message }, 500)
-    }
+    // 6. Retornar confirmación de eliminación exitosa
+    return new Response(
+      JSON.stringify({ success: true, message: 'Usuario eliminado exitosamente.' }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
 
-    return jsonResponse({ success: true, message: 'Usuario eliminado correctamente' }, 200)
-
-  } catch (err: any) {
-    return jsonResponse({ error: err.message || 'Error interno en el servidor' }, 500)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error interno en el servidor.'
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 })
