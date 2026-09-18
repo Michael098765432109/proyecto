@@ -31,19 +31,17 @@
     }
 
     :root[data-theme="light"]{
-      --bg-primary: #f6fff9;
-      --bg-secondary: #eafff1;
-      --bg-card: #dff8ea;
-
-      --text-primary: #0b2a19;
-      --text-secondary: #2a5c42;
-      --text-muted: #3b7a55;
-
-      --accent: #0ea37a;
-      --accent-hover: #06b6d4;
-      --accent-light: #164e63;
-
-      --gradient: linear-gradient(135deg, #0ea37a 0%, #06b6d4 100%);
+      --bg-primary:    #fafffe;
+      --bg-secondary:  #f0fdf8;
+      --bg-card:       #ffffff;
+      --bg-card-hover: #f0fdf8;
+      --text-primary:   #134e35;
+      --text-secondary: #2d6a4f;
+      --text-muted:     #52796f;
+      --accent:       #059669;
+      --accent-hover: #047857;
+      --accent-light: #d1fae5;
+      --gradient: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
     }
    
     
@@ -236,40 +234,7 @@
       100% { transform: translateY(100%); opacity: 0; }
     }
 
-    /* ===== Accesibilidad en tema claro =====
-       Esta página usa muchos colores Tailwind "fijos" (text-white, text-slate-300, etc.).
-       Si el tema cambia a light, esos colores pueden perder contraste.
-       Forzamos a que títulos y textos típicos respeten las variables del tema. */
-    :root[data-theme="light"] h1,
-    :root[data-theme="light"] h2,
-    :root[data-theme="light"] h3,
-    :root[data-theme="light"] h4,
-    :root[data-theme="light"] h5,
-    :root[data-theme="light"] h6 {
-      color: var(--text-primary) !important;
-      /* Contorno blanco brillante para legibilidad */
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95),
-         0   0px 6px rgba(255,255,255,0.35);
-    }
-
-    /* Reforzar contorno también en textos “de color” (amarillos/verde/cian/etc.) */
-    :root[data-theme="light"] .text-yellow-400,
-    :root[data-theme="light"] .text-green-400,
-    :root[data-theme="light"] .text-red-400,
-    :root[data-theme="light"] .text-purple-400,
-    :root[data-theme="light"] .text-blue-400,
-    :root[data-theme="light"] .text-cyan-400,
-    :root[data-theme="light"] .text-indigo-400,
-    :root[data-theme="light"] .text-orange-400 {
-      text-shadow:
-        0 1px 0 rgba(0,0,0,0.16),
-        0 0 2px rgba(0,0,0,0.08),
-        0 0 6px rgba(255,255,255,0.25) !important;
-    }
+    /* Tema claro: gestionado por light-theme.css via responsive.css */
 
     /* Animación: hojas cayendo en tema claro */
     .leaves-layer {
@@ -304,85 +269,23 @@
       }
     }
 
-    /* Solo mostrar hojas en tema claro */
-    :root[data-theme="light"] .leaves-layer {
-      display: block;
-    }
-    :root:not([data-theme="light"]) .leaves-layer {
-      display: none;
-    }
-
-    :root[data-theme="light"] .text-white,
-    :root[data-theme="light"] .text-gray-300,
-    :root[data-theme="light"] .text-slate-300,
-    :root[data-theme="light"] .text-cyan-100,
-    :root[data-theme="light"] .text-blue-200 {
-      color: var(--text-primary) !important;
-    }
-
-    :root[data-theme="light"] .text-secondary,
-    :root[data-theme="light"] .text-muted,
-    :root[data-theme="light"] .text-gray-400,
-    :root[data-theme="light"] .text-slate-400,
-    :root[data-theme="light"] .text-sm.text-muted {
-      color: var(--text-secondary) !important;
-    }
-
-    :root[data-theme="light"] .text-accent,
-    :root[data-theme="light"] .text-primary {
-      color: var(--text-primary) !important;
-    }
-
-    /* Letras claras en light -> más oscuras para contraste (y refuerzo visual) */
-    :root[data-theme="light"] .text-white,
-    :root[data-theme="light"] .text-gray-300,
-    :root[data-theme="light"] .text-gray-400,
-    :root[data-theme="light"] .text-slate-300,
-    :root[data-theme="light"] .text-slate-400,
-    :root[data-theme="light"] .text-slate-500,
-    :root[data-theme="light"] .text-cyan-100,
-    :root[data-theme="light"] .text-blue-200,
-    :root[data-theme="light"] .text-yellow-300,
-    :root[data-theme="light"] .text-green-300,
-    :root[data-theme="light"] .text-red-300,
-    :root[data-theme="light"] .text-purple-300 {
-      color: var(--text-primary) !important;
-      text-shadow:
-        0 1px 0 rgba(0,0,0,0.18),
-        0 0 2px rgba(0,0,0,0.10) !important;
-    }
-
-    :root[data-theme="light"] .text-secondary,
-    :root[data-theme="light"] .text-muted,
-    :root[data-theme="light"] .text-gray-500,
-    :root[data-theme="light"] .text-slate-200 {
-      color: var(--text-secondary) !important;
-      text-shadow:
-        0 1px 0 rgba(0,0,0,0.14),
-        0 0 2px rgba(0,0,0,0.08) !important;
-    }
-
-    :root[data-theme="light"] .btn-primary {
-      color: var(--bg-primary) !important;
-    }
+    :root[data-theme="light"] .leaves-layer { display: block; }
+    :root:not([data-theme="light"]) .leaves-layer { display: none; }
 
     /* Unifica tarjetas, controles y acciones con el resto de MacroSync. */
     .bg-card, .bg-card-alt, .result-card {
       border: 1px solid rgba(148, 163, 184, 0.24);
-    }
-
-    .bg-card, .bg-card-alt {
       border-radius: 12px;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
       color: #fff;
       border-radius: 8px;
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
     }
 
     .tab-button {
@@ -390,39 +293,8 @@
     }
 
     .tab-button.active {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
       color: #fff;
-    }
-
-    :root[data-theme="light"] .bg-card,
-    :root[data-theme="light"] .bg-card-alt,
-    :root[data-theme="light"] .result-card {
-      border-color: rgba(11, 42, 25, 0.16);
-    }
-
-    /* La cabecera conserva el contraste oscuro del resto de páginas en tema claro. */
-    :root[data-theme="light"] .gradient-bg.text-white {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-      color: #fff !important;
-    }
-
-    :root[data-theme="light"] .gradient-bg.text-white a,
-    :root[data-theme="light"] .gradient-bg.text-white span,
-    :root[data-theme="light"] .gradient-bg.text-white i {
-      color: #fff !important;
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95);
-    }
-
-    :root[data-theme="light"] .gradient-bg.text-white .text-cyan-300 {
-      color: #67e8f9 !important;
-    }
-
-    :root[data-theme="light"] .btn-primary {
-      color: #fff !important;
     }
   </style>
 </head>
@@ -1424,7 +1296,7 @@ el.innerHTML = loadingHtml;
               labels: {
                 padding: 20,
                 font: { size: 12 },
-                color: '#d1d5db'
+                color: document.documentElement.getAttribute('data-theme') === 'light' ? '#2d6a4f' : '#d1d5db'
               }
             }
           }

@@ -21,15 +21,16 @@
         }
 
         :root[data-theme="light"]{
-            --bg-primary: #f6fff9;
-            --bg-secondary: #eafff1;
-            --bg-card: #dff8ea;
-            --bg-card-hover: #c9f0d8;
-            --text-primary: #0b2a19;
-            --text-secondary: #2a5c42;
-            --accent-blue: #0ea37a;
-            --accent-emerald: #0ea37a;
-            --accent-cyan: #0ea37a;
+            --bg-primary:    #fafffe;
+            --bg-secondary:  #f0fdf8;
+            --bg-card:       #ffffff;
+            --bg-card-hover: #f0fdf8;
+            --text-primary:   #134e35;
+            --text-secondary: #2d6a4f;
+            --text-muted:     #52796f;
+            --accent-blue:    #059669;
+            --accent-emerald: #059669;
+            --accent-cyan:    #0891b2;
         }
 
         body {
@@ -131,55 +132,7 @@
             100% { transform: translateY(100%); opacity: 0; }
         }
 
-        /* ===== Accesibilidad en tema claro ===== */
-        :root[data-theme="light"] h1,
-        :root[data-theme="light"] h2,
-        :root[data-theme="light"] h3,
-        :root[data-theme="light"] h4,
-        :root[data-theme="light"] h5,
-        :root[data-theme="light"] h6 {
-            color: var(--text-primary) !important;
-            text-shadow:
-                -1px -1px 0 rgba(255,255,255,0.95),
-                 1px -1px 0 rgba(255,255,255,0.95),
-                -1px  1px 0 rgba(255,255,255,0.95),
-                 1px  1px 0 rgba(255,255,255,0.95),
-                 0   0px 6px rgba(255,255,255,0.35);
-        }
-
-        :root[data-theme="light"] .text-white,
-        :root[data-theme="light"] .text-gray-300,
-        :root[data-theme="light"] .text-slate-300 {
-            color: var(--text-primary) !important;
-        }
-
-        :root[data-theme="light"] .text-slate-400,
-        :root[data-theme="light"] .text-slate-500,
-        :root[data-theme="light"] .text-slate-200 {
-            color: var(--text-secondary) !important;
-        }
-
-        :root[data-theme="light"] .text-blue-400,
-        :root[data-theme="light"] .text-emerald-400,
-        :root[data-theme="light"] .text-cyan-400,
-        :root[data-theme="light"] .text-red-400,
-        :root[data-theme="light"] .text-yellow-400 {
-            color: var(--accent-emerald) !important;
-        }
-
-        :root[data-theme="light"] .text-white,
-        :root[data-theme="light"] .text-gray-300,
-        :root[data-theme="light"] .text-slate-300,
-        :root[data-theme="light"] .text-slate-200 {
-            color: var(--text-primary) !important;
-            text-shadow:
-                0 1px 0 rgba(0,0,0,0.18),
-                0 0 2px rgba(0,0,0,0.10) !important;
-        }
-
-:root[data-theme="light"] .border-slate-700 {
-            border-color: rgba(0,0,0,0.12) !important;
-        }
+        /* Tema claro: gestionado por light-theme.css via responsive.css */
 
 /* ===== Modal de personalización ===== */
         .settings-modal-overlay {
@@ -400,7 +353,8 @@
             <!-- Nombre de usuario -->
             <div class="mb-6">
                 <label for="settings-username" class="block text-slate-300 font-semibold mb-2">
-                    Nombre de usuario (nametag)
+                    Nombre de usuario 
+                     
                 </label>
                 <p class="text-slate-400 text-sm mb-3">
                     Este será el nombre que vistas para tu cuenta. Queda guardado junto a tu correo.

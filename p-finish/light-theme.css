@@ -1,0 +1,672 @@
+/*
+ * MacroSync — Tema Claro (rediseño completo)
+ * ─────────────────────────────────────────
+ * Teoría del color aplicada:
+ *   Fondo:           blanco puro con toque cálido (#fafffe) — neutro, descansado
+ *   Tarjetas:        blanco (#ffffff) con sombra verde muy suave
+ *   Texto primario:  verde oscuro profundo (#134e35) — contraste WCAG AA ≥ 7:1
+ *   Texto secundario:#2d6a4f — verde medio, legible sobre blanco
+ *   Texto muted:     #52796f — verde grisáceo, para hints
+ *   Acento:          #059669 esmeralda vibrante
+ *   Header:          degradado esmeralda #059669 → #10b981 → #34d399
+ *   Bordes:          verde muy tenue rgba(5,150,105,0.18)
+ *   Peligro:         #dc2626 rojo — complementario al verde
+ *   Advertencia:     #b45309 ámbar oscuro — análogo cálido
+ */
+
+/* ══════════════════════════════════════════════════════════
+   VARIABLES
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] {
+    --bg-primary:    #fafffe;
+    --bg-secondary:  #f0fdf8;
+    --bg-card:       #ffffff;
+    --bg-card-hover: #f0fdf8;
+
+    --text-primary:   #134e35;
+    --text-secondary: #2d6a4f;
+    --text-muted:     #52796f;
+
+    --accent:         #059669;
+    --accent-hover:   #047857;
+    --accent-strong:  #065f46;
+    --accent-light:   #d1fae5;
+    --accent-blue:    #059669;
+    --accent-emerald: #059669;
+    --accent-cyan:    #0891b2;
+
+    --success:  #059669;
+    --warning:  #b45309;
+    --danger:   #dc2626;
+
+    --border:        rgba(5, 150, 105, 0.18);
+    --border-strong: rgba(5, 150, 105, 0.32);
+
+    --shadow-sm: 0 1px 4px rgba(5, 150, 105, 0.08);
+    --shadow-md: 0 4px 16px rgba(5, 150, 105, 0.12);
+    --shadow-lg: 0 10px 32px rgba(5, 150, 105, 0.16);
+
+    /* Header esmeralda — tonos oscuros para buen contraste del logo */
+    --header-gradient: linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%);
+}
+
+/* ══════════════════════════════════════════════════════════
+   BODY
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* ══════════════════════════════════════════════════════════
+   HEADER — degradado esmeralda
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .gradient-header,
+:root[data-theme="light"] .gradient-bg {
+    background: var(--header-gradient) !important;
+}
+
+/* Todos los textos dentro del header quedan blancos (fondo oscuro-esmeralda) */
+:root[data-theme="light"] .gradient-header *,
+:root[data-theme="light"] .gradient-bg * {
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+/* Iconos y spans de acento dentro del header */
+:root[data-theme="light"] .gradient-header .text-cyan-300,
+:root[data-theme="light"] .gradient-header .text-cyan-400,
+:root[data-theme="light"] .gradient-bg .text-cyan-300,
+:root[data-theme="light"] .gradient-bg .text-cyan-400 {
+    color: #ecfdf5 !important;
+}
+
+/* Botones de navegación del header */
+:root[data-theme="light"] .gradient-header a.border,
+:root[data-theme="light"] .gradient-header button.border,
+:root[data-theme="light"] .gradient-bg a.border,
+:root[data-theme="light"] .gradient-bg button.border {
+    border-color: rgba(255,255,255,0.45) !important;
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.12) !important;
+}
+
+:root[data-theme="light"] .gradient-header a.border:hover,
+:root[data-theme="light"] .gradient-header button.border:hover,
+:root[data-theme="light"] .gradient-bg a.border:hover,
+:root[data-theme="light"] .gradient-bg button.border:hover {
+    background: rgba(255,255,255,0.25) !important;
+}
+
+/* Botón de cerrar sesión (logout) en el header */
+:root[data-theme="light"] .header-actions #logout-btn {
+    background: rgba(255,255,255,0.2) !important;
+    border-color: rgba(255,255,255,0.5) !important;
+    color: #ffffff !important;
+}
+
+:root[data-theme="light"] .header-actions #logout-btn:hover {
+    background: rgba(255,255,255,0.35) !important;
+}
+
+/* Footer */
+:root[data-theme="light"] footer.gradient-header,
+:root[data-theme="light"] footer.gradient-bg {
+    background: var(--header-gradient) !important;
+}
+
+:root[data-theme="light"] footer.gradient-header *,
+:root[data-theme="light"] footer.gradient-bg * {
+    color: #ffffff !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TARJETAS
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .card-dark {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+:root[data-theme="light"] .card-dark:hover {
+    background: var(--bg-card-hover) !important;
+    border-color: var(--border-strong) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+:root[data-theme="light"] .bg-card,
+:root[data-theme="light"] .bg-card-alt,
+:root[data-theme="light"] .result-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+:root[data-theme="light"] .hero-panel,
+:root[data-theme="light"] .profile-chip,
+:root[data-theme="light"] .session-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+:root[data-theme="light"] .session-card:hover {
+    background: var(--bg-card-hover) !important;
+    border-color: var(--accent) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TEXTOS — alto contraste sobre fondo claro
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] h1,
+:root[data-theme="light"] h2,
+:root[data-theme="light"] h3,
+:root[data-theme="light"] h4,
+:root[data-theme="light"] h5,
+:root[data-theme="light"] h6 {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
+}
+
+/* Excepción: tarjetas de macros con fondo de color propio — texto siempre blanco */
+:root[data-theme="light"] .gradient-calories,
+:root[data-theme="light"] .gradient-proteins,
+:root[data-theme="light"] .gradient-carbs,
+:root[data-theme="light"] .gradient-fats,
+:root[data-theme="light"] .gradient-calories *,
+:root[data-theme="light"] .gradient-proteins *,
+:root[data-theme="light"] .gradient-carbs *,
+:root[data-theme="light"] .gradient-fats * {
+    color: #ffffff !important;
+}
+
+/* Textos claros de Tailwind → oscuros en light */
+:root[data-theme="light"] .text-white,
+:root[data-theme="light"] .text-gray-100,
+:root[data-theme="light"] .text-gray-200,
+:root[data-theme="light"] .text-gray-300,
+:root[data-theme="light"] .text-slate-100,
+:root[data-theme="light"] .text-slate-200,
+:root[data-theme="light"] .text-slate-300,
+:root[data-theme="light"] .text-slate-400,
+:root[data-theme="light"] .text-cyan-100,
+:root[data-theme="light"] .text-blue-200,
+:root[data-theme="light"] .text-green-300,
+:root[data-theme="light"] .text-yellow-300,
+:root[data-theme="light"] .text-red-300,
+:root[data-theme="light"] .text-purple-300 {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
+}
+
+/* Excepción: dentro del header estos textos siguen siendo blancos */
+:root[data-theme="light"] .gradient-header .text-white,
+:root[data-theme="light"] .gradient-header .text-gray-300,
+:root[data-theme="light"] .gradient-header .text-slate-300,
+:root[data-theme="light"] .gradient-bg .text-white,
+:root[data-theme="light"] .gradient-bg .text-gray-300 {
+    color: #ffffff !important;
+}
+
+/* Textos secundarios */
+:root[data-theme="light"] .text-gray-400,
+:root[data-theme="light"] .text-gray-500,
+:root[data-theme="light"] .text-slate-500,
+:root[data-theme="light"] .text-secondary,
+:root[data-theme="light"] .text-muted,
+:root[data-theme="light"] .helper-text,
+:root[data-theme="light"] .muted-text,
+:root[data-theme="light"] .muted-subtext {
+    color: var(--text-secondary) !important;
+    text-shadow: none !important;
+}
+
+/* Acentos de color → esmeralda en light */
+:root[data-theme="light"] .text-blue-400,
+:root[data-theme="light"] .text-cyan-400,
+:root[data-theme="light"] .text-emerald-400,
+:root[data-theme="light"] .text-indigo-400,
+:root[data-theme="light"] .text-purple-400,
+:root[data-theme="light"] .text-green-400,
+:root[data-theme="light"] .accent-text {
+    color: var(--accent) !important;
+    text-shadow: none !important;
+}
+
+:root[data-theme="light"] .text-yellow-400 {
+    color: var(--warning) !important;
+    text-shadow: none !important;
+}
+
+:root[data-theme="light"] .text-red-400 {
+    color: var(--danger) !important;
+    text-shadow: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BORDES
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .border-slate-700,
+:root[data-theme="light"] .border-custom {
+    border-color: var(--border) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   INPUTS Y SELECTS
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .input-dark,
+:root[data-theme="light"] .input-group input,
+:root[data-theme="light"] .input-group select,
+:root[data-theme="light"] .settings-modal input[type="text"],
+:root[data-theme="light"] select {
+    background: #ffffff !important;
+    border: 1px solid var(--border-strong) !important;
+    color: var(--text-primary) !important;
+}
+
+:root[data-theme="light"] .input-dark:focus,
+:root[data-theme="light"] .input-group input:focus,
+:root[data-theme="light"] .input-group select:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
+    outline: none !important;
+}
+
+:root[data-theme="light"] .input-dark::placeholder,
+:root[data-theme="light"] .input-group input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BOTONES
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .gradient-button {
+    background: linear-gradient(135deg, #047857 0%, #059669 60%, #10b981 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(5, 150, 105, 0.35) !important;
+}
+
+:root[data-theme="light"] .gradient-button:hover {
+    background: linear-gradient(135deg, #065f46 0%, #047857 60%, #059669 100%) !important;
+    box-shadow: 0 4px 16px rgba(5, 150, 105, 0.45) !important;
+}
+
+:root[data-theme="light"] .btn-primary {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(5, 150, 105, 0.30) !important;
+}
+
+:root[data-theme="light"] .btn-primary:hover {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+}
+
+:root[data-theme="light"] .action-button {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(5, 150, 105, 0.30) !important;
+}
+
+/* Botones secundarios (Crear cuenta / Iniciar sesión) */
+:root[data-theme="light"] button.border.border-gray-600,
+:root[data-theme="light"] button[class*="border-gray-600"] {
+    color: var(--text-primary) !important;
+    border-color: var(--border-strong) !important;
+    background: transparent !important;
+}
+
+:root[data-theme="light"] button.border.border-gray-600:hover,
+:root[data-theme="light"] button[class*="border-gray-600"]:hover {
+    background: var(--bg-secondary) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .tab-button {
+    background: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border) !important;
+}
+
+:root[data-theme="light"] .tab-button:hover {
+    background: var(--bg-card-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+:root[data-theme="light"] .tab-button.active {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    box-shadow: 0 2px 10px rgba(5, 150, 105, 0.30) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TABLAS
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .table-dark {
+    background: var(--bg-card) !important;
+}
+
+:root[data-theme="light"] .table-dark th {
+    background: var(--bg-secondary) !important;
+    border-bottom: 2px solid var(--border-strong) !important;
+    color: var(--text-primary) !important;
+}
+
+:root[data-theme="light"] .table-dark td {
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--text-primary) !important;
+}
+
+:root[data-theme="light"] .table-dark tr:hover {
+    background: var(--bg-card-hover) !important;
+}
+
+/* Textos de colores dentro de tablas generadas por JS */
+:root[data-theme="light"] .table-dark .text-red-400 { color: #b91c1c !important; }
+:root[data-theme="light"] .table-dark .text-blue-400 { color: #1d4ed8 !important; }
+:root[data-theme="light"] .table-dark .text-emerald-400 { color: #047857 !important; }
+:root[data-theme="light"] .table-dark .text-yellow-400 { color: #92400e !important; }
+:root[data-theme="light"] .table-dark .text-slate-200,
+:root[data-theme="light"] .table-dark .text-slate-300 { color: var(--text-primary) !important; }
+
+/* ══════════════════════════════════════════════════════════
+   GRÁFICOS
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .chart-container {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODALES
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .settings-modal {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-strong) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+:root[data-theme="light"] .modal-content {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-strong) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DROPDOWN DE TEMA
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .theme-dropdown-menu {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-strong) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+:root[data-theme="light"] .theme-choice {
+    color: var(--text-primary) !important;
+}
+
+:root[data-theme="light"] .theme-choice:hover {
+    background: var(--bg-secondary) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ZONA DE PELIGRO
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .danger-zone {
+    background: #fff5f5 !important;
+    border: 1px solid rgba(220, 38, 38, 0.28) !important;
+}
+
+:root[data-theme="light"] .danger-zone h3,
+:root[data-theme="light"] .danger-zone .danger-icon {
+    color: #b91c1c !important;
+}
+
+:root[data-theme="light"] .danger-zone p {
+    color: #7f1d1d !important;
+}
+
+:root[data-theme="light"] .danger-zone #delete-account-btn {
+    background: #dc2626 !important;
+    border-color: #b91c1c !important;
+    color: #ffffff !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BADGES DE ESTADO NUTRICIONAL
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .status-success {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important;
+    border: 1px solid rgba(5, 150, 105, 0.35) !important;
+    color: #065f46 !important;
+}
+
+:root[data-theme="light"] .status-warning {
+    background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+    border: 1px solid rgba(180, 83, 9, 0.35) !important;
+    color: #78350f !important;
+}
+
+:root[data-theme="light"] .status-info {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+    border: 1px solid rgba(59, 130, 246, 0.35) !important;
+    color: #1e40af !important;
+}
+
+:root[data-theme="light"] .status-secondary {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0) !important;
+    border: 1px solid rgba(100, 116, 139, 0.35) !important;
+    color: #334155 !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BADGES DE CUMPLIMIENTO
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .badge-cumplido {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important;
+    border: 1px solid rgba(5, 150, 105, 0.35) !important;
+    color: #065f46 !important;
+}
+
+:root[data-theme="light"] .badge-no-cumplido {
+    background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+    border: 1px solid rgba(180, 83, 9, 0.35) !important;
+    color: #78350f !important;
+}
+
+:root[data-theme="light"] .badge-parcial {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+    border: 1px solid rgba(59, 130, 246, 0.35) !important;
+    color: #1e40af !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BOTONES DE RESPUESTA (modal visor)
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .respuesta-btn {
+    border: 1px solid var(--border-strong) !important;
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+:root[data-theme="light"] .respuesta-btn:hover {
+    background: var(--bg-card-hover) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SECCIONES DE CONSEJOS (bordes laterales de color)
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .border-l-4.border-green-500 {
+    background: linear-gradient(to right, rgba(5,150,105,0.07), transparent) !important;
+}
+:root[data-theme="light"] .border-l-4.border-red-500 {
+    background: linear-gradient(to right, rgba(220,38,38,0.06), transparent) !important;
+}
+:root[data-theme="light"] .border-l-4.border-purple-500 {
+    background: linear-gradient(to right, rgba(139,92,246,0.06), transparent) !important;
+}
+:root[data-theme="light"] .border-l-4.border-orange-500 {
+    background: linear-gradient(to right, rgba(249,115,22,0.06), transparent) !important;
+}
+:root[data-theme="light"] .border-l-4.border-indigo-500 {
+    background: linear-gradient(to right, rgba(99,102,241,0.06), transparent) !important;
+}
+:root[data-theme="light"] .border-l-4.border-yellow-400 {
+    background: linear-gradient(to right, rgba(180,83,9,0.07), transparent) !important;
+}
+
+/* Fondos oscuros de Tailwind (from-*-900, bg-*-900) → claros en light */
+:root[data-theme="light"] [class*="from-green-9"] { background: linear-gradient(to right, rgba(5,150,105,0.07), transparent) !important; }
+:root[data-theme="light"] [class*="from-red-9"]   { background: linear-gradient(to right, rgba(220,38,38,0.06), transparent) !important; }
+:root[data-theme="light"] [class*="from-purple-9"]{ background: linear-gradient(to right, rgba(139,92,246,0.06), transparent) !important; }
+:root[data-theme="light"] [class*="from-orange-9"]{ background: linear-gradient(to right, rgba(249,115,22,0.06), transparent) !important; }
+:root[data-theme="light"] [class*="from-indigo-9"]{ background: linear-gradient(to right, rgba(99,102,241,0.06), transparent) !important; }
+:root[data-theme="light"] .bg-slate-700,
+:root[data-theme="light"] [class*="bg-slate-7"],
+:root[data-theme="light"] [class*="bg-slate-8"],
+:root[data-theme="light"] [class*="bg-slate-9"],
+:root[data-theme="light"] [class*="bg-gray-7"],
+:root[data-theme="light"] [class*="bg-gray-8"],
+:root[data-theme="light"] [class*="bg-gray-9"]  { background: #e2e8f0 !important; }
+
+/* Textos dentro de secciones de advertencia */
+:root[data-theme="light"] .text-yellow-300 { color: #92400e !important; }
+:root[data-theme="light"] .text-yellow-400 { color: #b45309 !important; }
+
+/* ══════════════════════════════════════════════════════════
+   MODAL VISOR DE CALORÍAS — botones Sí/No/Parcial
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .respuesta-btn[class*="bg-green"] {
+    background: rgba(5,150,105,0.12) !important;
+    color: #065f46 !important;
+}
+:root[data-theme="light"] .respuesta-btn[class*="bg-red"] {
+    background: rgba(220,38,38,0.10) !important;
+    color: #b91c1c !important;
+}
+:root[data-theme="light"] .respuesta-btn[class*="bg-yellow"] {
+    background: rgba(180,83,9,0.10) !important;
+    color: #78350f !important;
+}
+
+/* Footer text-gray-300 sobre fondo esmeralda */
+:root[data-theme="light"] footer.gradient-header .text-gray-300,
+:root[data-theme="light"] footer.gradient-bg .text-gray-300 {
+    color: rgba(255,255,255,0.88) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TARJETAS DE EJEMPLO (calculadora macros)
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .example-card {
+    background: rgba(5, 150, 105, 0.06) !important;
+    border: 1px solid rgba(5, 150, 105, 0.20) !important;
+}
+
+:root[data-theme="light"] .type-focus {
+    background: rgba(5, 150, 105, 0.07) !important;
+    border: 1px solid rgba(5, 150, 105, 0.28) !important;
+}
+
+:root[data-theme="light"] .empty-state {
+    background: var(--bg-secondary) !important;
+    border: 1px dashed var(--border-strong) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   AVATAR Y SWITCH DE TEMA
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .avatar-option {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-strong) !important;
+}
+
+:root[data-theme="light"] .avatar-option:hover {
+    border-color: var(--accent) !important;
+    background: var(--bg-card-hover) !important;
+}
+
+:root[data-theme="light"] .avatar-option.avatar-selected {
+    border-color: var(--accent) !important;
+    background: rgba(5, 150, 105, 0.12) !important;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.20) !important;
+}
+
+:root[data-theme="light"] .switch .slider {
+    background: rgba(5, 150, 105, 0.25) !important;
+}
+
+:root[data-theme="light"] .switch input:checked + .slider {
+    background: var(--accent) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   OJITO DE CONTRASEÑA
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .password-toggle {
+    color: var(--text-secondary) !important;
+}
+
+:root[data-theme="light"] .password-toggle:hover {
+    color: var(--text-primary) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: rgba(5, 150, 105, 0.35);
+    border-radius: 4px;
+}
+
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(5, 150, 105, 0.55);
+}
+
+/* ══════════════════════════════════════════════════════════
+   FONDOS INLINE GENERADOS POR JS (rgba cian → esmeralda)
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] [style*="rgba(34, 211, 238, 0.1)"],
+:root[data-theme="light"] [style*="rgba(34,211,238,0.1)"],
+:root[data-theme="light"] [style*="rgba(34, 211, 238, 0.3)"],
+:root[data-theme="light"] [style*="rgba(34,211,238,0.3)"] {
+    background: rgba(5, 150, 105, 0.08) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MISCELÁNEOS
+══════════════════════════════════════════════════════════ */
+:root[data-theme="light"] .bg-white\/5 {
+    background: rgba(5, 150, 105, 0.05) !important;
+}
+
+:root[data-theme="light"] .border-gray-600 {
+    border-color: var(--border-strong) !important;
+}
+
+/* Textos de colores en tarjetas de resultados JS */
+:root[data-theme="light"] .text-green-400  { color: #047857 !important; }
+:root[data-theme="light"] .text-red-400    { color: #b91c1c !important; }
+:root[data-theme="light"] .text-blue-400   { color: #1d4ed8 !important; }
+:root[data-theme="light"] .text-purple-400 { color: #6d28d9 !important; }
+:root[data-theme="light"] .text-yellow-400 { color: #b45309 !important; }
+:root[data-theme="light"] .text-orange-400 { color: #c2410c !important; }
+
+/* Excepción: colores dentro del header/footer siguen siendo blancos */
+:root[data-theme="light"] .gradient-header .text-green-400,
+:root[data-theme="light"] .gradient-header .text-red-400,
+:root[data-theme="light"] .gradient-header .text-blue-400,
+:root[data-theme="light"] .gradient-header .text-yellow-400,
+:root[data-theme="light"] .gradient-bg .text-green-400,
+:root[data-theme="light"] .gradient-bg .text-red-400,
+:root[data-theme="light"] .gradient-bg .text-blue-400,
+:root[data-theme="light"] .gradient-bg .text-yellow-400 { color: #ffffff !important; }

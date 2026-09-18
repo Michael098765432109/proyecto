@@ -22,17 +22,16 @@
 
         /* Tema claro verdoso */
         :root[data-theme="light"]{
-            --bg-primary: #f6fff9;
-            --bg-secondary: #eafff1;
-            --bg-card: #dff8ea;
-            --bg-card-hover: #c9f0d8;
-            --text-primary: #0b2a19;
-            --text-secondary: #2a5c42;
-
-            /* Verde césped vibrante */
-            --accent-blue: #2CEB63;
-            --accent-emerald: #2CEB63;
-            --accent-cyan: #2CEB63;
+            --bg-primary:    #fafffe;
+            --bg-secondary:  #f0fdf8;
+            --bg-card:       #ffffff;
+            --bg-card-hover: #f0fdf8;
+            --text-primary:   #134e35;
+            --text-secondary: #2d6a4f;
+            --text-muted:     #52796f;
+            --accent-blue:    #059669;
+            --accent-emerald: #059669;
+            --accent-cyan:    #0891b2;
         }
 
         body {
@@ -42,24 +41,13 @@
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        /* Contorno blanco SOLO en los recuadros que llevan a otras páginas */
-        .card-dark {
-            border: 2px solid rgba(255,255,255,0.95);
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 10px 30px rgba(0,0,0,0.25);
-        }
-
-        /* Contorno blanco SOLO para el texto del header del index */
-        header .text-left h1,
-        header .text-left p {
-            -webkit-text-stroke: 1px rgba(255,255,255,0.95);
-        }
-
         .gradient-header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
         }
 
         .card-dark {
             background: var(--bg-card);
+            border: 1px solid rgba(51,65,85,0.7);
             transition: all 0.3s ease;
         }
         .login-container {
@@ -101,7 +89,7 @@ button:hover {
 
         .card-dark:hover {
             background: var(--bg-card-hover);
-            border-color: rgba(255,255,255,0.95);
+            border-color: #475569;
             transform: translateY(-2px);
         }
 
@@ -199,51 +187,7 @@ button:hover {
             100% { transform: translateY(100%); opacity: 0; }
         }
 
-        /* ===== Accesibilidad en tema claro =====
-           Muchas cabeceras usan clases Tailwind (ej. text-white) fijas.
-           Esto fuerza a que en light respeten tus variables. */
-        :root[data-theme="light"] h1,
-        :root[data-theme="light"] h2,
-        :root[data-theme="light"] h3,
-        :root[data-theme="light"] h4,
-        :root[data-theme="light"] h5,
-        :root[data-theme="light"] h6 {
-            color: var(--text-primary) !important;
-            /* Contorno blanco brillante para legibilidad */
-            text-shadow:
-                -1px -1px 0 rgba(255,255,255,0.95),
-                 1px -1px 0 rgba(255,255,255,0.95),
-                -1px  1px 0 rgba(255,255,255,0.95),
-                 1px  1px 0 rgba(255,255,255,0.95),
-                 0   0px 6px rgba(255,255,255,0.35);
-        }
-
-        :root[data-theme="light"] .text-white,
-        :root[data-theme="light"] .text-gray-300 {
-            color: var(--text-primary) !important;
-        }
-
-        :root[data-theme="light"] .text-text-secondary,
-        :root[data-theme="light"] .text-gray-400,
-        :root[data-theme="light"] .text-slate-300,
-        :root[data-theme="light"] .text-slate-400,
-        :root[data-theme="light"] .text-cyan-100,
-        :root[data-theme="light"] .text-blue-200,
-        :root[data-theme="light"] .text-yellow-300,
-        :root[data-theme="light"] .text-green-300,
-        :root[data-theme="light"] .text-red-300,
-        :root[data-theme="light"] .text-purple-300 {
-            color: var(--text-secondary) !important;
-        }
-
-        /* Letras claras que puedan perder contraste: se refuerzan */
-        :root[data-theme="light"] .text-white,
-        :root[data-theme="light"] .text-gray-300,
-        :root[data-theme="light"] .text-slate-300 {
-            text-shadow:
-                0 1px 0 rgba(0,0,0,0.18),
-                0 0 2px rgba(0,0,0,0.10) !important;
-        }
+        /* Tema claro: gestionado por light-theme.css via responsive.css */
 
         /* ===== Animación de hojas (solo tema claro) ===== */
         .leaves-layer{

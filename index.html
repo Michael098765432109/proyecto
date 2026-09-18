@@ -29,19 +29,17 @@
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    /* Tema claro verdoso */
+    /* Tema claro */
     :root[data-theme="light"]{
-      --bg-primary: #f6fff9;
-      --bg-secondary: #eafff1;
-      --bg-card: #dff8ea;
-      --bg-card-hover: #c9f0d8;
-      --text-primary: #0b2a19;
-      --text-secondary: #2a5c42;
-
-      /* Verde más vivo */
-      --accent-blue: #00d084;
-      --accent-emerald: #00d084;
-      --accent-cyan: #00b3ff;
+      --bg-primary:    #fafffe;
+      --bg-secondary:  #f0fdf8;
+      --bg-card:       #ffffff;
+      --bg-card-hover: #f0fdf8;
+      --text-primary:   #134e35;
+      --text-secondary: #2d6a4f;
+      --accent-blue:    #059669;
+      --accent-emerald: #059669;
+      --accent-cyan:    #0891b2;
     }
 
     .gradient-header {
@@ -68,16 +66,16 @@
       transform: translateY(-2px);
     }
 
-    /* Botón verde principal (más vivo) */
+    /* Botón principal */
     .btn-primary {
-      background: #00d084;
-      color: #121212;
-      font-weight: 800;
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      color: #ffffff;
+      font-weight: 700;
       transition: 0.25s;
       border: none;
     }
     .btn-primary:hover {
-      background: #00bf77;
+      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
       transform: translateY(-1px);
     }
 
@@ -145,9 +143,7 @@
       animation: popIn 0.6s ease-out both;
     }
 
-    /* ===== Accesibilidad en tema claro =====
-       En lobby se usan títulos con text-white / text-gray-300.
-       En light pueden perder contraste, así que forzamos a usar tus variables. */
+    /* ===== Accesibilidad en tema claro ===== */
     :root[data-theme="light"] h1,
     :root[data-theme="light"] h2,
     :root[data-theme="light"] h3,
@@ -178,92 +174,6 @@
     :root[data-theme="light"] .text-slate-300,
     :root[data-theme="light"] .text-slate-500 {
       color: var(--text-secondary) !important;
-    }
-
-    /* Contorno blanco para textos claros en tema claro */
-    :root[data-theme="light"] .text-slate-300,
-    :root[data-theme="light"] .text-gray-300,
-    :root[data-theme="light"] .text-white {
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95),
-         0   0px 6px rgba(255,255,255,0.35) !important;
-    }
-
-    /* Botón de cambio de tema con contorno blanco en tema claro */
-    :root[data-theme="light"] #theme-toggle-btn {
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95),
-         0   0px 6px rgba(255,255,255,0.35) !important;
-    }
-
-    /* Helper-text con contorno blanco en tema claro */
-    :root[data-theme="light"] .helper-text {
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95),
-         0   0px 4px rgba(255,255,255,0.30) !important;
-    }
-
-    /* Footer y otros textos con clase text-gray-300 */
-    :root[data-theme="light"] footer .text-gray-300 {
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95),
-         0   0px 6px rgba(255,255,255,0.35) !important;
-    }
-
-    /* Botones de cambio de sección (Crear cuenta / Iniciar sesión) con contorno blanco */
-    :root[data-theme="light"] #switch-to-register,
-    :root[data-theme="light"] #switch-auth {
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95),
-         0   0px 6px rgba(255,255,255,0.35) !important;
-    }
-
-    /* Contorno blanco brillante a títulos en tema claro para lectura */
-    :root[data-theme="light"] h1,
-    :root[data-theme="light"] h2,
-    :root[data-theme="light"] h3,
-    :root[data-theme="light"] h4,
-    :root[data-theme="light"] h5,
-    :root[data-theme="light"] h6 {
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.95),
-         1px -1px 0 rgba(255,255,255,0.95),
-        -1px  1px 0 rgba(255,255,255,0.95),
-         1px  1px 0 rgba(255,255,255,0.95),
-         0   0px 6px rgba(255,255,255,0.35);
-    }
-
-    /* Contorno blanco más marcado específicamente para el título MacroSync en tema claro */
-    :root[data-theme="light"] #macrosync-title {
-      text-shadow:
-        -2px -2px 0 rgba(255,255,255,0.95),
-         2px -2px 0 rgba(255,255,255,0.95),
-        -2px  2px 0 rgba(255,255,255,0.95),
-         2px  2px 0 rgba(255,255,255,0.95),
-         0    0px 10px rgba(255,255,255,0.5) !important;
-    }
-
-    /* ===== Ojito de contraseña (password toggle) para tema claro ===== */
-    :root[data-theme="light"] .password-toggle {
-      color: var(--text-secondary) !important;
-    }
-    :root[data-theme="light"] .password-toggle:hover {
-      color: var(--text-primary) !important;
     }
   </style>
 </head>

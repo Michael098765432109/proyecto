@@ -23,15 +23,15 @@
         }
 
         :root[data-theme="light"]{
-            --bg-primary: #f6fff9;
-            --bg-secondary: #eafff1;
-            --bg-card: #dff8ea;
-            --bg-card-hover: #c9f0d8;
-            --text-primary: #0b2a19;
-            --text-secondary: #2a5c42;
-            --accent-blue: #0ea37a;
-            --accent-emerald: #0ea37a;
-            --accent-cyan: #0ea37a;
+            --bg-primary:    #fafffe;
+            --bg-secondary:  #f0fdf8;
+            --bg-card:       #ffffff;
+            --bg-card-hover: #f0fdf8;
+            --text-primary:   #134e35;
+            --text-secondary: #2d6a4f;
+            --accent-blue:    #059669;
+            --accent-emerald: #059669;
+            --accent-cyan:    #0891b2;
         }
 
         body {
@@ -68,28 +68,7 @@
             transform: translateY(-1px);
         }
 
-        :root[data-theme="light"] .gradient-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-            color: #fff !important;
-        }
-
-        :root[data-theme="light"] .gradient-header h1,
-        :root[data-theme="light"] .gradient-header p,
-        :root[data-theme="light"] .gradient-header button,
-        :root[data-theme="light"] .gradient-header a,
-        :root[data-theme="light"] .gradient-header span {
-            color: #fff !important;
-            text-shadow:
-                -1px -1px 0 rgba(255,255,255,0.95),
-                 1px -1px 0 rgba(255,255,255,0.95),
-                -1px  1px 0 rgba(255,255,255,0.95),
-                 1px  1px 0 rgba(255,255,255,0.95);
-        }
-
-        :root[data-theme="light"] .gradient-header .text-cyan-300,
-        :root[data-theme="light"] .gradient-header .text-cyan-400 {
-            color: #67e8f9 !important;
-        }
+        /* Tema claro: gestionado por light-theme.css via responsive.css */
 
         .rayos {
             position: fixed;
@@ -124,62 +103,7 @@
             100% { transform: translateY(100%); opacity: 0; }
         }
 
-        :root[data-theme="light"] h1,
-        :root[data-theme="light"] h2,
-        :root[data-theme="light"] h3,
-        :root[data-theme="light"] h4,
-        :root[data-theme="light"] h5,
-        :root[data-theme="light"] h6 {
-            color: var(--text-primary) !important;
-            text-shadow:
-                -1px -1px 0 rgba(255,255,255,0.95),
-                 1px -1px 0 rgba(255,255,255,0.95),
-                -1px  1px 0 rgba(255,255,255,0.95),
-                 1px  1px 0 rgba(255,255,255,0.95),
-                 0   0px 6px rgba(255,255,255,0.35);
-        }
-
-        :root[data-theme="light"] .text-white,
-        :root[data-theme="light"] .text-gray-300,
-        :root[data-theme="light"] .text-slate-300 {
-            color: var(--text-primary) !important;
-        }
-
-        :root[data-theme="light"] .text-slate-400,
-        :root[data-theme="light"] .text-slate-300 {
-            color: var(--text-secondary) !important;
-        }
-
-        :root[data-theme="light"] .text-blue-400,
-        :root[data-theme="light"] .text-emerald-400,
-        :root[data-theme="light"] .text-cyan-400,
-        :root[data-theme="light"] .text-indigo-400,
-        :root[data-theme="light"] .text-purple-400,
-        :root[data-theme="light"] .text-yellow-400 {
-            color: var(--accent-emerald) !important;
-        }
-
-        :root[data-theme="light"] .text-white,
-        :root[data-theme="light"] .text-gray-300,
-        :root[data-theme="light"] .text-slate-300,
-        :root[data-theme="light"] .text-red-300,
-        :root[data-theme="light"] .text-yellow-300,
-        :root[data-theme="light"] .text-green-300,
-        :root[data-theme="light"] .text-blue-200,
-        :root[data-theme="light"] .text-cyan-100 {
-            color: var(--text-primary) !important;
-            text-shadow:
-                0 1px 0 rgba(0,0,0,0.18),
-                0 0 2px rgba(0,0,0,0.10) !important;
-        }
-
-        :root[data-theme="light"] .text-slate-200,
-        :root[data-theme="light"] .text-slate-400,
-        :root[data-theme="light"] .text-slate-500,
-        :root[data-theme="light"] .text-secondary,
-        :root[data-theme="light"] .text-slate-300 {
-            color: var(--text-secondary) !important;
-        }
+        /* Tema claro: gestionado por light-theme.css via responsive.css */
 
         /* Modal overlay */
         .modal-overlay {
@@ -634,13 +558,13 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                color: '#94a3b8',
+                                color: document.documentElement.getAttribute('data-theme') === 'light' ? '#2d6a4f' : '#94a3b8',
                                 callback: function(value) { return value + ' kcal'; }
                             },
                             grid: { color: 'rgba(148, 163, 184, 0.1)' }
                         },
                         x: {
-                            ticks: { color: '#94a3b8' },
+                            ticks: { color: document.documentElement.getAttribute('data-theme') === 'light' ? '#2d6a4f' : '#94a3b8' },
                             grid: { color: 'rgba(148, 163, 184, 0.1)' }
                         }
                     }
@@ -678,7 +602,7 @@
                             labels: {
                                 padding: 20,
                                 font: { size: 12 },
-                                color: '#94a3b8'
+                                color: document.documentElement.getAttribute('data-theme') === 'light' ? '#0f2d1e' : '#94a3b8'
                             }
                         }
                     }
