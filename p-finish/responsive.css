@@ -49,6 +49,29 @@ button { touch-action: manipulation; }
   .badge-animate { padding: 0.6rem !important; }
 }
 
+/* Keep the preset profile avatars compact on phones; general grid rules above
+   intentionally stack page content but should not turn avatar choices into cards. */
+#settings-avatar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0.65rem !important;
+}
+
+#settings-avatar-grid .avatar-option {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  height: auto !important;
+  padding: 0 !important;
+  aspect-ratio: 1 / 1;
+}
+
+@media (min-width: 640px) {
+  #settings-avatar-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+}
+
 /* Mejoras de accesibilidad táctil */
 button, .btn-primary, .gradient-button, .gradient-calories { min-height: 44px; }
 
