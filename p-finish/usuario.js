@@ -16,6 +16,8 @@ const THEME_KEY = 'nutry_theme'
 // ==========================================
 let currentUsername = null
 let currentAvatar = null
+let currentAvatarImage = null
+let selectedAvatarImage = null
 
 const AVATARS = [
   { emoji: '🥑', label: 'Aguacate' },
@@ -85,7 +87,17 @@ function getInitial(email) {
 function updateHeaderProfile() {
   const target = document.getElementById('header-profile')
   if (!target) return
-  target.textContent = (currentAvatar || '') + (currentUsername ? ' @' + currentUsername : '')
+  target.replaceChildren()
+  if (currentAvatarImage) {
+    const image = document.createElement('img')
+    image.className = 'brand-profile-photo'
+    image.src = currentAvatarImage
+    image.alt = 'Foto de perfil'
+    target.appendChild(image)
+  } else if (currentAvatar) {
+    target.append(document.createTextNode(currentAvatar))
+  }
+  if (currentUsername) target.append(document.createTextNode(' @' + currentUsername))
 }
 
 // ==========================================
@@ -203,11 +215,16 @@ function renderProfile(user) {
 
   currentUsername = metadata.username || null
   currentAvatar = metadata.avatar || null
-  localStorage.setItem('macrosync_profile', JSON.stringify({ username: currentUsername, avatar: currentAvatar }))
+  currentAvatarImage = typeof metadata.avatarImage === 'string' && metadata.avatarImage.startsWith('data:image/')
+    ? metadata.avatarImage
+    : null
+  localStorage.setItem('macrosync_profile', JSON.stringify({ username: currentUsername, avatar: currentAvatar, avatarImage: currentAvatarImage }))
   updateHeaderProfile()
 
   const displayName = currentUsername || email
-  const avatarDisplay = currentAvatar || escapeHtml(getInitial(email))
+  const avatarDisplay = currentAvatarImage
+    ? `<img src="${escapeHtml(currentAvatarImage)}" alt="Foto de perfil" class="w-full h-full rounded-full object-cover" />`
+    : escapeHtml(currentAvatar || getInitial(email))
 
   if (titleEl) {
     titleEl.textContent = 'Mi Información'
@@ -355,6 +372,51 @@ function buildAvatarOptions(selectedEmoji) {
   }).join('')
 }
 
+function setAvatarImagePreview(dataUrl) {
+  const preview = document.getElementById('settings-avatar-preview')
+  const removeButton = document.getElementById('settings-avatar-remove')
+  if (!preview || !removeButton) return
+  selectedAvatarImage = dataUrl || null
+  if (selectedAvatarImage) {
+    preview.src = selectedAvatarImage
+    preview.classList.remove('hidden')
+    removeButton.classList.remove('hidden')
+  } else {
+    preview.removeAttribute('src')
+    preview.classList.add('hidden')
+    removeButton.classList.add('hidden')
+  }
+}
+
+function resizeAvatarImage(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file)
+    const image = new Image()
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const maxDimension = 256
+      const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+      const context = canvas.getContext('2d')
+      if (!context) {
+        reject(new Error('No se pudo procesar la imagen.'))
+        return
+      }
+      context.fillStyle = '#ffffff'
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL('image/jpeg', 0.82))
+    }
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      reject(new Error('No se pudo abrir esta imagen. Prueba con otro archivo.'))
+    }
+    image.src = objectUrl
+  })
+}
+
 function openSettingsModal() {
   const overlay = document.getElementById('settings-modal-overlay')
   const usernameInput = document.getElementById('settings-username')
@@ -364,6 +426,11 @@ function openSettingsModal() {
 
   usernameInput.value = currentUsername || ''
   hint.textContent = currentUsername ? 'Tu nombre de usuario actual.' : 'Crea un nombre para tu cuenta.'
+  const photoHint = document.getElementById('settings-avatar-hint')
+  const fileInput = document.getElementById('settings-avatar-file')
+  if (fileInput) fileInput.value = ''
+  if (photoHint) photoHint.textContent = ''
+  setAvatarImagePreview(currentAvatarImage)
 
   let selectedEmoji = currentAvatar || null
   avatarGrid.innerHTML = buildAvatarOptions(selectedEmoji)
@@ -374,6 +441,7 @@ function openSettingsModal() {
       options.forEach(o => o.classList.remove('avatar-selected'))
       opt.classList.add('avatar-selected')
       selectedEmoji = opt.dataset.emoji
+      setAvatarImagePreview(null)
     })
   })
 
@@ -392,7 +460,9 @@ async function saveSettings() {
   const hint = document.getElementById('settings-username-hint')
 
   const username = (usernameInput.value || '').trim()
-  const selectedEmoji = overlay.querySelector('.avatar-option.avatar-selected')?.dataset?.emoji || currentAvatar || null
+  const selectedEmoji = selectedAvatarImage
+    ? null
+    : overlay.querySelector('.avatar-option.avatar-selected')?.dataset?.emoji || currentAvatar || null
 
   if (username && !/^[a-zA-Z0-9_.-]+$/.test(username)) {
     hint.textContent = 'Solo letras, números, puntos, guiones y guiones bajos.'
@@ -411,6 +481,8 @@ async function saveSettings() {
     else delete meta.username
     if (selectedEmoji) meta.avatar = selectedEmoji
     else delete meta.avatar
+    if (selectedAvatarImage) meta.avatarImage = selectedAvatarImage
+    else delete meta.avatarImage
 
     const { error } = await supabase.auth.updateUser({
       data: meta
@@ -426,7 +498,8 @@ async function saveSettings() {
 
     currentUsername = username || null
     currentAvatar = selectedEmoji || null
-    localStorage.setItem('macrosync_profile', JSON.stringify({ username: currentUsername, avatar: currentAvatar }))
+    currentAvatarImage = selectedAvatarImage || null
+    localStorage.setItem('macrosync_profile', JSON.stringify({ username: currentUsername, avatar: currentAvatar, avatarImage: currentAvatarImage }))
     updateHeaderProfile()
 
     if (saveBtn) {
@@ -634,6 +707,52 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeBtn) closeBtn.addEventListener('click', closeSettingsModal)
   if (cancelBtn) cancelBtn.addEventListener('click', closeSettingsModal)
   if (saveBtn) saveBtn.addEventListener('click', saveSettings)
+  const avatarFileInput = document.getElementById('settings-avatar-file')
+  const avatarRemoveButton = document.getElementById('settings-avatar-remove')
+  const avatarHint = document.getElementById('settings-avatar-hint')
+  if (avatarFileInput) {
+    avatarFileInput.addEventListener('change', async () => {
+      const file = avatarFileInput.files?.[0]
+      if (!file) return
+      if (!file.type.startsWith('image/')) {
+        avatarHint.textContent = 'Selecciona un archivo de imagen.'
+        avatarHint.style.color = '#f87171'
+        avatarFileInput.value = ''
+        return
+      }
+      if (file.size > 15 * 1024 * 1024) {
+        avatarHint.textContent = 'La imagen debe pesar menos de 15 MB.'
+        avatarHint.style.color = '#f87171'
+        avatarFileInput.value = ''
+        return
+      }
+      avatarHint.textContent = 'Preparando la foto…'
+      avatarHint.style.color = ''
+      try {
+        const compressedImage = await resizeAvatarImage(file)
+        setAvatarImagePreview(compressedImage)
+        document.querySelectorAll('#settings-avatar-grid .avatar-option').forEach(option => {
+          option.classList.remove('avatar-selected')
+        })
+        avatarHint.textContent = 'Foto lista. Pulsa “Guardar cambios” para aplicarla.'
+        avatarHint.style.color = '#34d399'
+      } catch (error) {
+        avatarHint.textContent = error.message || 'No se pudo procesar la imagen.'
+        avatarHint.style.color = '#f87171'
+        avatarFileInput.value = ''
+      }
+    })
+  }
+  if (avatarRemoveButton) {
+    avatarRemoveButton.addEventListener('click', () => {
+      setAvatarImagePreview(null)
+      if (avatarFileInput) avatarFileInput.value = ''
+      if (avatarHint) {
+        avatarHint.textContent = 'La foto se quitará al guardar los cambios.'
+        avatarHint.style.color = ''
+      }
+    })
+  }
   if (overlay) {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeSettingsModal()

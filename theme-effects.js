@@ -1,10 +1,36 @@
 (function () {
   const THEME_KEY = 'nutry_theme'
-  const leafCount = 28
+  const leafCount = 24
+  const rayCount = 6
+
+  function ensureRays() {
+    let raysLayer = document.querySelector('.rayos')
+    if (!raysLayer) {
+      raysLayer = document.createElement('div')
+      raysLayer.className = 'rayos'
+      raysLayer.setAttribute('aria-hidden', 'true')
+      for (let index = 0; index < rayCount; index += 1) {
+        raysLayer.appendChild(document.createElement('div')).className = 'rayo'
+      }
+    }
+    if (raysLayer.parentElement !== document.body) document.body.prepend(raysLayer)
+  }
+
+  function getLeavesLayer() {
+    let leavesLayer = document.getElementById('leavesLayer')
+    if (!leavesLayer) {
+      leavesLayer = document.createElement('div')
+      leavesLayer.id = 'leavesLayer'
+      leavesLayer.className = 'leaves-layer'
+      leavesLayer.setAttribute('aria-hidden', 'true')
+    }
+    if (leavesLayer.parentElement !== document.body) document.body.prepend(leavesLayer)
+    return leavesLayer
+  }
 
   function spawnLeaves() {
-    const leavesLayer = document.getElementById('leavesLayer')
-    if (!leavesLayer || leavesLayer.dataset.spawned === '1') return
+    const leavesLayer = getLeavesLayer()
+    if (leavesLayer.dataset.spawned === '1') return
 
     leavesLayer.dataset.spawned = '1'
     for (let index = 0; index < leafCount; index += 1) {
@@ -14,7 +40,9 @@
       leaf.style.setProperty('--leaf-x', Math.random() * 100 + 'vw')
       leaf.style.setProperty('--leaf-drift', 20 + Math.random() * 60 + 'px')
       leaf.style.setProperty('--leaf-rot', Math.random() * 40 - 20 + 'deg')
-      leaf.style.setProperty('--leaf-duration', 5 + Math.random() * 6 + 's')
+      const duration = 8 + Math.random() * 8
+      leaf.style.setProperty('--leaf-duration', duration + 's')
+      leaf.style.animationDelay = -Math.random() * duration + 's'
       leaf.style.setProperty('--leaf-size', size + 'px')
       leaf.style.fontSize = size + 'px'
       leaf.style.lineHeight = '1'
@@ -29,6 +57,7 @@
       spawnLeaves()
     } else {
       document.documentElement.removeAttribute('data-theme')
+      ensureRays()
     }
   }
 
@@ -37,6 +66,7 @@
 
     const observer = new MutationObserver(() => {
       if (document.documentElement.matches('[data-theme="light"]')) spawnLeaves()
+      else ensureRays()
     })
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
   }

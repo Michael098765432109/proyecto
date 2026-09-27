@@ -67,7 +67,6 @@ table th, table td { white-space: nowrap; }
 
 /* Hide decorative vertical rays and prevent horizontal overflow on touch devices (Android/tablets) */
 @media (max-width: 768px), (pointer: coarse) {
-  .rayos, .rayo { display: none !important; }
   html, body { overflow-x: hidden; }
   /* Ensure main layout containers don't produce horizontal overflow on mobile */
   .container, main, header, footer { padding-left: 1rem !important; padding-right: 1rem !important; box-sizing: border-box; }
