@@ -318,6 +318,69 @@
             vertical-align: middle;
         }
 
+        .avatar-file-picker {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px dashed rgba(148, 163, 184, 0.55);
+            border-radius: 0.85rem;
+            background: var(--bg-secondary);
+        }
+        .avatar-file-input {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        .avatar-file-button {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            width: auto !important;
+            min-height: 48px !important;
+            padding: 0.7rem 1rem !important;
+            border: 1px solid var(--accent-emerald) !important;
+            border-radius: 0.7rem !important;
+            background: var(--accent-emerald) !important;
+            color: #fff !important;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .avatar-file-button:hover {
+            background: var(--accent-cyan) !important;
+            border-color: var(--accent-cyan) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
+        }
+        .avatar-file-button:focus-visible {
+            outline: 3px solid var(--accent-cyan);
+            outline-offset: 3px;
+        }
+        .avatar-file-name {
+            min-width: 0;
+            flex: 1 1 10rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            overflow-wrap: anywhere;
+        }
+        :root[data-theme="light"] .avatar-file-picker {
+            border-color: rgba(5, 150, 105, 0.35);
+            background: #f0fdf8;
+        }
+        :root[data-theme="light"] .avatar-file-button:hover {
+            background: #047857 !important;
+            border-color: #047857 !important;
+        }
+
         /* ===== Animación de hojas (solo tema claro) ===== */
         .leaves-layer{
             position: fixed;
@@ -421,8 +484,14 @@
             </div>
 
             <div class="mb-6">
-                <label for="settings-avatar-file" class="block text-slate-300 font-semibold mb-2">O usa una foto de tu dispositivo</label>
-                <input id="settings-avatar-file" type="file" accept="image/*" class="block w-full text-sm text-slate-300" />
+                <label class="block text-slate-300 font-semibold mb-2">O usa una foto de tu dispositivo</label>
+                <div class="avatar-file-picker">
+                    <input id="settings-avatar-file" class="avatar-file-input" type="file" accept="image/*" aria-label="Seleccionar foto de perfil" />
+                    <button type="button" id="settings-avatar-browse" class="avatar-file-button" aria-controls="settings-avatar-file">
+                        <i class="fas fa-camera" aria-hidden="true"></i>Seleccionar foto
+                    </button>
+                    <span id="settings-avatar-filename" class="avatar-file-name">Ninguna foto seleccionada</span>
+                </div>
                 <p class="text-slate-400 text-sm mt-2">Selecciona una imagen JPG, PNG o WebP. La foto se ajustará para usarla como avatar.</p>
                 <div class="flex items-center gap-4 mt-4">
                     <img id="settings-avatar-preview" class="profile-photo-preview hidden" alt="Vista previa de la foto de perfil" />

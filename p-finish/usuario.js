@@ -428,7 +428,9 @@ function openSettingsModal() {
   hint.textContent = currentUsername ? 'Tu nombre de usuario actual.' : 'Crea un nombre para tu cuenta.'
   const photoHint = document.getElementById('settings-avatar-hint')
   const fileInput = document.getElementById('settings-avatar-file')
+  const fileName = document.getElementById('settings-avatar-filename')
   if (fileInput) fileInput.value = ''
+  if (fileName) fileName.textContent = 'Ninguna foto seleccionada'
   if (photoHint) photoHint.textContent = ''
   setAvatarImagePreview(currentAvatarImage)
 
@@ -708,22 +710,30 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cancelBtn) cancelBtn.addEventListener('click', closeSettingsModal)
   if (saveBtn) saveBtn.addEventListener('click', saveSettings)
   const avatarFileInput = document.getElementById('settings-avatar-file')
+  const avatarBrowseButton = document.getElementById('settings-avatar-browse')
+  const avatarFileName = document.getElementById('settings-avatar-filename')
   const avatarRemoveButton = document.getElementById('settings-avatar-remove')
   const avatarHint = document.getElementById('settings-avatar-hint')
+  if (avatarBrowseButton && avatarFileInput) {
+    avatarBrowseButton.addEventListener('click', () => avatarFileInput.click())
+  }
   if (avatarFileInput) {
     avatarFileInput.addEventListener('change', async () => {
       const file = avatarFileInput.files?.[0]
       if (!file) return
+      if (avatarFileName) avatarFileName.textContent = file.name
       if (!file.type.startsWith('image/')) {
         avatarHint.textContent = 'Selecciona un archivo de imagen.'
         avatarHint.style.color = '#f87171'
         avatarFileInput.value = ''
+        if (avatarFileName) avatarFileName.textContent = 'Ninguna foto seleccionada'
         return
       }
       if (file.size > 15 * 1024 * 1024) {
         avatarHint.textContent = 'La imagen debe pesar menos de 15 MB.'
         avatarHint.style.color = '#f87171'
         avatarFileInput.value = ''
+        if (avatarFileName) avatarFileName.textContent = 'Ninguna foto seleccionada'
         return
       }
       avatarHint.textContent = 'Preparando la foto…'
@@ -740,6 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
         avatarHint.textContent = error.message || 'No se pudo procesar la imagen.'
         avatarHint.style.color = '#f87171'
         avatarFileInput.value = ''
+        if (avatarFileName) avatarFileName.textContent = 'Ninguna foto seleccionada'
       }
     })
   }
@@ -747,6 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
     avatarRemoveButton.addEventListener('click', () => {
       setAvatarImagePreview(null)
       if (avatarFileInput) avatarFileInput.value = ''
+      if (avatarFileName) avatarFileName.textContent = 'Ninguna foto seleccionada'
       if (avatarHint) {
         avatarHint.textContent = 'La foto se quitará al guardar los cambios.'
         avatarHint.style.color = ''
