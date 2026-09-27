@@ -253,6 +253,39 @@
             box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
         }
 
+        /* Tamaño propio del selector: evita que las reglas móviles globales
+           conviertan cada avatar en un botón ancho o una tarjeta gigante. */
+        #settings-avatar-grid {
+            display: grid !important;
+            grid-template-columns: repeat(6, 56px) !important;
+            justify-content: start;
+            gap: 10px !important;
+        }
+        #settings-avatar-grid .avatar-option {
+            display: flex !important;
+            width: 56px !important;
+            height: 56px !important;
+            min-width: 56px !important;
+            min-height: 56px !important;
+            max-width: 56px !important;
+            padding: 0 !important;
+            aspect-ratio: auto !important;
+            flex: none !important;
+        }
+        @media (max-width: 480px) {
+            #settings-avatar-grid {
+                grid-template-columns: repeat(4, 48px) !important;
+                gap: 8px !important;
+            }
+            #settings-avatar-grid .avatar-option {
+                width: 48px !important;
+                height: 48px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
+                max-width: 48px !important;
+            }
+        }
+
         :root[data-theme="light"] .avatar-option {
             background: var(--bg-secondary);
             border-color: rgba(0,0,0,0.15);
