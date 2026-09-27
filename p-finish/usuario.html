@@ -328,16 +328,21 @@
             border-radius: 0.85rem;
             background: var(--bg-secondary);
         }
+        .avatar-file-control {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
         .avatar-file-input {
             position: absolute !important;
-            width: 1px !important;
-            height: 1px !important;
+            inset: 0 !important;
+            z-index: 2;
+            width: 100% !important;
+            height: 100% !important;
             padding: 0 !important;
-            margin: -1px !important;
-            overflow: hidden !important;
-            clip: rect(0, 0, 0, 0) !important;
-            white-space: nowrap !important;
-            border: 0 !important;
+            margin: 0 !important;
+            opacity: 0;
+            cursor: pointer;
         }
         .avatar-file-button {
             display: inline-flex !important;
@@ -362,6 +367,10 @@
             box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
         }
         .avatar-file-button:focus-visible {
+            outline: 3px solid var(--accent-cyan);
+            outline-offset: 3px;
+        }
+        .avatar-file-input:focus-visible + .avatar-file-button {
             outline: 3px solid var(--accent-cyan);
             outline-offset: 3px;
         }
@@ -486,10 +495,12 @@
             <div class="mb-6">
                 <label class="block text-slate-300 font-semibold mb-2">O usa una foto de tu dispositivo</label>
                 <div class="avatar-file-picker">
-                    <input id="settings-avatar-file" class="avatar-file-input" type="file" accept="image/*" aria-label="Seleccionar foto de perfil" />
-                    <button type="button" id="settings-avatar-browse" class="avatar-file-button" aria-controls="settings-avatar-file">
+                    <div class="avatar-file-control">
+                        <input id="settings-avatar-file" class="avatar-file-input" type="file" accept="image/*" aria-label="Seleccionar foto de perfil" />
+                        <label for="settings-avatar-file" class="avatar-file-button">
                         <i class="fas fa-camera" aria-hidden="true"></i>Seleccionar foto
-                    </button>
+                        </label>
+                    </div>
                     <span id="settings-avatar-filename" class="avatar-file-name">Ninguna foto seleccionada</span>
                 </div>
                 <p class="text-slate-400 text-sm mt-2">Selecciona una imagen JPG, PNG o WebP. La foto se ajustará para usarla como avatar.</p>
@@ -588,7 +599,7 @@
         </div>
     </div>
 
-    <script type="module" src="./usuario.js?v=4"></script>
+    <script type="module" src="./usuario.js?v=5"></script>
     <link rel="stylesheet" href="../responsive.css">
     <script src="../theme-effects.js"></script>
     <script>

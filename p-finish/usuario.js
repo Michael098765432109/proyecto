@@ -710,13 +710,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cancelBtn) cancelBtn.addEventListener('click', closeSettingsModal)
   if (saveBtn) saveBtn.addEventListener('click', saveSettings)
   const avatarFileInput = document.getElementById('settings-avatar-file')
-  const avatarBrowseButton = document.getElementById('settings-avatar-browse')
   const avatarFileName = document.getElementById('settings-avatar-filename')
   const avatarRemoveButton = document.getElementById('settings-avatar-remove')
   const avatarHint = document.getElementById('settings-avatar-hint')
-  if (avatarBrowseButton && avatarFileInput) {
-    avatarBrowseButton.addEventListener('click', () => avatarFileInput.click())
-  }
   if (avatarFileInput) {
     avatarFileInput.addEventListener('change', async () => {
       const file = avatarFileInput.files?.[0]
