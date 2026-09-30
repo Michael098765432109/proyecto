@@ -149,9 +149,9 @@ export async function obtenerComidas() {
 /**
  * Guarda el registro de cumplimiento diario (Sí/No/Parcial).
  */
-export async function guardarCumplimiento(respuesta) {
+export async function guardarCumplimiento(respuesta, fechaOverride) {
   const userId = getUserId()
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = fechaOverride || new Date().toISOString().split('T')[0]
   const key = getComplianceLogKey()
 
   const entry = {

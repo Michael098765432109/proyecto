@@ -125,6 +125,15 @@
             width: 90%;
             padding: 32px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-height: calc(100vh - 32px);
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        @media (max-width: 480px) {
+            .modal-content { width: min(100% - 24px, 500px); padding: 24px 18px; }
+            .modal-content .grid-cols-3 { grid-template-columns: 1fr; }
         }
 
         .respuesta-btn {
@@ -411,6 +420,7 @@
         const metaLogKey = 'nutry_meta_log_' + currentUserId;
         const complianceLogKey = 'nutry_compliance_log_' + currentUserId;
         const dailyWelcomeKey = 'nutry_compliance_prompt_' + currentUserId;
+        const lastVisitKey = 'nutry_calorie_viewer_last_visit_' + currentUserId;
         let foodLog = JSON.parse(localStorage.getItem(foodLogKey) || '[]');
         let metaLog = JSON.parse(localStorage.getItem(metaLogKey) || '[]');
         let complianceData = JSON.parse(localStorage.getItem(complianceLogKey) || '[]');
@@ -421,6 +431,27 @@
             const month = String(ahora.getMonth() + 1).padStart(2, '0');
             const day = String(ahora.getDate()).padStart(2, '0');
             return year + '-' + month + '-' + day;
+        }
+
+        function registrarDiasSinVisita() {
+            const hoy = obtenerFechaLocal();
+            const ultimaVisita = localStorage.getItem(lastVisitKey);
+            if (ultimaVisita && ultimaVisita < hoy) {
+                const fecha = new Date(ultimaVisita + 'T12:00:00');
+                fecha.setDate(fecha.getDate() + 1);
+                while (fecha.toISOString().slice(0, 10) < hoy) {
+                    const dia = fecha.getFullYear() + '-' + String(fecha.getMonth() + 1).padStart(2, '0') + '-' + String(fecha.getDate()).padStart(2, '0');
+                    if (!complianceData.some(entry => entry.fecha === dia)) {
+                        complianceData.push({ fecha: dia, respuesta: 'no_entro', timestamp: new Date().toISOString() });
+                        if (window.__cloud) window.__cloud.guardarCumplimiento('no_entro', dia).catch(e => console.warn('No se pudo guardar la ausencia:', e));
+                    }
+                    fecha.setDate(fecha.getDate() + 1);
+                }
+                complianceData.sort((a, b) => a.fecha.localeCompare(b.fecha));
+                if (complianceData.length > 365) complianceData.splice(0, complianceData.length - 365);
+                localStorage.setItem(complianceLogKey, JSON.stringify(complianceData));
+            }
+            localStorage.setItem(lastVisitKey, hoy);
         }
 
         function prepararAvisoDiario() {
@@ -460,7 +491,7 @@
             // Guardar también en la nube si es posible
             try {
                 if (window.__cloud) {
-                    await window.__cloud.guardarCumplimiento(respuesta);
+                    await window.__cloud.guardarCumplimiento(respuesta, hoy);
                 }
             } catch (e) {
                 console.warn('No se pudo guardar cumplimiento en la nube:', e);
@@ -477,6 +508,7 @@
             prepararAvisoDiario();
         }
 
+        registrarDiasSinVisita();
         prepararAvisoDiario();
 
         // ===== DASHBOARD UPDATE =====
@@ -489,9 +521,10 @@
             const avgCal = foodLog.length > 0 ? Math.round(totalCal / foodLog.length) : 0;
             document.getElementById('promedioCalorias').textContent = avgCal;
 
-            const totalCumplidos = complianceData.filter(d => d.respuesta === 'si').length;
-            const pctCumplimiento = complianceData.length > 0 
-                ? Math.round((totalCumplidos / complianceData.length) * 100) 
+            const respuestasCumplimiento = complianceData.filter(d => ['si', 'no', 'parcial'].includes(d.respuesta));
+            const totalCumplidos = respuestasCumplimiento.filter(d => d.respuesta === 'si').length;
+            const pctCumplimiento = respuestasCumplimiento.length > 0 
+                ? Math.round((totalCumplidos / respuestasCumplimiento.length) * 100) 
                 : 0;
             document.getElementById('porcentajeCumplimiento').textContent = pctCumplimiento + '%';
 
@@ -655,6 +688,10 @@
                     badgeClass = 'badge-no-cumplido';
                     icono = 'fas fa-times-circle';
                     texto = 'No cumplí';
+                } else if (entry.respuesta === 'no_entro') {
+                    badgeClass = 'badge-no-cumplido';
+                    icono = 'fas fa-user-slash';
+                    texto = 'No ingresó';
                 } else {
                     badgeClass = 'badge-parcial';
                     icono = 'fas fa-minus-circle';
@@ -674,6 +711,8 @@
                                 ? '<span class="text-emerald-400 text-xs">¡Bien hecho!</span>'
                                 : entry.respuesta === 'no'
                                 ? '<span class="text-yellow-400 text-xs">Ánimo, mañana será mejor</span>'
+                                : entry.respuesta === 'no_entro'
+                                ? '<span class="text-slate-400 text-xs">Día sin visita al visor</span>'
                                 : '<span class="text-blue-400 text-xs">Vas por buen camino</span>'
                             }
                         </td>
