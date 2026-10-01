@@ -618,7 +618,7 @@
                 const palabrasTexto = textoLower.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p)).map(normalizar);
                 for (const item of alimentosGlobal) {
                     const palabrasNombre = getPalabrasClave(item.nombre).map(normalizar);
-                    if (palabrasTexto.some(p => palabrasNombre.some(pn => p === pn || (p.length >= 4 && pn.length >= 4 && (pn.startsWith(p) || p.startsWith(pn))))) {
+                    if (palabrasTexto.some(p => palabrasNombre.some(pn => p === pn || (p.length >= 4 && pn.length >= 4 && (pn.startsWith(p) || p.startsWith(pn)))))) {
                         alimentosEncontrados.push({ nombre: item.nombre, cantidad: 1, datos: item, score: 5 });
                     }
                     if (alimentosEncontrados.length > 0) break;
