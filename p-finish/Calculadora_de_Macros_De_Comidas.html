@@ -433,10 +433,18 @@
             while ((match = regexToken.exec(textoLower)) !== null) {
                 // Determinar la palabra a buscar (después del patrón numérico)
                 const afterMatch = textoLower.slice(match.index + match[0].length);
-                const palabrasRestantes = afterMatch.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                const palabrasRestantes = afterMatch.split(/\s+/).filter(p =>
+                    p.length > 1 && !stopWords.has(p) && !/^\d/.test(p) && !/^(?:g|gr|gramos|ml|litros|tazas?|vasos?|cucharadas?|cucharaditas?)$/i.test(p)
+                );
                 
                 // Tomar hasta 3 palabras como posible nombre de alimento
-                const nombreCandidato = palabrasRestantes.slice(0, 3).join(' ');
+                let nombreCandidato = palabrasRestantes.slice(0, 3).join(' ');
+                // Aceptar también cantidades pegadas al final: "pollo13" / "arroz 13".
+                if (!nombreCandidato) {
+                    const beforeMatch = textoLower.slice(0, match.index).trim();
+                    const palabrasPrevias = beforeMatch.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                    nombreCandidato = palabrasPrevias.slice(-3).join(' ');
+                }
 
                 // Parsear cantidad
                 let cantidad = 1;
@@ -497,6 +505,7 @@
 
             // ===== MATCHING: encontrar el mejor alimento para cada token =====
             const alimentosUsados = new Set();
+            const normalizar = valor => valor.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
 
             tokens.forEach(token => {
                 let mejorMatch = null;
@@ -506,41 +515,19 @@
                     if (alimentosUsados.has(item.id)) return; // ya usado
 
                     let score = 0;
-                    const candidatoLower = token.nombreCandidato.toLowerCase();
+                    const candidatoLower = normalizar(token.nombreCandidato);
+                    const nombreNormalizado = normalizar(item.nombre.replace(/\([^)]*\)/g, ''));
+                    const palabrasCandidato = candidatoLower.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                    const palabrasNombre = nombreNormalizado.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
 
                     // 1. Coincidencia exacta del nombre
-                    if (nombreLower === candidatoLower) {
-                        score = 100;
-                    }
-                    // 2. Coincidencia de nombre completo dentro del candidato
-                    else if (nombreLower.includes(candidatoLower) || candidatoLower.includes(nombreLower)) {
-                        score = 80 - Math.abs(nombreLower.length - candidatoLower.length) * 2;
-                    }
-                    // 3. Coincidencia de palabras clave
-                    else {
-                        const palabrasCandidato = candidatoLower.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
-                        let coincidencias = 0;
-                        palabrasClave.forEach(pc => {
-                            if (palabrasCandidato.some(pc2 => 
-                                pc2 === pc || pc2.includes(pc) || pc.includes(pc2)
-                            )) {
-                                coincidencias++;
-                            }
-                        });
-                        if (coincidencias > 0) {
-                            score = (coincidencias / Math.max(palabrasClave.length, palabrasCandidato.length)) * 70;
-                        }
-                        // 4. Coincidencia por palabra suelta (ej: "huevos" -> "huevo")
-                        if (score === 0) {
-                            palabrasCandidato.forEach(pc => {
-                                palabrasClave.forEach(pk => {
-                                    if (pc.startsWith(pk) || pk.startsWith(pc) || 
-                                        (pc.length > 3 && pk.length > 3 && (pc.includes(pk) || pk.includes(pc)))) {
-                                        score = Math.max(score, 40);
-                                    }
-                                });
-                            });
-                        }
+                    if (nombreNormalizado === candidatoLower) score = 120;
+                    // Compare whole words. Substring matching made "pollo" match "repollo".
+                    else if (palabrasCandidato.length && palabrasCandidato.every(pc =>
+                        palabrasNombre.some(pn => pn === pc || (pc.length >= 4 && pn.length >= 4 && (pn.startsWith(pc) || pc.startsWith(pn))))
+                    )) {
+                        const exactas = palabrasCandidato.filter(pc => palabrasNombre.includes(pc)).length;
+                        score = 80 + exactas;
                     }
 
                     if (score > mejorScore) {
@@ -596,7 +583,7 @@
                     const palabrasClave = getPalabrasClave(item.nombre);
                     for (const palabra of palabrasTexto) {
                         for (const pk of palabrasClave) {
-                            if (palabra === pk || palabra.includes(pk) || pk.includes(palabra)) {
+                            if (palabra === pk || (palabra.length >= 4 && pk.length >= 4 && (palabra.startsWith(pk) || pk.startsWith(palabra)))) {
                                 if (!alimentosYaMatch.has(item.id)) {
                                     // Buscar si hay un número antes de esta palabra
                                     let cantidad = 1;
@@ -628,11 +615,10 @@
 
             // Último recurso: búsqueda por inclusión directa (muy tolerante)
             if (alimentosEncontrados.length === 0) {
-                const palabrasTexto = textoLower.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p));
+                const palabrasTexto = textoLower.split(/\s+/).filter(p => p.length > 1 && !stopWords.has(p)).map(normalizar);
                 for (const item of alimentosGlobal) {
-                    const nombreLower = item.nombre.toLowerCase();
-                    // Si el nombre del alimento está incluido en el texto o alguna palabra clave aparece
-                    if (textoLower.includes(nombreLower) || palabrasTexto.some(p => nombreLower.includes(p) || p.includes(nombreLower))) {
+                    const palabrasNombre = getPalabrasClave(item.nombre).map(normalizar);
+                    if (palabrasTexto.some(p => palabrasNombre.some(pn => p === pn || (p.length >= 4 && pn.length >= 4 && (pn.startsWith(p) || p.startsWith(pn))))) {
                         alimentosEncontrados.push({ nombre: item.nombre, cantidad: 1, datos: item, score: 5 });
                     }
                     if (alimentosEncontrados.length > 0) break;
