@@ -104,6 +104,12 @@ function setCurrentMessage(text, color) {
   el.style.color = color
 }
 
+function isEmailRateLimitError(error) {
+  return error?.code === 'over_email_send_rate_limit' || /email rate limit exceeded|too many emails/i.test(error?.message || '')
+}
+
+const EMAIL_RATE_LIMIT_MESSAGE = 'Supabase limitó temporalmente el envío de correos. Espera antes de solicitar otro enlace. Para aumentar el límite en producción, configura un servidor SMTP propio en Supabase.'
+
 function setSubmittingState(isSubmitting) {
   isUserSubmitting = isSubmitting
 
@@ -138,7 +144,7 @@ function showResendButton(email) {
       })
 
       if (error) {
-        setCurrentMessage(error.message || 'No se pudo reenviar el correo.', '#ff4d4d')
+        setCurrentMessage(isEmailRateLimitError(error) ? EMAIL_RATE_LIMIT_MESSAGE : (error.message || 'No se pudo reenviar el correo.'), '#ff4d4d')
         return
       }
 
@@ -394,7 +400,7 @@ async function handleForgotPassword() {
     const redirectTo = `${window.location.origin}${window.location.pathname}`
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
     if (error) {
-      setCurrentMessage(error.message || 'No se pudo enviar el enlace de recuperación.', '#ff4d4d')
+      setCurrentMessage(isEmailRateLimitError(error) ? EMAIL_RATE_LIMIT_MESSAGE : (error.message || 'No se pudo enviar el enlace de recuperación.'), '#ff4d4d')
       return
     }
     setCurrentMessage('Si el correo corresponde a una cuenta, recibirás un enlace para crear una contraseña nueva.', '#3ecf8e')
