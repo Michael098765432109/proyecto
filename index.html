@@ -298,10 +298,6 @@
 
               <div id="login-message" class="text-center font-bold text-sm min-h-[20px]"></div>
 
-              <button id="forgot-password" type="button" class="w-full text-sm text-cyan-300 hover:text-cyan-200 underline underline-offset-4">
-                ¿Olvidaste tu contraseña?
-              </button>
-
               <button id="login-submit" type="submit" class="btn-primary w-full py-3 rounded-xl shadow-lg">
                 Entrar
               </button>
@@ -313,22 +309,6 @@
               >
                 Crear cuenta
               </button>
-            </form>
-          </div>
-
-          <div id="reset-password-section" class="hidden">
-            <form id="reset-password-form" class="space-y-4">
-              <div>
-                <label for="new-password" class="block helper-text mb-2">Nueva contraseña</label>
-                <input id="new-password" type="password" required minlength="6" autocomplete="new-password" class="input-dark" placeholder="Mínimo 6 caracteres" />
-              </div>
-              <div>
-                <label for="confirm-new-password" class="block helper-text mb-2">Confirma la contraseña</label>
-                <input id="confirm-new-password" type="password" required minlength="6" autocomplete="new-password" class="input-dark" placeholder="Repite la nueva contraseña" />
-              </div>
-              <div id="reset-password-message" class="text-center font-bold text-sm min-h-[20px]"></div>
-              <button id="reset-password-submit" type="submit" class="btn-primary w-full py-3 rounded-xl shadow-lg">Guardar contraseña</button>
-              <button id="reset-password-back" type="button" class="w-full border border-gray-600 rounded-xl py-3 text-white font-bold bg-transparent hover:bg-white/5 transition">Volver al inicio de sesión</button>
             </form>
           </div>
 
@@ -443,7 +423,7 @@
       })();
     </script>
 
-  <script type="module" src="./login.js?v=3"></script>
+  <script type="module" src="./login.js?v=4"></script>
   </div>
   <link rel="stylesheet" href="responsive.css">
   <script src="theme-effects.js"></script>
