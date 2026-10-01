@@ -21,6 +21,7 @@ const registerForm = document.getElementById('register-form')
 const registerMessage = document.getElementById('message')
 const switchToLoginBtn = document.getElementById('switch-auth')
 const registerSubmitBtn = document.getElementById('submit-btn')
+const googleSignupBtn = document.getElementById('google-signup')
 
 // Register inputs
 function getRegisterEmail() {
@@ -361,6 +362,39 @@ async function handleRegisterSubmit(e) {
 
 loginForm?.addEventListener('submit', handleLoginSubmit)
 registerForm?.addEventListener('submit', handleRegisterSubmit)
+
+googleSignupBtn?.addEventListener('click', async () => {
+  if (isUserSubmitting) return
+
+  if (window.location.protocol === 'file:') {
+    setCurrentMessage('Abre la app desde un servidor web (HTTP/HTTPS) para continuar con Google.', '#ff4d4d')
+    return
+  }
+
+  clearResendButton()
+  setCurrentMessage('', '#3ecf8e')
+  googleSignupBtn.disabled = true
+  googleSignupBtn.style.opacity = '0.7'
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://myfitnesspal.misaeltech.com/p-finish/index.html'
+      }
+    })
+
+    if (error) {
+      setCurrentMessage(`No se pudo continuar con Google: ${error.message}`, '#ff4d4d')
+      googleSignupBtn.disabled = false
+      googleSignupBtn.style.opacity = '1'
+    }
+  } catch (error) {
+    setCurrentMessage('No se pudo conectar con Google. Inténtalo de nuevo.', '#ff4d4d')
+    googleSignupBtn.disabled = false
+    googleSignupBtn.style.opacity = '1'
+  }
+})
 
 // ===== Switch buttons =====
 switchToRegisterBtn?.addEventListener('click', () => {

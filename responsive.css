@@ -121,7 +121,7 @@ html.android-device body .top-header .top-nav-scroll > a {
 }
 
 /* Mantiene todas las páginas por delante de la capa animada. */
-body > :not(.leaves-layer):not(.rayos):not(.settings-modal-overlay) {
+body > :not(.leaves-layer):not(.rayos):not(.settings-modal-overlay):not(.modal-overlay) {
   position: relative;
   z-index: 1;
 }
