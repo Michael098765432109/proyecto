@@ -7,6 +7,12 @@ const loginForm = document.getElementById('auth-form')
 const loginMessage = document.getElementById('login-message')
 const switchToRegisterBtn = document.getElementById('switch-to-register')
 const loginSubmitBtn = document.getElementById('login-submit')
+const forgotPasswordBtn = document.getElementById('forgot-password')
+const resetPasswordSectionEl = document.getElementById('reset-password-section')
+const resetPasswordForm = document.getElementById('reset-password-form')
+const resetPasswordMessage = document.getElementById('reset-password-message')
+const resetPasswordSubmitBtn = document.getElementById('reset-password-submit')
+const recoveryLink = `${window.location.search}${window.location.hash}`
 
 // Login inputs
 function getLoginEmail() {
@@ -37,6 +43,7 @@ const registerExtraEl = document.getElementById('register-extra')
 
 // ===== Estado =====
 let isLogin = true
+let isResettingPassword = /type=recovery/i.test(recoveryLink)
 let isUserSubmitting = false
 
 // ===== Cooldown (rate limit) =====
@@ -86,6 +93,7 @@ function startCooldownCountdown() {
 
 // ===== Mensajes/UI =====
 function getCurrentMessageEl() {
+  if (isResettingPassword) return resetPasswordMessage
   return isLogin ? loginMessage : registerMessage
 }
 
@@ -159,18 +167,24 @@ function clearResendButton() {
 
 // ===== Switch sections =====
 function syncSectionsUI() {
-  if (loginSectionEl) loginSectionEl.classList.toggle('hidden', !isLogin)
-  if (registerSectionEl) registerSectionEl.classList.toggle('hidden', isLogin)
+  if (loginSectionEl) loginSectionEl.classList.toggle('hidden', !isLogin || isResettingPassword)
+  if (registerSectionEl) registerSectionEl.classList.toggle('hidden', isLogin || isResettingPassword)
+  if (resetPasswordSectionEl) resetPasswordSectionEl.classList.toggle('hidden', !isResettingPassword)
 
   if (registerExtraEl) {
-    registerExtraEl.classList.toggle('hidden', isLogin)
+    registerExtraEl.classList.toggle('hidden', isLogin || isResettingPassword)
   }
+
+  const titleEl = document.getElementById('form-title')
+  const subtitleEl = document.getElementById('form-subtitle')
+  if (titleEl) titleEl.innerText = isResettingPassword ? 'Crear nueva contraseña' : (isLogin ? 'Iniciar sesión' : 'Crear cuenta')
+  if (subtitleEl) subtitleEl.innerText = isResettingPassword ? 'Elige una contraseña nueva para tu cuenta' : (isLogin ? 'Ingresa tus datos para acceder' : 'Completa tus datos para crear tu cuenta')
 }
 
 // ===== Auth state redirect =====
 function redirectIfSignedIn(session, eventName) {
   // Redirige automáticamente al detectar sesión iniciada (al presionar login o al volver del enlace de correo)
-  if ((eventName === 'SIGNED_IN' || eventName === 'TOKEN_REFRESHED') && session?.access_token) {
+  if (!isResettingPassword && (eventName === 'SIGNED_IN' || eventName === 'TOKEN_REFRESHED') && session?.access_token) {
     window.location.href = SUCCESS_REDIRECT_URL
   }
 }
@@ -359,11 +373,82 @@ async function handleRegisterSubmit(e) {
   }
 }
 
+async function handleForgotPassword() {
+  const emailInput = document.getElementById('login-email')
+  const email = getLoginEmail().trim()
+
+  if (!email || !emailInput?.checkValidity()) {
+    setCurrentMessage('Escribe un correo válido para enviarte el enlace de recuperación.', '#ff4d4d')
+    emailInput?.focus()
+    return
+  }
+
+  if (window.location.protocol === 'file:') {
+    setCurrentMessage('Abre la app desde un servidor web (HTTP/HTTPS) para recuperar la contraseña.', '#ff4d4d')
+    return
+  }
+
+  forgotPasswordBtn.disabled = true
+  setCurrentMessage('', '#94a3b8')
+  try {
+    const redirectTo = `${window.location.origin}${window.location.pathname}`
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+    if (error) {
+      setCurrentMessage(error.message || 'No se pudo enviar el enlace de recuperación.', '#ff4d4d')
+      return
+    }
+    setCurrentMessage('Si el correo corresponde a una cuenta, recibirás un enlace para crear una contraseña nueva.', '#3ecf8e')
+  } catch (error) {
+    setCurrentMessage(error?.message || 'No se pudo enviar el enlace de recuperación.', '#ff4d4d')
+  } finally {
+    forgotPasswordBtn.disabled = false
+  }
+}
+
+async function handlePasswordResetSubmit(e) {
+  e.preventDefault()
+  const password = document.getElementById('new-password').value
+  const confirmation = document.getElementById('confirm-new-password').value
+
+  if (password.length < 6) {
+    setCurrentMessage('La contraseña debe tener al menos 6 caracteres.', '#ff4d4d')
+    return
+  }
+  if (password !== confirmation) {
+    setCurrentMessage('Las contraseñas no coinciden.', '#ff4d4d')
+    return
+  }
+
+  resetPasswordSubmitBtn.disabled = true
+  try {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) {
+      setCurrentMessage(error.message || 'No se pudo actualizar la contraseña.', '#ff4d4d')
+      return
+    }
+    setCurrentMessage('Contraseña actualizada. Te llevaremos a tu cuenta…', '#3ecf8e')
+    setTimeout(() => { window.location.href = SUCCESS_REDIRECT_URL }, 1200)
+  } catch (error) {
+    setCurrentMessage(error?.message || 'No se pudo actualizar la contraseña.', '#ff4d4d')
+  } finally {
+    resetPasswordSubmitBtn.disabled = false
+  }
+}
+
 loginForm?.addEventListener('submit', handleLoginSubmit)
 registerForm?.addEventListener('submit', handleRegisterSubmit)
+forgotPasswordBtn?.addEventListener('click', handleForgotPassword)
+resetPasswordForm?.addEventListener('submit', handlePasswordResetSubmit)
+document.getElementById('reset-password-back')?.addEventListener('click', () => {
+  isResettingPassword = false
+  isLogin = true
+  setCurrentMessage('', '#3ecf8e')
+  syncSectionsUI()
+})
 
 // ===== Switch buttons =====
 switchToRegisterBtn?.addEventListener('click', () => {
+  isResettingPassword = false
   isLogin = false
   clearResendButton()
   setCurrentMessage('', '#3ecf8e')
@@ -377,6 +462,7 @@ switchToRegisterBtn?.addEventListener('click', () => {
 })
 
 switchToLoginBtn?.addEventListener('click', () => {
+  isResettingPassword = false
   isLogin = true
   clearResendButton()
   setCurrentMessage('', '#3ecf8e')
@@ -391,6 +477,12 @@ switchToLoginBtn?.addEventListener('click', () => {
 
 // ===== Auth redirect =====
 supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    isResettingPassword = true
+    isLogin = true
+    syncSectionsUI()
+    setCurrentMessage('', '#3ecf8e')
+  }
   redirectIfSignedIn(session, event)
 
   if (event === 'SIGNED_IN' && session?.user?.id) {
