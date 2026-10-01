@@ -367,18 +367,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="input-group">
                 <label for="peso">Peso (kg)</label>
-<input id="peso" type="number" min="30" max="200" step="0.1" value="67" required>
+<input id="peso" type="number" min="30" max="600" step="0.1" value="67" required>
               </div>
               <div class="input-group">
                 <label for="altura">Altura (cm)</label>
-<input id="altura" type="number" min="140" max="250" step="0.1" value="176" required>
+<input id="altura" type="number" min="140" max="270" step="0.1" value="176" required>
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="input-group">
                 <label for="edad">¿Qué edad tienes?</label>
-<input id="edad" type="number" min="16" max="60" step="1" value="17" required>
+<input id="edad" type="number" min="16" max="80" step="1" value="17" required>
               </div>
               <div class="input-group">
                 <label for="sexo">¿Eres hombre o mujer?</label>
@@ -894,7 +894,7 @@ document.getElementById('btnSave').addEventListener('click', guardarDatos);
     document.getElementById('btnLoad').addEventListener('click', loadDatos);
 
 // ===== LIMITAR VALOR MÁXIMO EN CAMPOS NUMÉRICOS =====
-    // Evita que el usuario escriba un valor mayor al máximo permitido (peso ≤ 200, altura ≤ 250, edad ≤ 60)
+    // Evita que el usuario escriba un valor mayor al máximo permitido (peso ≤ 600, altura ≤ 270, edad ≤ 80)
     // NO fuerza el valor mínimo, para que puedas borrar el campo y escribir lo que quieras.
     function limitarValorMax(input) {
       const max = parseFloat(input.getAttribute('max'));
@@ -917,9 +917,9 @@ document.getElementById('btnSave').addEventListener('click', guardarDatos);
     }
 
     // Aplicar límite máximo a peso, altura y edad
-    limitarValorMax(document.getElementById('peso'));   // máx 200 kg
-    limitarValorMax(document.getElementById('altura')); // máx 250 cm
-    limitarValorMax(document.getElementById('edad'));   // máx 60 años
+    limitarValorMax(document.getElementById('peso'));   // máx 600 kg
+    limitarValorMax(document.getElementById('altura')); // máx 270 cm
+    limitarValorMax(document.getElementById('edad'));   // máx 80 años
 
 // ===== FUNCIONES PRINCIPALES =====
     function calcular(mostrarGif = false) {
@@ -936,17 +936,17 @@ if (!peso || !altura || !edad) {
         return;
       }
 
-      // Validar rangos de datos (edad hasta 60, altura hasta 250, peso hasta 200, sin negativos)
-if (peso < 30 || peso > 200) {
-        alert('El peso debe estar entre 30 y 200 kg. Porfa revisa ese dato.');
+      // Validar rangos de datos (edad hasta 80, altura hasta 270, peso hasta 600, sin negativos)
+if (peso < 30 || peso > 600) {
+        alert('El peso debe estar entre 30 y 600 kg. Porfa revisa ese dato.');
         return;
       }
-      if (altura < 140 || altura > 250) {
-        alert('La altura debe estar entre 140 y 250 cm. Porfa revisa ese dato.');
+      if (altura < 140 || altura > 270) {
+        alert('La altura debe estar entre 140 y 270 cm. Porfa revisa ese dato.');
         return;
       }
-if (edad < 16 || edad > 60) {
-        alert('La edad debe estar entre 16 y 60 años. Porfa revisa ese dato.');
+if (edad < 16 || edad > 80) {
+        alert('La edad debe estar entre 16 y 80 años. Porfa revisa ese dato.');
         return;
       }
 
