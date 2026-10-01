@@ -237,6 +237,25 @@ async function handleRegisterSubmit(e) {
 
   const email = getRegisterEmail()
   const password = getRegisterPassword()
+  const fullName = (document.getElementById('register-full-name')?.value || '').trim().replace(/\s+/g, ' ')
+  const phone = (document.getElementById('register-phone')?.value || '').trim()
+  const age = Number(document.getElementById('register-age')?.value)
+
+  if (fullName.split(' ').filter(Boolean).length < 2) {
+    setCurrentMessage('Escribe tus nombres y al menos un apellido.', '#ff4d4d')
+    return
+  }
+
+  const phoneDigits = phone.replace(/\D/g, '')
+  if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+    setCurrentMessage('Escribe un número telefónico válido (entre 7 y 15 dígitos).', '#ff4d4d')
+    return
+  }
+
+  if (!Number.isInteger(age) || age < 13 || age > 120) {
+    setCurrentMessage('La edad debe ser un número entre 13 y 120 años.', '#ff4d4d')
+    return
+  }
 
   if (!email || !password) {
     setCurrentMessage('Escribe un correo y una contraseña válidos.', '#ff4d4d')
@@ -268,7 +287,12 @@ async function handleRegisterSubmit(e) {
       email,
       password,
       options: {
-        emailRedirectTo
+        emailRedirectTo,
+        data: {
+          full_name: fullName,
+          phone,
+          age
+        }
       }
     })
 

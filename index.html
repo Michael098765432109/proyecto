@@ -316,6 +316,21 @@
           <div id="register-section" class="hidden">
             <form id="register-form" class="space-y-4">
               <div>
+                <label for="register-full-name" class="block helper-text mb-2">Nombres y apellidos</label>
+                <input id="register-full-name" type="text" required minlength="5" maxlength="100" autocomplete="name" class="input-dark" placeholder="Tus nombres y apellidos" />
+              </div>
+
+              <div>
+                <label for="register-phone" class="block helper-text mb-2">Número telefónico</label>
+                <input id="register-phone" type="tel" required minlength="7" maxlength="20" autocomplete="tel" inputmode="tel" pattern="[+0-9(). -]{7,20}" class="input-dark" placeholder="+57 300 123 4567" />
+              </div>
+
+              <div>
+                <label for="register-age" class="block helper-text mb-2">Edad</label>
+                <input id="register-age" type="number" required min="13" max="120" step="1" autocomplete="bday-year" inputmode="numeric" class="input-dark" placeholder="Tu edad" />
+              </div>
+
+              <div>
                 <label for="email" class="block helper-text mb-2">Correo</label>
                 <input id="email" type="email" required class="input-dark" placeholder="tucorreo@ejemplo.com" />
               </div>
@@ -333,7 +348,7 @@
               <div class="border border-white/10 rounded-xl p-4 bg-white/5">
                 <h3 class="text-lg font-bold mb-2">¡Listo, vamos a crear tu cuenta!</h3>
                 <p class="helper-text mb-1">
-                  Llena <strong>Correo</strong> y <strong>Contraseña</strong> y presiona <strong>Registrarse</strong>.
+                  Completa tus datos y presiona <strong>Registrarse</strong>.
                 </p>
                 <p class="helper-text mt-2">
                   Si Supabase te pide confirmación por correo, te llegará un link.
